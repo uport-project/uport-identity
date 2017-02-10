@@ -1,5 +1,5 @@
 pragma solidity ^0.4.4;
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 
 contract Proxy is Owned {
   event Forwarded (address indexed destination, uint value, bytes data );

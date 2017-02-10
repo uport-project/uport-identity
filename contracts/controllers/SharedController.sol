@@ -14,8 +14,8 @@ contract SharedController {
         userAddresses = _userAddresses;
     }
 
-    function forward(address destination, uint value, bytes data, uint optionalNonce) {
-        bytes32 txHash = sha3(destination, value, data, optionalNonce);
+    function forward(address destination, uint value, bytes data) {
+        bytes32 txHash = sha3(destination, value, data);
         txSigners[txHash][msg.sender] = true;
         if (collectedSignatures(txHash) >= neededSignatures()){
             toProxy(destination, value, data);
