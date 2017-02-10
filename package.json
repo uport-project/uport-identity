@@ -1,0 +1,40 @@
+{
+  "name": "uport-contracts",
+  "version": "4.0.2",
+  "description": "uPort contracts and JS module",
+  "main": "lib/uportregistry.js",
+  "keywords": [
+    "uPort"
+  ],
+  "author": "Zac Mitton",
+  "license": "Apache-2",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-core": "^6.21.0",
+    "babel-preset-es2015": "*",
+    "babelify": "*",
+    "browserify": "^13.1.1",
+    "chai": "*",
+    "ethereumjs-testrpc": "^3.0.3",
+    "ipfsd-ctl": "^0.14.0",
+    "ipfs": "*",
+    "mocha": "^2.4.5",
+    "bs58": "^4.0.0",
+    "truffle": "^2.1.1",
+    "eth-signer" : "0.1.2",
+    "eth-lightwallet" : "*",
+    "hooked-web3-provider" : "*"
+  },
+  "dependencies": {
+    "ipfs-mini": "^1.0.1",
+    "web3-provider-engine": "^8.5.0",
+    "web3": "^0.16.0"
+  },
+  "scripts": {
+    "build:es5": "./node_modules/.bin/babel app -d lib",
+    "build": "node_modules/.bin/browserify lib/uportregistry.js --s uportRegistry --o dist/uportregistry.js",
+    "build-contract": "./node_modules/truffle/cli.js build",
+    "test": "node_modules/.bin/mocha --reporter spec test/*.js",
+    "allofthethings": "npm run build-contract ; npm run build:es5 ; npm run test ; npm run build"
+  }
+}
