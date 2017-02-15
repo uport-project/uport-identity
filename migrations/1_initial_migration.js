@@ -7,4 +7,5 @@ module.exports = function(deployer) {
   deployer.deploy(IdentityFactory);
   deployer.deploy(RecoveryQuorum);
   deployer.deploy(IdentityFactoryWithRecoveryKey);
+  deployer.deploy(SensuiBank);
 };

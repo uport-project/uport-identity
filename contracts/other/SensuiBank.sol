@@ -20,7 +20,7 @@ contract SensuiBank is Owned{
   function withdraw(uint amount) onlyOwner{
     if(withdrawlIsValid(amount)){
       spentThisCycle += amount;
-      if(!owner.send(amount)) throw;
+      if(!owner.send(amount)) throw;//possible to 
     }
   }
   //settings
@@ -40,7 +40,7 @@ contract SensuiBank is Owned{
       cycleEnd = now + cycleTime;
       spentThisCycle = 0;
     }
-    if((amount <= limit - spentThisCycle) && (limit >= spentThisCycle)){
+    if((amount <= limit - spentThisCycle) && (limit >= spentThisCycle/* sanity check*/)){
       return true;
     }else{
       return false;
