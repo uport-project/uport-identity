@@ -2,7 +2,7 @@
   "name": "truffle-3-test",
   "version": "1.0.0",
   "description": "",
-  "main": "build/index.js",
+  "main": "lib.js",
   "directories": {
     "test": "test"
   },
