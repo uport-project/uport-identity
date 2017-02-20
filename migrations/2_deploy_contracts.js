@@ -7,9 +7,8 @@ var UportRegistry = artifacts.require("./registries/UportRegistry.sol");
 module.exports = function(deployer) {
   deployer.deploy(ArrayLib);
   deployer.link(ArrayLib, IdentityFactory);
-  deployer.link(ArrayLib, IdentityFactoryWithRecoveryKey);
   deployer.deploy(IdentityFactory);
   deployer.deploy(IdentityFactoryWithRecoveryKey);
   deployer.deploy(SensuiBank);
-  deployer.deploy(UportRegistry);
+  // deployer.deploy(UportRegistry);
 };

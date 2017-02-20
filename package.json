@@ -9,9 +9,9 @@
   "scripts": {
     "truffle": "node_modules/.bin/truffle",
     "truffle-compile": "node_modules/.bin/truffle compile",
-    "truffle-deploy-ropsten": "node_modules/.bin/truffle migrate --reset --network ropsten",
-    "truffle-deploy-ethereum": "node_modules/.bin/truffle migrate --reset --network ethereum",
-    "truffle-deploy-testrpc": "node_modules/.bin/truffle migrate --reset --network testrpc",
+    "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
+    "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
+    "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
     "truffle-test": "node_modules/.bin/truffle test --network testrpc",
     "dist": "node_modules/.bin/browserify lib.js -o dist.js"
   },
