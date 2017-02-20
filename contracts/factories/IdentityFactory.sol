@@ -1,5 +1,5 @@
-// mainnet: 
-// ropsten: 0xc31877f83ced81aaadbc418313ab748695a466a1
+// mainnet: 0x12e627125abcfa989de831572f198577780d7127
+// ropsten: 0x1c9d9e1962985c9b8101777cae25c46279fe2a9c
 pragma solidity 0.4.8;
 import "../recovery/RecoveryQuorum.sol";
 

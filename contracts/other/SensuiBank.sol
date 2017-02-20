@@ -1,5 +1,5 @@
-// mainnet:
-// ropsten: 0xa4c42ffc2e4f621fd6952bbe5c7a896c5cb58d5d
+// mainnet: 0x9f500c2ac868d2b160c62162970d659f22a194aa
+// ropsten: 0xa47461d8f6049b2547141f03b4c23b1ecaa5dd60
 pragma solidity 0.4.8;
 import "../libraries/Owned.sol";
 

@@ -1,5 +1,5 @@
-// mainnet:
-// ropsten: 0x65c1120f15e92b57ea729a047d1ba19f73c007d4
+// mainnet: 0x96360525c00ce7ab8129ff619235796069f16f0a
+// ropsten: 0x96e96f7e293e7fc17c614aae5a8de952e108edfd
 pragma solidity 0.4.8;
 import "../controllers/StandardController.sol";
 
