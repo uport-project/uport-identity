@@ -1,4 +1,6 @@
-pragma solidity ^0.4.4;
+// mainnet:
+// ropsten: 0xeb790681821e81e7deef053d076bc5f3efb5b2ed
+pragma solidity 0.4.8;
 library ArrayLib{
   function findAddress(address a, address[] storage arry) returns (int){
     for (uint i = 0 ; i < arry.length ; i++){

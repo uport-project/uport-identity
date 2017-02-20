@@ -1,4 +1,6 @@
-pragma solidity ^0.4.4;
+// mainnet:
+// ropsten: 0xa4c42ffc2e4f621fd6952bbe5c7a896c5cb58d5d
+pragma solidity 0.4.8;
 import "../libraries/Owned.sol";
 
 contract SensuiBank is Owned{

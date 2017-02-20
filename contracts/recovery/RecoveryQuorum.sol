@@ -1,4 +1,4 @@
-pragma solidity ^0.4.4;
+pragma solidity 0.4.8;
 import "../controllers/StandardController.sol";
 import "../libraries/ArrayLib.sol";
 

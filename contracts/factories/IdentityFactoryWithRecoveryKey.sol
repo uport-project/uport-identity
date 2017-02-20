@@ -1,5 +1,7 @@
-pragma solidity ^0.4.4;
-import "../recovery/RecoveryQuorum.sol";
+// mainnet:
+// ropsten: 0x65c1120f15e92b57ea729a047d1ba19f73c007d4
+pragma solidity 0.4.8;
+import "../controllers/StandardController.sol";
 
 contract IdentityFactoryWithRecoveryKey {
   mapping(address => address) public senderToProxy;

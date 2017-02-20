@@ -1,5 +1,5 @@
 // VERSION 1
-// pragma solidity ^0.4.4;
+// pragma solidity 0.4.9;
 // import "../libraries/Owned.sol";
 // contract Proxy is Owned {
 //   event Forwarded (address indexed destination, uint value, bytes data );
@@ -13,7 +13,7 @@
 // }
 
 // VERSION 2
-pragma solidity ^0.4.4;
+pragma solidity 0.4.8;
 import "../libraries/Owned.sol";
 contract Proxy is Owned {
   event Forwarded (address indexed destination, uint value, bytes data );
@@ -27,7 +27,7 @@ contract Proxy is Owned {
   }
 }
 
-// 'VERSION 3' creatable proxy will go here
+// 'VERSION 3' creatable proxy will go here. not used yet though...
 // contract Proxy is Owned {
 //   event Forwarded (address indexed destination, uint value, bytes data );
 //   event Received (address indexed sender, uint value);

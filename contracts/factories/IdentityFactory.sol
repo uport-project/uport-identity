@@ -1,4 +1,6 @@
-pragma solidity ^0.4.4;
+// mainnet: 
+// ropsten: 0xc31877f83ced81aaadbc418313ab748695a466a1
+pragma solidity 0.4.8;
 import "../recovery/RecoveryQuorum.sol";
 
 contract IdentityFactory {
