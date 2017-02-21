@@ -221,7 +221,7 @@ contract IdentityHub {
         if(collectedSignatures(_idenNum, _proposedController, true) >= neededSignatures(_idenNum) || alreadyApproved){
             user.proxy.transfer(_proposedController);
             if (_proposedController == address(identityFactory)) {
-              identityFactory.CreateControllerAndRecoveryForProxy(user.proxy, msg.sender, user.delegateAddresses, _longTimeLock, _shortTimeLock);
+              identityFactory.CreateControllerAndRecoveryForProxy(user.proxy, user.userKey, user.delegateAddresses, _longTimeLock, _shortTimeLock);
             }
             deleteIdentity(user.userKey);
         }
