@@ -1,8 +1,8 @@
 {
   "name": "truffle-3-test",
   "version": "1.0.0",
+  "private": true,
   "description": "",
-  "main": "lib.js",
   "directories": {
     "test": "test"
   },
@@ -12,8 +12,7 @@
     "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
     "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
     "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
-    "truffle-test": "node_modules/.bin/truffle test --network testrpc",
-    "dist": "node_modules/.bin/browserify lib.js -o dist.js"
+    "truffle-test": "node_modules/.bin/truffle test --network testrpc"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +21,8 @@
   },
   "devDependencies": {
     "browserify": "^13.1.1",
+    "eth-signer": "^0.2.1",
+    "hooked-web3-provider": "^1.0.0",
     "truffle": "^3.1.9"
   }
 }
