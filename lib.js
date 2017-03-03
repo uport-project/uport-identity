@@ -1,18 +1,27 @@
-const Contract = require('truffle-contract')
+// const Contract = require('truffle-contract')
+// const Web3 = require('web3');
+// const Uport = {
+//   ArrayLib:                       Contract(require('./build/contracts/ArrayLib.json')),
+//   Migrations:                     Contract(require('./build/contracts/Migrations.json')),
+//   Owned:                          Contract(require('./build/contracts/Owned.json')),
+//   Proxy:                          Contract(require('./build/contracts/Proxy.json')),
+//   RecoveryQuorum:                 Contract(require('./build/contracts/RecoveryQuorum.json')),
+//   StandardController:             Contract(require('./build/contracts/StandardController.json')),
+//   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
+// }
 
+// module.exports = { Uport , Web3 }
+
+
+const Contract = require('truffle-contract')
+Web3 = require('web3');
 Uport = {
   ArrayLib:                       Contract(require('./build/contracts/ArrayLib.json')),
-  IdentityFactory:                Contract(require('./build/contracts/IdentityFactory.json')),
-  IdentityFactoryWithRecoveryKey: Contract(require('./build/contracts/IdentityFactoryWithRecoveryKey.json')),
   Migrations:                     Contract(require('./build/contracts/Migrations.json')),
   Owned:                          Contract(require('./build/contracts/Owned.json')),
   Proxy:                          Contract(require('./build/contracts/Proxy.json')),
-  ProxyKeyFinder:                 Contract(require('./build/contracts/ProxyKeyFinder.json')),
   RecoveryQuorum:                 Contract(require('./build/contracts/RecoveryQuorum.json')),
-  SensuiBank:                     Contract(require('./build/contracts/SensuiBank.json')),
-  SharedController:               Contract(require('./build/contracts/SharedController.json')),
   StandardController:             Contract(require('./build/contracts/StandardController.json')),
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
 }
 
-module.exports = { Uport }
