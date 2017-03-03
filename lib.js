@@ -1,6 +1,6 @@
 const Contract = require('truffle-contract')
-Web3 = require('web3');
-Uport = {
+
+const UportContracts = {
   ArrayLib:                       Contract(require('./build/contracts/ArrayLib.json')),
   Migrations:                     Contract(require('./build/contracts/Migrations.json')),
   Owned:                          Contract(require('./build/contracts/Owned.json')),
@@ -9,3 +9,5 @@ Uport = {
   StandardController:             Contract(require('./build/contracts/StandardController.json')),
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
 }
+
+module.exports = { UportContracts }

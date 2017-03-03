@@ -1044,22 +1044,7 @@ module.exports={
 },{}],8:[function(require,module,exports){
 const Contract = require('truffle-contract')
 
-// const Web3 = require('web3');
-// const Uport = {
-//   ArrayLib:                       Contract(require('./build/contracts/ArrayLib.json')),
-//   Migrations:                     Contract(require('./build/contracts/Migrations.json')),
-//   Owned:                          Contract(require('./build/contracts/Owned.json')),
-//   Proxy:                          Contract(require('./build/contracts/Proxy.json')),
-//   RecoveryQuorum:                 Contract(require('./build/contracts/RecoveryQuorum.json')),
-//   StandardController:             Contract(require('./build/contracts/StandardController.json')),
-//   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
-// }
-
-// module.exports = { Uport , Web3 }
-
-
-Web3 = require('web3');
-Uport = {
+const UportContracts = {
   ArrayLib:                       Contract(require('./build/contracts/ArrayLib.json')),
   Migrations:                     Contract(require('./build/contracts/Migrations.json')),
   Owned:                          Contract(require('./build/contracts/Owned.json')),
@@ -1069,8 +1054,9 @@ Uport = {
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
 }
 
+module.exports = { UportContracts }
 
-},{"./build/contracts/ArrayLib.json":1,"./build/contracts/Migrations.json":2,"./build/contracts/Owned.json":3,"./build/contracts/Proxy.json":4,"./build/contracts/RecoveryQuorum.json":5,"./build/contracts/StandardController.json":6,"./build/contracts/UportRegistry.json":7,"truffle-contract":240,"web3":244}],9:[function(require,module,exports){
+},{"./build/contracts/ArrayLib.json":1,"./build/contracts/Migrations.json":2,"./build/contracts/Owned.json":3,"./build/contracts/Proxy.json":4,"./build/contracts/RecoveryQuorum.json":5,"./build/contracts/StandardController.json":6,"./build/contracts/UportRegistry.json":7,"truffle-contract":240}],9:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');

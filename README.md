@@ -12,7 +12,7 @@ This Repository is uPort's *most* up-to-date source on our currently used contra
 ##JavaScript Integration
 Either install the package with npm in your `package.json` file:
 ```
-"uport-contracts": "git://github.com/zmitton/uport-contracts.git#master"
+"uport-contracts": "git://github.com/uport-project/uport-contracts.git#develop"
 ```
 or simply download and include `dist.js` in an html file
 ```
@@ -21,7 +21,7 @@ or simply download and include `dist.js` in an html file
     <script type="text/javascript" src="dist.js"></script>
   </head>
   <body>
-    This page has global access to the `Uport` javascript object.
+    This page has global access to the `UportContracts` and `Web3` javascript objects.
   </body>
 </html>
 
@@ -29,6 +29,8 @@ or simply download and include `dist.js` in an html file
 The library exposes a `Uport` object which has all other contract objects nested in it (i.e. `Uport.Registry`). These objects are built using truffle-contract (see full API)[https://github.com/trufflesuite/truffle-contract]. They have promise-based functions corresponding to their solidity functions, and once initialized with a (web3)[https://github.com/ethereum/web3.js/] `provider`, will know their deployed address corresponding to the provided network.
 
 ```
+Web3 = require('web3');
+
 if (typeof web3 == 'undefined') {
   web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io"));
 }
