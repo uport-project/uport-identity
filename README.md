@@ -26,7 +26,7 @@ or simply download and include `dist.js` in an html file
 </html>
 
 ```
-The library exposes a `Uport` object which has all other contract objects nested in it (i.e. `Uport.Registry`). These objects are built using truffle-contract (see full API)[https://github.com/trufflesuite/truffle-contract]. They have promise-based functions corresponding to their solidity functions, and once initialized with a (web3)[https://github.com/ethereum/web3.js/] `provider`, will know their deployed address corresponding to the provided network.
+The library exposes a `UportContracts` object which has all other contract objects nested in it (i.e. `UportContracts.Registry`). These objects are built using truffle-contract (see full API)[https://github.com/trufflesuite/truffle-contract]. They have promise-based functions corresponding to their solidity functions, and once initialized with a (web3)[https://github.com/ethereum/web3.js/] `provider`, will know their deployed address corresponding to the provided network.
 
 ```
 Web3 = require('web3');
@@ -35,8 +35,8 @@ if (typeof web3 == 'undefined') {
   web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io"));
 }
 
-Uport.Registry.setProvider(web3.currentProvider)
-Uport.Registry.deployed().then(function(instance){
+UportContracts.Registry.setProvider(web3.currentProvider)
+UportContracts.Registry.deployed().then(function(instance){
   uportRegistry = instance
   console.log("Registry Address (ropsten): ", uportRegistry.address)
   return uportRegistry.get.call("uPortProfileIPFS1220", "0x1F4E7Db8514Ec4E99467a8d2ee3a63094a904e7A", "0x1F4E7Db8514Ec4E99467a8d2ee3a63094a904e7A")
