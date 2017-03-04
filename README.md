@@ -47,7 +47,8 @@ UportContracts.Registry.setProvider(web3.currentProvider)
 UportContracts.Registry.deployed().then(function(instance){
   uportRegistry = instance
   console.log("Registry Address (ropsten): ", uportRegistry.address)
-  return uportRegistry.get.call("uPortProfileIPFS1220", "0x1F4E7Db8514Ec4E99467a8d2ee3a63094a904e7A", "0x1F4E7Db8514Ec4E99467a8d2ee3a63094a904e7A")
+  var someExistingUportAddress = "0x58471b238277224d2e1d0a3d07a40a9fe5bd485e"
+  return uportRegistry.getAttributes.call(someExistingUportAddress)
 }).then(function(encodedIpfsAddress) {
   console.log("SelfSigned Attributes: ", encodedIpfsAddress)
 });
