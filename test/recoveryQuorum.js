@@ -1,5 +1,9 @@
 require('./helpers.js')()
 
+const Proxy = artifacts.require('Proxy')
+const StandardController = artifacts.require('StandardController')
+const RecoveryQuorum = artifacts.require('RecoveryQuorum')
+
 const LOG_NUMBER_1 = 1234;
 const LOG_NUMBER_2 = 2345;
 
@@ -22,7 +26,6 @@ contract("RecoveryQuorum", (accounts) => {
   var longTimeLock  = 5;
 
   before(() => {
-    proxy = Proxy.deployed();
     user1 = accounts[0];
     user2 = accounts[1];
     recovery1 = accounts[2];
@@ -48,6 +51,9 @@ contract("RecoveryQuorum", (accounts) => {
       accounts[14],
       accounts[15],
     ];
+    Proxy.deployed().then((instance) => {
+      proxy = instance
+    })
   });
 
   it("Correctly deploys contract", (done) => {
@@ -340,7 +346,7 @@ contract("RecoveryQuorum", (accounts) => {
 
  // THE FOLLOWING TESTS REQUIRE 25 ACCOUNTS: `testrpc --accounts 25`
  //=================================================================
- 
+
  it("protected against gasLimit attack. WARNING: strange error if gas is overspent", (done) => {
    Proxy.new({from: accounts[0]})
     .then((newPX) => {
@@ -418,7 +424,7 @@ contract("RecoveryQuorum", (accounts) => {
   it("protected against gasLimit attack. WARNING: strange error if gas is overspent", (done) => {
    Proxy.new({from: accounts[0]})
     .then((newPX) => {
-      proxy = newPX;    
+      proxy = newPX;
       return StandardController.new(proxy.address, user2, 0, 0, {from: recovery1})})
     .then((newRC) => {
       standardController = newRC;

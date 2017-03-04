@@ -1,18 +1,23 @@
 require('./helpers.js')()
 
+const IdentityFactory = artifacts.require('IdentityFactory')
+const Proxy = artifacts.require('Proxy')
+const RecoverableController = artifacts.require('RecoverableController')
+const RecoveryQuorum = artifacts.require('RecoveryQuorum')
+
 contract("IdentityFactory", (accounts) => {
   var identityFactory;
   var proxy;
   var deployedProxy;
-  var deployedStandardController;
-  var standardController;
+  var deployedRecoverableController;
+  var recoverableController;
   var testReg;
   var user1;
   var admin;
 
   var contractAddresses;
   var proxyAddress;
-  var standardControllerAddress;
+  var recoverableControllerAddress;
   var recoveryQuorumAddress;
 
   var delegateDeletedAfter =    0;
@@ -24,10 +29,6 @@ contract("IdentityFactory", (accounts) => {
 
   before(() => {
     // Truffle deploys contracts with accounts[0]
-    identityFactory = IdentityFactory.deployed();
-    deployedProxy = Proxy.deployed();
-    deployedStandardController = StandardController.deployed();
-    deployedRecoveryQuorum = RecoveryQuorum.deployed();
     user1 = accounts[0];
     nobody = accounts[1];//has no authority
     recoveryUser1 = accounts[2];
@@ -40,6 +41,18 @@ contract("IdentityFactory", (accounts) => {
 
     delegate5 = accounts[8];
     delegate6 = accounts[9];
+    IdentityFactory.deployed().then((instance) => {
+      identityFactory = instance
+      return Proxy.deployed()
+    }).then((instance) => {
+      deployedProxy = instance
+      return RecoverableController.deployed()
+    }).then((instance) => {
+      deployedRecoverableController = instance
+      return RecoveryQuorum.deployed()
+    }).then((instance) => {
+      deployedRecoveryQuorum = instance
+    })
 
   });
 
@@ -49,20 +62,20 @@ contract("IdentityFactory", (accounts) => {
       event.stopWatching();
       // Check that event has addresses to correct contracts
       proxyAddress = result.args.proxy;
-      standardControllerAddress = result.args.controller;
+      recoverableControllerAddress = result.args.controller;
       recoveryQuorumAddress = result.args.recoveryQuorum;
 
       assert.equal(web3.eth.getCode(proxyAddress),
                    web3.eth.getCode(deployedProxy.address),
                    "Created proxy should have correct code");
-      assert.equal(web3.eth.getCode(standardControllerAddress),
-                   web3.eth.getCode(deployedStandardController.address),
+      assert.equal(web3.eth.getCode(recoverableControllerAddress),
+                   web3.eth.getCode(deployedRecoverableController.address),
                    "Created controller should have correct code");
       assert.equal(web3.eth.getCode(recoveryQuorumAddress),
                    web3.eth.getCode(deployedRecoveryQuorum.address),
                    "Created recoveryQuorum should have correct code");
       proxy = Proxy.at(proxyAddress);
-      standardController = StandardController.at(result.args.controller);
+      recoverableController = RecoverableController.at(result.args.controller);
       // Check that the mapping has correct proxy address
       identityFactory.senderToProxy.call(nobody).then((createdProxyAddress) => {
         assert(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
@@ -74,18 +87,18 @@ contract("IdentityFactory", (accounts) => {
 
   it("Created proxy should have correct state", (done) => {
     proxy.owner.call().then((createdControllerAddress) => {
-      assert.equal(createdControllerAddress, standardController.address);
+      assert.equal(createdControllerAddress, recoverableController.address);
       done();
     }).catch(done);
   });
 
   it("Created controller should have correct state", (done) => {
-    standardController.proxy().then((_proxyAddress) => {
+    recoverableController.proxy().then((_proxyAddress) => {
       assert.equal(_proxyAddress, proxy.address);
-      return standardController.userKey();
+      return recoverableController.userKey();
     }).then((userKey) => {
       assert.equal(userKey, user1);
-      return standardController.recoveryKey();
+      return recoverableController.recoveryKey();
     }).then((recoveryKey) => {
       assert.equal(recoveryKey, recoveryQuorumAddress);
       done();
@@ -97,7 +110,7 @@ contract("IdentityFactory", (accounts) => {
     event.watch((error, result) => {
       event.stopWatching();
       proxy = Proxy.at(result.args['proxy']);
-      controller = StandardController.at(result.args['controller']);
+      controller = RecoverableController.at(result.args['controller']);
       quorum = RecoveryQuorum.at(result.args['recoveryQuorum']);
       quorum.signUserChange(recoveryUser2, {from: user1}).then(() => {
         return controller.userKey();
@@ -150,8 +163,8 @@ contract("IdentityFactory", (accounts) => {
     identityFactory.CreateProxyWithControllerAndRecovery(
       user1,//userKey
       [delegate1, delegate3],//delegates
-      longTimeLock, 
-      shortTimeLock, 
+      longTimeLock,
+      shortTimeLock,
       {from: nobody}
     );
   });
@@ -161,7 +174,7 @@ contract("IdentityFactory", (accounts) => {
     event.watch((error, result) => {
       event.stopWatching();
       proxy = Proxy.at(result.args['proxy']);
-      controller = StandardController.at(result.args['controller']);
+      controller = RecoverableController.at(result.args['controller']);
       quorum = RecoveryQuorum.at(result.args['recoveryQuorum']);
       quorum.replaceDelegates([], [delegate5, delegate6], {from: user1}).then(() => {})
       .then(() => {return quorum.signUserChange(recoveryUser2, {from:delegate5})})//pending
@@ -226,14 +239,14 @@ contract("IdentityFactory", (accounts) => {
     identityFactory.CreateProxyWithControllerAndRecovery(
       user1,//userKey
       delegates,// #1,2,3, and 4
-      longTimeLock, 
-      shortTimeLock, 
+      longTimeLock,
+      shortTimeLock,
       {from: nobody}
     );
   });
 });
 
-  
+
 
 
 

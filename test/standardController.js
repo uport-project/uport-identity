@@ -1,5 +1,9 @@
 require('./helpers.js')()
 
+const Proxy = artifacts.require('Proxy')
+const TestRegistry = artifacts.require('TestRegistry')
+const StandardController = artifacts.require('StandardController')
+
 const LOG_NUMBER_1 = 1234;
 const LOG_NUMBER_2 = 2345;
 
@@ -15,9 +19,6 @@ contract("StandardController", (accounts) => {
   var longTime =  4;
 
   before(() => {
-    // Truffle deploys contracts with accounts[0]
-    proxy = Proxy.deployed();
-    testReg = TestRegistry.deployed();
     user1 = accounts[0];
     user2 = accounts[1];
     user3 = accounts[2];
@@ -25,6 +26,13 @@ contract("StandardController", (accounts) => {
     admin2 = accounts[4];
     admin3 = accounts[5];
     nobody = accounts[6];
+    // Truffle deploys contracts with accounts[0]
+    Proxy.deployed().then((instance) => {
+      proxy = instance
+      return TestRegistry.deployed()
+    }).then((instance) => {
+      testReg = instance
+    })
   });
 
   it("Correctly deploys contract", (done) => {
@@ -139,7 +147,7 @@ contract("StandardController", (accounts) => {
       assert.equal(recoveryKey, admin2, "ChangeRecovery Should affect recoveryKey after longTimeLock period");
       done();
     }).catch(done);
-  });  
+  });
 
   it("Updates recoveryKey as recovery", (done) => { //recoveryKey is currently admin2
     standardController.changeRecoveryFromRecovery(admin3, {from: user3}).then(() => {
