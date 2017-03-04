@@ -1,12 +1,20 @@
-##uPort
+#uPort
 Please read our (Whitepaper)[http://whitepaper.uport.me/uPort_whitepaper_DRAFT20161020.pdf] for information on what uPort is, and what is currently possible as far as integration.
 
 ##Contracts
-This Repository is uPort's *most* up-to-date source on our currently used contracts, and addresses of our deployed contracts on Ropsten and Ethereum (mainnet).
-- [Solidity Contracts](https://github.com/ConsenSys/uport-proxy/tree/master/contracts)
-- [ABI Definitions and Deployed Addresses](https://github.com/ConsenSys/uport-proxy/tree/master/build/contracts) (created with truffle-artifactor. Note: not all contracts have deployments)
-- JS integrations/tests (not available yet)
+This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.
 
+### Proxy
+This is the main identity contract. All your transactions are forwarded through this contract which acts as your persistent identifier.
+
+### StandardController
+This is a controller which plugs in to the proxy contract. It gives you the ability to have one key that can make transactions through the proxy, but can't change the owner of the proxy, and another key that acts as a recovery key that can change the owner of the proxy. This gives you the ability to store a recovery key in cold storage while you can use your main key for regular transactions. If your main key is lost you can change it using the recovery key from cold storage.
+
+### RecoveryQuorum
+This contract plugs into the StandardController to provide recovery with a n-of-m setup. This allows for creating recovery networks consisting of your friends.
+
+### UportRegistry
+This contract is used to store information related to your identity.
 
 
 ##JavaScript Integration
