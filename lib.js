@@ -10,4 +10,4 @@ const UportContracts = {
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
 }
 
-module.exports = { UportContracts }
+module.exports = UportContracts

@@ -826,219 +826,171 @@ module.exports={
   "updated_at": 1487628547084
 }
 },{}],7:[function(require,module,exports){
-module.exports={
-  "contract_name": "UportRegistry",
-  "abi": [
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "registrationIdentifier",
-          "type": "bytes32"
-        },
-        {
-          "name": "issuer",
-          "type": "address"
-        },
-        {
-          "name": "subject",
-          "type": "address"
+module.exports={  
+  "contract_name":"UportRegistry",
+  "abi":[  
+    {  
+      "constant":true,
+      "inputs":[  
+        {  
+          "name":"personaAddress",
+          "type":"address"
         }
       ],
-      "name": "get",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bytes32"
+      "name":"getAttributes",
+      "outputs":[  
+        {  
+          "name":"",
+          "type":"bytes"
         }
       ],
-      "payable": false,
-      "type": "function"
+      "payable":false,
+      "type":"function"
     },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "version",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
+    {  
+      "constant":true,
+      "inputs":[  
+
+      ],
+      "name":"version",
+      "outputs":[  
+        {  
+          "name":"",
+          "type":"uint256"
         }
       ],
-      "payable": false,
-      "type": "function"
+      "payable":false,
+      "type":"function"
     },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "previousPublishedVersion",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
+    {  
+      "constant":true,
+      "inputs":[  
+
+      ],
+      "name":"previousPublishedVersion",
+      "outputs":[  
+        {  
+          "name":"",
+          "type":"address"
         }
       ],
-      "payable": false,
-      "type": "function"
+      "payable":false,
+      "type":"function"
     },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "bytes32"
-        },
-        {
-          "name": "",
-          "type": "address"
-        },
-        {
-          "name": "",
-          "type": "address"
+    {  
+      "constant":false,
+      "inputs":[  
+        {  
+          "name":"ipfsHash",
+          "type":"bytes"
         }
       ],
-      "name": "registry",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bytes32"
-        }
+      "name":"setAttributes",
+      "outputs":[  
+
       ],
-      "payable": false,
-      "type": "function"
+      "payable":false,
+      "type":"function"
     },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "registrationIdentifier",
-          "type": "bytes32"
-        },
-        {
-          "name": "subject",
-          "type": "address"
-        },
-        {
-          "name": "value",
-          "type": "bytes32"
+    {  
+      "constant":true,
+      "inputs":[  
+        {  
+          "name":"",
+          "type":"address"
         }
       ],
-      "name": "set",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
+      "name":"ipfsAttributeLookup",
+      "outputs":[  
+        {  
+          "name":"",
+          "type":"bytes"
+        }
+      ],
+      "payable":false,
+      "type":"function"
     },
-    {
-      "inputs": [
-        {
-          "name": "_previousPublishedVersion",
-          "type": "address"
+    {  
+      "inputs":[  
+        {  
+          "name":"_previousPublishedVersion",
+          "type":"address"
         }
       ],
-      "payable": false,
-      "type": "constructor"
+      "payable":false,
+      "type":"constructor"
     },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "registrationIdentifier",
-          "type": "bytes32"
+    {  
+      "anonymous":false,
+      "inputs":[  
+        {  
+          "indexed":true,
+          "name":"_sender",
+          "type":"address"
         },
-        {
-          "indexed": true,
-          "name": "issuer",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "subject",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "updatedAt",
-          "type": "uint256"
+        {  
+          "indexed":false,
+          "name":"_timestamp",
+          "type":"uint256"
         }
       ],
-      "name": "Set",
-      "type": "event"
+      "name":"AttributesSet",
+      "type":"event"
     }
   ],
-  "unlinked_binary": "0x6060604052346100005760405160208061029083398101604052515b600360005560018054600160a060020a031916600160a060020a0383161790555b505b6102438061004d6000396000f300606060405263ffffffff60e060020a600035041663447885f0811461005057806354fd4d50146100845780636104464f146100a357806381895b73146100cc578063d79d8e6c14610100575b610000565b3461000057610072600435600160a060020a0360243581169060443516610121565b60408051918252519081900360200190f35b3461000057610072610158565b60408051918252519081900360200190f35b34610000576100b061015e565b60408051600160a060020a039092168252519081900360200190f35b3461000057610072600435600160a060020a036024358116906044351661016d565b60408051918252519081900360200190f35b346100005761011f600435600160a060020a0360243516604435610190565b005b6000838152600260209081526040808320600160a060020a03808716855290835281842090851684529091529020545b9392505050565b60005481565b600154600160a060020a031681565b600260209081526000938452604080852082529284528284209052825290205481565b81600160a060020a031633600160a060020a031684600019167feaf626c2c2ec7b7bd4328ffad20cd8bf2e631858020a5a4a0b4ea02276af3e91426040518082815260200191505060405180910390a46000838152600260209081526040808320600160a060020a033381168552908352818420908616845290915290208190555b5050505600a165627a7a72305820731b2e821caac4dcb6683cc2d9c839fe3d0340814e15230946482373ef8c72720029",
-  "networks": {
-    "1": {
-      "links": {},
-      "events": {
-        "0xeaf626c2c2ec7b7bd4328ffad20cd8bf2e631858020a5a4a0b4ea02276af3e91": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "name": "registrationIdentifier",
-              "type": "bytes32"
+  "unlinked_binary":"0x60606040523461000057604051602080610579833981016040528080519060200190919050505b600160008190555080600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff02191690836c010000000000000000000000009081020402179055505b505b6104fd8061007c6000396000f360606040526000357c010000000000000000000000000000000000000000000000000000000090048063446d5aa41461006457806354fd4d50146100ed5780636104464f146101105780636737c87714610149578063884179d8146101a0575b610000565b346100005761007f6004808035906020019091905050610229565b60405180806020018281038252838181518152602001915080519060200190808383829060006004602084601f0104600302600f01f150905090810190601f1680156100df5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34610000576100fa610307565b6040518082815260200191505060405180910390f35b346100005761011d61030d565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b346100005761019e600480803590602001908201803590602001908080601f01602080910402602001604051908101604052809392919081815260200183838082843782019150505050505091905050610333565b005b34610000576101bb600480803590602001909190505061044d565b60405180806020018281038252838181518152602001915080519060200190808383829060006004602084601f0104600302600f01f150905090810190601f16801561021b5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b6020604051908101604052806000815260200150600260008373ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000208054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156102fa5780601f106102cf576101008083540402835291602001916102fa565b820191906000526020600020905b8154815290600101906020018083116102dd57829003601f168201915b505050505090505b919050565b60005481565b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b80600260003373ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000209080519060200190828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106103a657805160ff19168380011785556103d4565b828001600101855582156103d4579182015b828111156103d35782518255916020019190600101906103b8565b5b5090506103f991905b808211156103f55760008160009055506001016103dd565b5090565b50503373ffffffffffffffffffffffffffffffffffffffff167f70c8251d1f51f94ab26213a0dd53ead1bf32aeeb2e95bb6497d8d8bbde61b98d426040518082815260200191505060405180910390a25b50565b60026020528060005260406000206000915090508054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156104f55780601f106104ca576101008083540402835291602001916104f5565b820191906000526020600020905b8154815290600101906020018083116104d857829003601f168201915b50505050508156",
+  "networks":{  
+    "1":{  
+      "links":{},
+      "events":{  
+        "70c8251d1f51f94ab26213a0dd53ead1bf32aeeb2e95bb6497d8d8bbde61b98d":{  
+          "anonymous":false,
+          "inputs":[  
+            {  
+              "indexed":true,
+              "name":"_sender",
+              "type":"address"
             },
-            {
-              "indexed": true,
-              "name": "issuer",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "name": "subject",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "name": "updatedAt",
-              "type": "uint256"
+            {  
+              "indexed":false,
+              "name":"_timestamp",
+              "type":"uint256"
             }
           ],
-          "name": "Set",
-          "type": "event"
+          "name":"AttributesSet",
+          "type":"event"
         }
       },
-      "address": "0xab5c8051b9a1df1aab0149f8b0630848b7ecabf6",
-      "updated_at": 1487624027710
+      "address":"0x022f41a91cb30d6a20ffcfde3f84be6c1fa70d60",
+      "updated_at":1487624027710
     },
-    "3": {
-      "links": {},
-      "events": {
-        "0xeaf626c2c2ec7b7bd4328ffad20cd8bf2e631858020a5a4a0b4ea02276af3e91": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "name": "registrationIdentifier",
-              "type": "bytes32"
+    "3":{  
+      "links":{},
+      "events":{  
+        "70c8251d1f51f94ab26213a0dd53ead1bf32aeeb2e95bb6497d8d8bbde61b98d":{  
+          "anonymous":false,
+          "inputs":[  
+            {  
+              "indexed":true,
+              "name":"_sender",
+              "type":"address"
             },
-            {
-              "indexed": true,
-              "name": "issuer",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "name": "subject",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "name": "updatedAt",
-              "type": "uint256"
+            {  
+              "indexed":false,
+              "name":"_timestamp",
+              "type":"uint256"
             }
           ],
-          "name": "Set",
-          "type": "event"
+          "name":"AttributesSet",
+          "type":"event"
         }
       },
-      "address": "0x41566e3a081f5032bdcad470adb797635ddfe1f0",
-      "updated_at": 1487622652023
+      "address":"0xb9C1598e24650437a3055F7f66AC1820c419a679",
+      "updated_at":1487622652023
     }
   },
-  "schema_version": "0.0.5",
-  "updated_at": 1487626238156
+  "schema_version":"0.0.5",
+  "updated_at":1487626238156
 }
 
 },{}],8:[function(require,module,exports){
@@ -1054,7 +1006,7 @@ const UportContracts = {
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
 }
 
-module.exports = { UportContracts }
+module.exports = UportContracts
 
 },{"./build/contracts/ArrayLib.json":1,"./build/contracts/Migrations.json":2,"./build/contracts/Owned.json":3,"./build/contracts/Proxy.json":4,"./build/contracts/RecoveryQuorum.json":5,"./build/contracts/StandardController.json":6,"./build/contracts/UportRegistry.json":7,"truffle-contract":240}],9:[function(require,module,exports){
 var asn1 = exports;
