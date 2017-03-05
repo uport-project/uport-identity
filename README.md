@@ -1,5 +1,5 @@
 #uPort
-Please read our (Whitepaper)[http://whitepaper.uport.me/uPort_whitepaper_DRAFT20161020.pdf] for information on what uPort is, and what is currently possible as far as integration.
+Please read our [Whitepaper](http://whitepaper.uport.me/uPort_whitepaper_DRAFT20161020.pdf) for information on what uPort is, and what is currently possible as far as integration.
 
 ##Contracts
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.
@@ -34,7 +34,7 @@ or simply download and include `dist.js` in an html file
 </html>
 
 ```
-The library exposes a `UportContracts` object which has all other contract objects nested in it (i.e. `UportContracts.Registry`). These objects are built using truffle-contract (see full API)[https://github.com/trufflesuite/truffle-contract]. They have promise-based functions corresponding to their solidity functions, and once initialized with a (web3)[https://github.com/ethereum/web3.js/] `provider`, will know their deployed address corresponding to the provided network.
+The library exposes a `UportContracts` object which has all other contract objects nested in it (i.e. `UportContracts.Registry`). These objects are built using truffle-contract [see full API](https://github.com/trufflesuite/truffle-contract). They have promise-based functions corresponding to their solidity functions, and once initialized with a [web3](https://github.com/ethereum/web3.js/) `provider`, will know their deployed address corresponding to the provided network.
 
 ```
 Web3 = require('web3');
