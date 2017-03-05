@@ -36,7 +36,7 @@ or simply download and include `dist.js` in an html file
 ```
 The library exposes a `UportContracts` object which has all other contract objects nested in it (i.e. `UportContracts.Registry`). These objects are built using truffle-contract [see full API](https://github.com/trufflesuite/truffle-contract). They have promise-based functions corresponding to their solidity functions, and once initialized with a [web3](https://github.com/ethereum/web3.js/) `provider`, will know their deployed address corresponding to the provided network.
 
-```
+```javascript
 Web3 = require('web3');
 
 if (typeof web3 == 'undefined') {
@@ -55,6 +55,16 @@ UportContracts.Registry.deployed().then(function(instance){
 
 ```
 (todo: add more examples)
+
+## Testing the contracts
+To run the tests for the contract you need `ethereumjs-testrpc` installed. Then run:
+```
+$ testrpc --accounts 25
+```
+Followed by,
+```
+$ npm test
+```
 
 ##Known Issues
 This is still a work in progress and as of now, the uport-registry used by the uport team is the older version with less functionality found [here](https://github.com/uport-project/uport-registry). 

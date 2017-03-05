@@ -1,6 +1,6 @@
 {
-  "name": "truffle-3-test",
-  "version": "1.0.0",
+  "name": "uport-contracts",
+  "version": "0.0.1",
   "private": true,
   "description": "",
   "directories": {
@@ -12,7 +12,7 @@
     "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
     "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
     "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
-    "truffle-test": "node_modules/.bin/truffle test --network testrpc"
+    "test": "node_modules/.bin/truffle test"
   },
   "author": "",
   "license": "ISC",

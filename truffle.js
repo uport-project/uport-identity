@@ -1,6 +1,6 @@
 module.exports = {
   networks: {
-    testrpc: {
+    development: {
       host: "localhost",
       port: 8545,
       network_id: "*"
