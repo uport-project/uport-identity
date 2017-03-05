@@ -1,0 +1,196 @@
+{
+  "contract_name": "SensuiBank",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_cycleTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "setTimelock",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "cycleEnd",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "setLimit",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "isOwner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "spentThisCycle",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "limit",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "uportTeam",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "cycleTime",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "emergencyWithdraw",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_uportTeam",
+          "type": "address"
+        },
+        {
+          "name": "_limit",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "payable": true,
+      "type": "fallback"
+    }
+  ],
+  "unlinked_binary": "0x6060604052346100005760405160408061048e8339810160405280516020909101515b5b60008054600160a060020a03191633600160a060020a03161790555b60008054600160a060020a03338116600160a060020a0319928316179092556005805492851692909116919091179055600181905562093a80600281905542016003555b50505b6103f9806100956000396000f3006060604052361561009e5763ffffffff60e060020a6000350416631a69523081146100a75780631e891c0a146100c257806321496c72146100d457806327ea6f2b146100f35780632e1a7d4d146101055780632f54bf6e146101175780633cce1a28146101445780638da5cb5b14610163578063a4d66daf1461018c578063a8940c8f146101ab578063d708e2c1146101d4578063db2e21bc146101f3575b6100a55b5b565b005b34610000576100a5600160a060020a0360043516610202565b005b34610000576100a560043561023e565b005b34610000576100e1610260565b60408051918252519081900360200190f35b34610000576100a5600435610266565b005b34610000576100a5600435610288565b005b3461000057610130600160a060020a03600435166102e6565b604080519115158252519081900360200190f35b34610000576100e16102fd565b60408051918252519081900360200190f35b3461000057610170610303565b60408051600160a060020a039092168252519081900360200190f35b34610000576100e1610312565b60408051918252519081900360200190f35b3461000057610170610318565b60408051600160a060020a039092168252519081900360200190f35b34610000576100e1610327565b60408051918252519081900360200190f35b34610000576100a561032d565b005b61020b336102e6565b15610239576000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b5b50565b60055433600160a060020a03908116911614156102395760028190555b5b5b50565b60035481565b60055433600160a060020a03908116911614156102395760018190555b5b5b50565b610291336102e6565b156102395761029f8161037e565b1561023957600480548201905560008054604051600160a060020a039091169183156108fc02918491818181858888f19350505050151561023957610000565b5b5b5b5b50565b600054600160a060020a038281169116145b919050565b60045481565b600054600160a060020a031681565b60015481565b600554600160a060020a031681565b60025481565b60055433600160a060020a03908116911614156100a257600554604051600160a060020a039182169130163180156108fc02916000818181858888f1935050505015156100a257610000565b5b5b5b565b600060035442111561039857600254420160035560006004555b6004546001540382111580156103b2575060045460015410155b156103bf575060016102f8565b5060006102f8565b5b9190505600a165627a7a72305820dda5205a5f2382adda989f1e7a7c25c85cbe6bfe8fbde15c1fd10a72be2a69f60029",
+  "networks": {
+    "1": {
+      "events": {},
+      "links": {},
+      "address": "0x9f500c2ac868d2b160c62162970d659f22a194aa",
+      "updated_at": 1487624027710
+    },
+    "3": {
+      "events": {},
+      "links": {},
+      "address": "0xa47461d8f6049b2547141f03b4c23b1ecaa5dd60",
+      "updated_at": 1487622652026
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1487628547084
+}
