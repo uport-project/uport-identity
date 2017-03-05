@@ -9,7 +9,7 @@ var regularWeb3Provider = web3.currentProvider;
 
 const IdentityFactory = artifacts.require('IdentityFactory')
 const Proxy = artifacts.require('Proxy')
-const RecoverableController = artifacts.require('RecoverableController')
+const StandardController = artifacts.require('StandardController')
 const RecoveryQuorum = artifacts.require('RecoveryQuorum')
 const TestRegistry = artifacts.require('TestRegistry')
 
@@ -26,7 +26,7 @@ contract("Uport proxy integration tests", (accounts) => {
   var identityFactory;
   var testReg;
   var proxy;
-  var recoverableController;
+  var standardController;
   var recoveryQuorum;
 
   var delegateDeletedAfter =    0;
@@ -79,17 +79,17 @@ contract("Uport proxy integration tests", (accounts) => {
     event.watch((error, result) => {
       event.stopWatching();
       proxy = Proxy.at(result.args.proxy);
-      recoverableController = RecoverableController.at(result.args.controller);
+      standardController = StandardController.at(result.args.controller);
       recoveryQuorum = RecoveryQuorum.at(result.args.recoveryQuorum);
 
-      recoverableController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: admin}).then(() => {done();});
+      standardController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: admin}).then(() => {done();});
     });
     identityFactory.CreateProxyWithControllerAndRecovery(user1, delegates, longTimeLock, shortTimeLock, {from: user1}).catch(done);
   });
 
   it("Use proxy for simple function call", (done) => {
     // Set up the new Proxy provider
-    proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, recoverableController.address));
+    proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, standardController.address));
     var web3ProxyProvider = new HookedWeb3Provider({
       host: 'http://localhost:8545',
       transaction_signer: proxySigner
@@ -118,7 +118,7 @@ contract("Uport proxy integration tests", (accounts) => {
       var mediumCoinbaseBalance = web3.eth.getBalance(accounts[0])/(web3.toWei(1, "ether"))
       assert.approximately(mediumCoinbaseBalance, initialCoinbaseBalance - 1.5, .05, "coinbase should have less (1.5ETH value + gas)")
 
-      proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, recoverableController.address));
+      proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, standardController.address));
       var web3ProxyProvider = new HookedWeb3Provider({
         host: 'http://localhost:8545',
         transaction_signer: proxySigner
@@ -150,16 +150,16 @@ contract("Uport proxy integration tests", (accounts) => {
       assert.equal(delegate1Address, delegates[1], "this delegate should also be in the delegateAddresses array in quorum");
       return recoveryQuorum.signUserChange(user2, {from: delegates[1]});
     }).then(() => {
-      proxySigner = new Signer(new ProxySigner(proxy.address, user2Signer, recoverableController.address));
+      proxySigner = new Signer(new ProxySigner(proxy.address, user2Signer, standardController.address));
       var web3ProxyProvider = new HookedWeb3Provider({
         host: 'http://localhost:8545',
         transaction_signer: proxySigner
       });
       TestRegistry.setProvider(web3ProxyProvider);
       // Register a number from proxy.address
-      return recoverableController.userKey.call()
+      return standardController.userKey.call()
     }).then((newUserKey) => {
-      assert.equal(newUserKey, user2, "User key of recoverableController should have been updated.");
+      assert.equal(newUserKey, user2, "User key of standardController should have been updated.");
       return testReg.register(LOG_NUMBER_2, {from: proxy.address})
     }).then(() => {
       return testReg.registry.call(proxy.address);

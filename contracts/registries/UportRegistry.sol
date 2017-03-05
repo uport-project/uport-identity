@@ -1,7 +1,7 @@
 // VERSION 1
 // mainnet: 0x022f41a91cb30d6a20ffcfde3f84be6c1fa70d60
 // ropsten: 0xb9C1598e24650437a3055F7f66AC1820c419a679
-pragma solidity 0.4.6;
+pragma solidity 0.4.8;
 contract UportRegistry{
   event AttributesSet(address indexed _sender, uint _timestamp);
 

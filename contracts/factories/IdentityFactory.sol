@@ -1,5 +1,5 @@
 pragma solidity ^0.4.4;
-import "./RecoveryQuorum.sol";
+import "../recovery/RecoveryQuorum.sol";
 
 contract IdentityFactory {
     event IdentityCreated(
@@ -13,7 +13,7 @@ contract IdentityFactory {
     //cost ~2.4M gas
     function CreateProxyWithControllerAndRecovery(address userKey, address[] delegates, uint longTimeLock, uint shortTimeLock) {
         Proxy proxy = new Proxy();
-        RecoverableController controller = new RecoverableController(proxy, userKey, longTimeLock, shortTimeLock);
+        StandardController controller = new StandardController(proxy, userKey, longTimeLock, shortTimeLock);
         proxy.transfer(controller);
         RecoveryQuorum recoveryQuorum = new RecoveryQuorum(controller, delegates);
         controller.changeRecoveryFromRecovery(recoveryQuorum);

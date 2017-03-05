@@ -1,5 +1,5 @@
 pragma solidity ^0.4.4;
-import "./RecoverableController.sol";
+import "../controllers/StandardController.sol";
 
 contract IdentityFactoryWithRecoveryKey {
     event IdentityCreated(
@@ -13,7 +13,7 @@ contract IdentityFactoryWithRecoveryKey {
     //cost ~2.4M gas
     function CreateProxyWithControllerAndRecoveryKey(address userKey, address _recoveryKey, uint longTimeLock, uint shortTimeLock) {
         Proxy proxy = new Proxy();
-        RecoverableController controller = new RecoverableController(proxy, userKey, longTimeLock, shortTimeLock);
+        StandardController controller = new StandardController(proxy, userKey, longTimeLock, shortTimeLock);
         proxy.transfer(controller);
         controller.changeRecoveryFromRecovery(_recoveryKey);
 
