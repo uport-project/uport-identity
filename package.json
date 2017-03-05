@@ -12,7 +12,8 @@
     "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
     "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
     "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
-    "test": "node_modules/.bin/truffle test"
+    "test": "node_modules/.bin/truffle test",
+    "dist": "node_modules/.bin/browserify lib.js -o dist.js"
   },
   "author": "",
   "license": "ISC",
