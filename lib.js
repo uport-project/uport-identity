@@ -9,6 +9,7 @@ const UportContracts = {
   RecoveryQuorum:                 Contract(require('./build/contracts/RecoveryQuorum.json')),
   StandardController:             Contract(require('./build/contracts/StandardController.json')),
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
+  SharedController:               Contract(require('./build/contracts/SharedController.json'))
 }
 
 module.exports = UportContracts
