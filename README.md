@@ -57,11 +57,7 @@ UportContracts.Registry.deployed().then(function(instance){
 (todo: add more examples)
 
 ## Testing the contracts
-To run the tests for the contract you need `ethereumjs-testrpc` installed. Then run:
-```
-$ testrpc --accounts 25
-```
-Followed by,
+The test script automatically starts an instance of `testrpc`, so the only thing you need to do is:
 ```
 $ npm test
 ```
