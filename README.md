@@ -57,7 +57,7 @@ UportContracts.Registry.deployed().then(function(instance){
 (todo: add more examples)
 
 ## Testing the contracts
-The test script automatically starts an instance of `testrpc`, so the only thing you need to do is:
+The test script automatically starts an instance of `testrpc`, so simple make sure it is not already running and use:
 ```
 $ npm test
 ```

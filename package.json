@@ -13,7 +13,7 @@
     "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
     "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
     "dist": "node_modules/.bin/browserify lib.js -o dist.js",
-    "test": "node_modules/.bin/testrpc --accounts 25 > /dev/null & TPID=$! && node_modules/.bin/truffle test && kill $TPID"
+    "test": "node_modules/.bin/testrpc --accounts 25 > /dev/null & TPID=$! && sleep 4 && node_modules/.bin/truffle test && kill $TPID"
   },
   "author": "",
   "license": "ISC",
