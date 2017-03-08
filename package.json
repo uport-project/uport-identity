@@ -1,6 +1,6 @@
 {
-  "name": "truffle-3-test",
-  "version": "1.0.0",
+  "name": "uport-contracts",
+  "version": "0.0.1",
   "private": true,
   "description": "",
   "directories": {
@@ -12,7 +12,8 @@
     "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
     "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
     "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
-    "truffle-test": "node_modules/.bin/truffle test --network testrpc"
+    "dist": "node_modules/.bin/browserify lib.js -o dist.js",
+    "test": "node_modules/.bin/testrpc --accounts 25 > /dev/null & TPID=$! && sleep 4 && node_modules/.bin/truffle test && kill $TPID"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "browserify": "^13.1.1",
     "eth-signer": "^0.2.1",
+    "ethereumjs-testrpc": "^3.0.3",
     "hooked-web3-provider": "^1.0.0",
     "truffle": "^3.1.9"
   }
