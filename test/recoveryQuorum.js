@@ -1,5 +1,9 @@
 require('./helpers.js')()
 
+const Proxy = artifacts.require('Proxy')
+const RecoverableController = artifacts.require('RecoverableController')
+const RecoveryQuorum = artifacts.require('RecoveryQuorum')
+
 const LOG_NUMBER_1 = 1234;
 const LOG_NUMBER_2 = 2345;
 
@@ -7,7 +11,7 @@ contract("RecoveryQuorum", (accounts) => {
   var userSigner;
   var proxySigner;
 
-  var standardController;
+  var recoverableController;
   var recoveryQuorum;
   var user1;
   var user2;
@@ -22,7 +26,6 @@ contract("RecoveryQuorum", (accounts) => {
   var longTimeLock  = 5;
 
   before(() => {
-    proxy = Proxy.deployed();
     user1 = accounts[0];
     user2 = accounts[1];
     recovery1 = accounts[2];
@@ -48,28 +51,31 @@ contract("RecoveryQuorum", (accounts) => {
       accounts[14],
       accounts[15],
     ];
+    Proxy.deployed().then((instance) => {
+      proxy = instance
+    })
   });
 
   it("Correctly deploys contract", (done) => {
-    StandardController.new(proxy.address, user1, longTimeLock, shortTimeLock, {from: recovery1})
+    RecoverableController.new(proxy.address, user1, longTimeLock, shortTimeLock, {from: recovery1})
     .then((newRC) => {
-      standardController = newRC;
-      return proxy.transfer(standardController.address, {from: accounts[0]});
+      recoverableController = newRC;
+      return proxy.transfer(recoverableController.address, {from: accounts[0]});
     }).then(() => {
-      return RecoveryQuorum.new(standardController.address, delegateList);
+      return RecoveryQuorum.new(recoverableController.address, delegateList);
     }).then((newRQ) => {
       recoveryQuorum = newRQ;
-      return standardController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
+      return recoverableController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
     }).then(() => {
-      return standardController.recoveryKey.call();
+      return recoverableController.recoveryKey.call();
     }).then((RCrecoveryKey) => {
       assert.equal(RCrecoveryKey, recoveryQuorum.address, "Controller's recoverKey should be the RQ's address")
       return recoveryQuorum.controller.call();
     }).then((RCcontroller) => {
-      assert.equal(RCcontroller, standardController.address, "RQ's controller var should be the controller's address")
+      assert.equal(RCcontroller, recoverableController.address, "RQ's controller var should be the controller's address")
       return recoveryQuorum.controller();
     }).then((controllerAddress) => {
-      assert.equal(controllerAddress, standardController.address);
+      assert.equal(controllerAddress, recoverableController.address);
       return recoveryQuorum.delegates.call(delegateList[0]);
     }).then((delegate) => {
       assert.isAbove(delegate[delegateDeletedAfter].toNumber(), 0);
@@ -113,7 +119,7 @@ contract("RecoveryQuorum", (accounts) => {
   it("delegate can sign recovery", (done) => {
     recoveryQuorum.signUserChange(user2, {from: delegateList[0]})
     .then(() => {
-      return standardController.userKey.call();
+      return recoverableController.userKey.call();
     }).then((userKey) => {
       return recoveryQuorum.collectedSignatures.call(user2);
     }).then((collectedSignatures) => {
@@ -138,7 +144,7 @@ contract("RecoveryQuorum", (accounts) => {
       assert.equal(collectedSignatures.toNumber(), 1, "should keep track of how many votes user2 has (1)");
       return recoveryQuorum.changeUserKey(user2, {from: delegateList[0]});
     }).then(() => {
-      return standardController.userKey.call();
+      return recoverableController.userKey.call();
     }).then((userKey) => {
       assert.equal(userKey, user1, "User key in controller should not have changed.");
       return recoveryQuorum.collectedSignatures.call(user2)
@@ -156,7 +162,7 @@ contract("RecoveryQuorum", (accounts) => {
       return recoveryQuorum.collectedSignatures.call(user2);
     }).then((collectedSigs) => {
       assert.equal(collectedSigs.toNumber(), 0, "collected sigs should e reset after changeUserKey")
-      return standardController.userKey.call();
+      return recoverableController.userKey.call();
     }).then((userKey) => {
       assert.equal(userKey, user2, "User key in controller should have been updated.");
       return recoveryQuorum.delegates.call(user1);
@@ -186,15 +192,15 @@ contract("RecoveryQuorum", (accounts) => {
     Proxy.new({from: accounts[0]})
     .then((newPX) => {
       proxy = newPX;
-      return StandardController.new(proxy.address, user2, longTimeLock, shortTimeLock, {from: recovery1})})
+      return RecoverableController.new(proxy.address, user2, longTimeLock, shortTimeLock, {from: recovery1})})
     .then((newRC) => {
-      standardController = newRC;
-      return proxy.transfer(standardController.address, {from: accounts[0]});
+      recoverableController = newRC;
+      return proxy.transfer(recoverableController.address, {from: accounts[0]});
     }).then(() => {
-      return RecoveryQuorum.new(standardController.address, delegateList);
+      return RecoveryQuorum.new(recoverableController.address, delegateList);
     }).then((newRQ) => {
       recoveryQuorum = newRQ;
-      return standardController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
+      return recoverableController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
     }).then(() => {
       return recoveryQuorum.replaceDelegates([], [accounts[7]], {from: user1})})
     .then(() => {
@@ -276,7 +282,7 @@ contract("RecoveryQuorum", (accounts) => {
       assert.equal(delegate[delegateProposedUserKey], user1, "Proposed user should be set");
       return recoveryQuorum.changeUserKey(user1, {from: accounts[7]});
     }).then(() => {
-      return standardController.userKey.call();
+      return recoverableController.userKey.call();
     }).then((userKey) => {
       assert.equal(userKey, user2, "controller userKey should not change because these delegates are too new");
       done();
@@ -287,15 +293,15 @@ contract("RecoveryQuorum", (accounts) => {
     Proxy.new({from: accounts[0]})
     .then((newPX) => {
       proxy = newPX;
-      return StandardController.new(proxy.address, user2, shortTimeLock , longTimeLock, {from: recovery1})})
+      return RecoverableController.new(proxy.address, user2, shortTimeLock , longTimeLock, {from: recovery1})})
     .then((newRC) => {
-      standardController = newRC;
-      return proxy.transfer(standardController.address, {from: accounts[0]});
+      recoverableController = newRC;
+      return proxy.transfer(recoverableController.address, {from: accounts[0]});
     }).then(() => {
-      return RecoveryQuorum.new(standardController.address, delegateList);//init with delegates
+      return RecoveryQuorum.new(recoverableController.address, delegateList);//init with delegates
     }).then((newRQ) => {
       recoveryQuorum = newRQ;
-      return standardController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
+      return recoverableController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
     }).then(() => {
       return recoveryQuorum.getAddresses();
     }).then((delegateAddresses) => {
@@ -340,20 +346,20 @@ contract("RecoveryQuorum", (accounts) => {
 
  // THE FOLLOWING TESTS REQUIRE 25 ACCOUNTS: `testrpc --accounts 25`
  //=================================================================
- 
+
  it("protected against gasLimit attack. WARNING: strange error if gas is overspent", (done) => {
    Proxy.new({from: accounts[0]})
     .then((newPX) => {
       proxy = newPX;
-      return StandardController.new(proxy.address, user2, 100000, 100000, {from: recovery1})})
+      return RecoverableController.new(proxy.address, user2, 100000, 100000, {from: recovery1})})
     .then((newRC) => {
-      standardController = newRC;
-      return proxy.transfer(standardController.address, {from: accounts[0]});
+      recoverableController = newRC;
+      return proxy.transfer(recoverableController.address, {from: accounts[0]});
     }).then(() => {
-      return RecoveryQuorum.new(standardController.address, [accounts[1]]);//only 1 delegate
+      return RecoveryQuorum.new(recoverableController.address, [accounts[1]]);//only 1 delegate
     }).then((newRQ) => {
       recoveryQuorum = newRQ;
-      return standardController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
+      return recoverableController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
     }).then(() => {
       return recoveryQuorum.replaceDelegates([accounts[1]], largeDelegateList, {from: user2})//add 14 more
     }).then(() => {
@@ -408,7 +414,7 @@ contract("RecoveryQuorum", (accounts) => {
       assert.equal(delegate[delegateProposedUserKey], 0x0);
       return recoveryQuorum.signUserChange(0x123, {from: accounts[1], gas: 1000000});
     }).then(() => {
-      return standardController.userKey();
+      return recoverableController.userKey();
     }).then((userKey) => {
       assert.equal(userKey, 0x123, "enough gas was present to recover");
       done();
@@ -418,17 +424,17 @@ contract("RecoveryQuorum", (accounts) => {
   it("protected against gasLimit attack. WARNING: strange error if gas is overspent", (done) => {
    Proxy.new({from: accounts[0]})
     .then((newPX) => {
-      proxy = newPX;    
-      return StandardController.new(proxy.address, user2, 0, 0, {from: recovery1})})
+      proxy = newPX;
+      return RecoverableController.new(proxy.address, user2, 0, 0, {from: recovery1})})
     .then((newRC) => {
-      standardController = newRC;
-      return proxy.transfer(standardController.address, {from: accounts[0]});
+      recoverableController = newRC;
+      return proxy.transfer(recoverableController.address, {from: accounts[0]});
     }).then(() => {
       largeDelegateList.push(accounts[1]);
-      return RecoveryQuorum.new(standardController.address, largeDelegateList);//full 15 delegates
+      return RecoveryQuorum.new(recoverableController.address, largeDelegateList);//full 15 delegates
     }).then((newRQ) => {
       recoveryQuorum = newRQ;
-      return standardController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
+      return recoverableController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: recovery1});
     }).then(() => {
       return recoveryQuorum.signUserChange(0x111, {from: accounts[1]});
     }).then(() => {
@@ -473,7 +479,7 @@ contract("RecoveryQuorum", (accounts) => {
       assert.equal(delegate[delegateProposedUserKey], 0x0);
       return recoveryQuorum.signUserChange(0x456, {from: accounts[15], gas: 1000000});
     }).then(() => {
-      return standardController.userKey();
+      return recoverableController.userKey();
     }).then((userKey) => {
       assert.equal(userKey, 0x456, "enough gas was present to recover");
       done();

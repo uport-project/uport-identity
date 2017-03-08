@@ -1,8 +1,13 @@
+const Owned = artifacts.require('Owned')
+
 contract("Owned", (accounts) => {
   var owned
 
   before(() => {
     owned = Owned.deployed();
+    Owned.deployed().then((instance) => {
+      owned = instance
+    })
   });
 
   it("Is owned by creator", (done) => {

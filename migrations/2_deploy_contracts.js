@@ -1,14 +1,20 @@
-var ArrayLib = artifacts.require("./libraries/ArrayLib.sol");
-var IdentityFactory = artifacts.require("./factories/IdentityFactory.sol");
-var IdentityFactoryWithRecoveryKey = artifacts.require("./factories/IdentityFactoryWithRecoveryKey.sol");
-var SensuiBank = artifacts.require("./other/SensuiBank.sol");
-var UportRegistry = artifacts.require("./registries/UportRegistry.sol");
+const Owned = artifacts.require('./libraries/Owned.sol')
+const Proxy = artifacts.require('./libraries/Proxy.sol')
+const TestRegistry = artifacts.require('./other/TestRegistry.sol')
+const RecoverableController = artifacts.require('./other/RecoverableController.sol')
+const ArrayLib = artifacts.require('./other/ArrayLib.sol')
+const RecoveryQuorum = artifacts.require('./other/RecoveryQuorum.sol')
+const IdentityFactory = artifacts.require('./other/IdentityFactory.sol')
+const IdentityFactoryWithRecoveryKey = artifacts.require('./other/IdentityFactoryWithRecoveryKey.sol')
 
 module.exports = function(deployer) {
+  deployer.deploy(Owned);
+  deployer.deploy(Proxy);
+  deployer.deploy(TestRegistry);
+  deployer.deploy(RecoverableController);
   deployer.deploy(ArrayLib);
-  deployer.link(ArrayLib, IdentityFactory);
+  deployer.link(ArrayLib, [RecoveryQuorum, IdentityFactory])
+  deployer.deploy(RecoveryQuorum);
   deployer.deploy(IdentityFactory);
   deployer.deploy(IdentityFactoryWithRecoveryKey);
-  deployer.deploy(SensuiBank);
-  // deployer.deploy(UportRegistry);
 };

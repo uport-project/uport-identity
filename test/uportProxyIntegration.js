@@ -7,6 +7,12 @@ var Phrase = lightwallet.generators.Phrase;
 var ProxySigner = lightwallet.signers.ProxySigner;
 var regularWeb3Provider = web3.currentProvider;
 
+const IdentityFactory = artifacts.require('IdentityFactory')
+const Proxy = artifacts.require('Proxy')
+const RecoverableController = artifacts.require('RecoverableController')
+const RecoveryQuorum = artifacts.require('RecoveryQuorum')
+const TestRegistry = artifacts.require('TestRegistry')
+
 const SEED1 = 'tackle crystal drum type spin nest wine occur humor grocery worry pottery';
 const SEED2 = 'tree clock fly receive mirror scissors away avoid seminar attract wife holiday';
 const LOG_NUMBER_1 = 1234;
@@ -20,7 +26,7 @@ contract("Uport proxy integration tests", (accounts) => {
   var identityFactory;
   var testReg;
   var proxy;
-  var standardController;
+  var recoverableController;
   var recoveryQuorum;
 
   var delegateDeletedAfter =    0;
@@ -59,7 +65,10 @@ contract("Uport proxy integration tests", (accounts) => {
     // Truffle deploys contracts with accounts[0]
     IdentityFactory.setProvider(web3Prov);
     TestRegistry.setProvider(web3Prov);
-    identityFactory = IdentityFactory.deployed();
+    IdentityFactory.deployed().then((instance) => {
+      identityFactory = instance
+    })
+
     TestRegistry.new({from: accounts[0]}).then(tr => {
       testReg = tr;
     })
@@ -70,17 +79,17 @@ contract("Uport proxy integration tests", (accounts) => {
     event.watch((error, result) => {
       event.stopWatching();
       proxy = Proxy.at(result.args.proxy);
-      standardController = StandardController.at(result.args.controller);
+      recoverableController = RecoverableController.at(result.args.controller);
       recoveryQuorum = RecoveryQuorum.at(result.args.recoveryQuorum);
 
-      standardController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: admin}).then(() => {done();});
+      recoverableController.changeRecoveryFromRecovery(recoveryQuorum.address, {from: admin}).then(() => {done();});
     });
     identityFactory.CreateProxyWithControllerAndRecovery(user1, delegates, longTimeLock, shortTimeLock, {from: user1}).catch(done);
   });
 
   it("Use proxy for simple function call", (done) => {
     // Set up the new Proxy provider
-    proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, standardController.address));
+    proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, recoverableController.address));
     var web3ProxyProvider = new HookedWeb3Provider({
       host: 'http://localhost:8545',
       transaction_signer: proxySigner
@@ -88,9 +97,9 @@ contract("Uport proxy integration tests", (accounts) => {
     TestRegistry.setProvider(web3ProxyProvider);
 
     // Register a number from proxy.address
-    testReg.register(LOG_NUMBER_1, {from: proxy.address}).then((txHash) => {
+    testReg.register(LOG_NUMBER_1, {from: proxy.address}).then(txData => {
       // Verify that the proxy address is logged
-      web3.eth.getTransactionReceipt(txHash, function(err, receiptProxy){gasUsedWithProxy = receiptProxy.cumulativeGasUsed})
+      gasUsedWithProxy = txData.receipt.cumulativeGasUsed
       return testReg.registry.call(proxy.address);
     }).then((regData) => {
       assert.equal(regData.toNumber(), LOG_NUMBER_1);
@@ -108,8 +117,8 @@ contract("Uport proxy integration tests", (accounts) => {
       assert.equal(mediumProxyBalance, 1.5, "then proxy contract should have received 1.5ETH value")
       var mediumCoinbaseBalance = web3.eth.getBalance(accounts[0])/(web3.toWei(1, "ether"))
       assert.approximately(mediumCoinbaseBalance, initialCoinbaseBalance - 1.5, .05, "coinbase should have less (1.5ETH value + gas)")
-     
-      proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, standardController.address));
+
+      proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, recoverableController.address));
       var web3ProxyProvider = new HookedWeb3Provider({
         host: 'http://localhost:8545',
         transaction_signer: proxySigner
@@ -132,7 +141,7 @@ contract("Uport proxy integration tests", (accounts) => {
     .then(() => {
       return recoveryQuorum.delegates.call(delegates[0]);})
     .then((delegate1) => {
-      assert.isAbove(delegate1[delegateDeletedAfter], 0, "this delegate should have record in quorum"); 
+      assert.isAbove(delegate1[delegateDeletedAfter], 0, "this delegate should have record in quorum");
       return recoveryQuorum.delegates.call("0xdeadbeef");})
     .then((notADelegate) => {
       assert.equal(notADelegate[delegateDeletedAfter], 0, "this delegate should not have a record in quorum");
@@ -141,16 +150,16 @@ contract("Uport proxy integration tests", (accounts) => {
       assert.equal(delegate1Address, delegates[1], "this delegate should also be in the delegateAddresses array in quorum");
       return recoveryQuorum.signUserChange(user2, {from: delegates[1]});
     }).then(() => {
-      proxySigner = new Signer(new ProxySigner(proxy.address, user2Signer, standardController.address));
+      proxySigner = new Signer(new ProxySigner(proxy.address, user2Signer, recoverableController.address));
       var web3ProxyProvider = new HookedWeb3Provider({
         host: 'http://localhost:8545',
         transaction_signer: proxySigner
       });
       TestRegistry.setProvider(web3ProxyProvider);
       // Register a number from proxy.address
-      return standardController.userKey.call()
+      return recoverableController.userKey.call()
     }).then((newUserKey) => {
-      assert.equal(newUserKey, user2, "User key of standardController should have been updated.");
+      assert.equal(newUserKey, user2, "User key of recoverableController should have been updated.");
       return testReg.register(LOG_NUMBER_2, {from: proxy.address})
     }).then(() => {
       return testReg.registry.call(proxy.address);
@@ -168,15 +177,13 @@ contract("Uport proxy integration tests", (accounts) => {
     var web3Prov = new web3.providers.HttpProvider("http://localhost:8545")
     TestRegistry.setProvider(web3Prov);
     // Register a number from proxy.address
-    TestRegistry.new({from: accounts[0]}).then((tr => {
+    TestRegistry.new({from: accounts[0]}).then(tr => {
       testReg2 = tr
       return testReg2.register(LOG_NUMBER_1, {from: accounts[0]})
-    })).then((txHash) => {
-      web3.eth.getTransactionReceipt(txHash, function(err, receiptNoProxy){
-        gasUsedWithoutProxy = receiptNoProxy.cumulativeGasUsed;
-        assert.approximately(gasUsedWithProxy - gasUsedWithoutProxy, PROXY_GAS_OVERHEAD, 1000, "PROXY_GAS_OVERHEAD has unexpected value. Please update this in the test file if value has changed.");
-        done();
-      })
+    }).then(txData => {
+      gasUsedWithoutProxy = txData.receipt.cumulativeGasUsed
+      assert.approximately(gasUsedWithProxy - gasUsedWithoutProxy, PROXY_GAS_OVERHEAD, 1000, "PROXY_GAS_OVERHEAD has unexpected value. Please update this in the test file if value has changed.");
+      done();
     }).catch(done);
   });
 

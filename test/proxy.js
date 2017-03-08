@@ -1,5 +1,8 @@
 require('./helpers.js')()
 
+const Proxy = artifacts.require('Proxy')
+const TestRegistry = artifacts.require('TestRegistry')
+
 const LOG_NUMBER_1 = 1234;
 const LOG_NUMBER_2 = 2345;
 
@@ -9,8 +12,12 @@ contract("Proxy", (accounts) => {
 
   before(() => {
     // Truffle deploys contracts with accounts[0]
-    proxy = Proxy.deployed();
-    testReg = TestRegistry.deployed();
+    Proxy.deployed().then((instance) => {
+      proxy = instance
+      return TestRegistry.deployed()
+    }).then((instance) => {
+      testReg = instance
+    })
   });
 
   it("Owner can send transaction", (done) => {
