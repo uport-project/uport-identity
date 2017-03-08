@@ -711,7 +711,7 @@ module.exports={
 }
 },{}],7:[function(require,module,exports){
 module.exports={
-  "contract_name": "StandardController",
+  "contract_name": "RecoverableController",
   "abi": [
     {
       "constant": true,
@@ -1202,13 +1202,13 @@ const UportContracts = {
   Owned:                          Contract(require('./build/contracts/Owned.json')),
   Proxy:                          Contract(require('./build/contracts/Proxy.json')),
   RecoveryQuorum:                 Contract(require('./build/contracts/RecoveryQuorum.json')),
-  StandardController:             Contract(require('./build/contracts/StandardController.json')),
+  RecoverableController:             Contract(require('./build/contracts/RecoverableController.json')),
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
 }
 
 module.exports = UportContracts
 
-},{"./build/contracts/ArrayLib.json":1,"./build/contracts/IdentityFactory.json":2,"./build/contracts/Migrations.json":3,"./build/contracts/Owned.json":4,"./build/contracts/Proxy.json":5,"./build/contracts/RecoveryQuorum.json":6,"./build/contracts/StandardController.json":7,"./build/contracts/UportRegistry.json":8,"truffle-contract":191}],10:[function(require,module,exports){
+},{"./build/contracts/ArrayLib.json":1,"./build/contracts/IdentityFactory.json":2,"./build/contracts/Migrations.json":3,"./build/contracts/Owned.json":4,"./build/contracts/Proxy.json":5,"./build/contracts/RecoveryQuorum.json":6,"./build/contracts/RecoverableController.json":7,"./build/contracts/UportRegistry.json":8,"truffle-contract":191}],10:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');

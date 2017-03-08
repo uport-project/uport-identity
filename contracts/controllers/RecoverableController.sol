@@ -1,7 +1,7 @@
 pragma solidity 0.4.8;
 import "../proxies/Proxy.sol";
 
-contract StandardController {
+contract RecoverableController {
   uint    public version;
   Proxy   public proxy;
   
@@ -24,7 +24,7 @@ contract StandardController {
   modifier onlyUserKey() { if (msg.sender == userKey) _; }
   modifier onlyRecoveryKey() { if (msg.sender == recoveryKey) _; }
 
-  function StandardController(address proxyAddress, address _userKey, uint _longTimeLock, uint _shortTimeLock) {
+  function RecoverableController(address proxyAddress, address _userKey, uint _longTimeLock, uint _shortTimeLock) {
     version = 1;
     proxy = Proxy(proxyAddress);
     userKey = _userKey;

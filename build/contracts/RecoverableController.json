@@ -1,5 +1,5 @@
 {
-  "contract_name": "StandardController",
+  "contract_name": "RecoverableController",
   "abi": [
     {
       "constant": true,

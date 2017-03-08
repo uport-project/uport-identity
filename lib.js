@@ -7,7 +7,7 @@ const UportContracts = {
   Owned:                          Contract(require('./build/contracts/Owned.json')),
   Proxy:                          Contract(require('./build/contracts/Proxy.json')),
   RecoveryQuorum:                 Contract(require('./build/contracts/RecoveryQuorum.json')),
-  StandardController:             Contract(require('./build/contracts/StandardController.json')),
+  RecoverableController:          Contract(require('./build/contracts/RecoverableController.json')),
   Registry:                       Contract(require('./build/contracts/UportRegistry.json'))
 }
 

@@ -2,14 +2,14 @@ require('./helpers.js')()
 
 const IdentityFactoryWithRecoveryKey = artifacts.require('IdentityFactoryWithRecoveryKey')
 const Proxy = artifacts.require('Proxy')
-const StandardController = artifacts.require('StandardController')
+const RecoverableController = artifacts.require('RecoverableController')
 
 contract("IdentityFactoryWithRecoveryKey", (accounts) => {
   var identityFactory;
   var proxy;
   var deployedProxy;
   var deployedRecoverableController;
-  var standardController;
+  var recoverableController;
   var testReg;
   var user1;
   var admin;
@@ -39,7 +39,7 @@ contract("IdentityFactoryWithRecoveryKey", (accounts) => {
       return Proxy.deployed()
     }).then((instance) => {
       deployedProxy = instance
-      return StandardController.deployed()
+      return RecoverableController.deployed()
     }).then((instance) => {
       deployedRecoverableController = instance
     })
@@ -64,7 +64,7 @@ contract("IdentityFactoryWithRecoveryKey", (accounts) => {
       assert.equal(recoveryKeyInContract, recoveryKey,
                    "Created recoveryQuorum should have correct code");
       proxy = Proxy.at(proxyAddress);
-      standardController = StandardController.at(result.args.controller);
+      recoverableController = RecoverableController.at(result.args.controller);
       // Check that the mapping has correct proxy address
       identityFactoryWithRecoveryKey.senderToProxy.call(nobody).then((createdProxyAddress) => {
         assert(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
@@ -76,18 +76,18 @@ contract("IdentityFactoryWithRecoveryKey", (accounts) => {
 
   it("Created proxy should have correct state", (done) => {
     proxy.owner.call().then((createdControllerAddress) => {
-      assert.equal(createdControllerAddress, standardController.address);
+      assert.equal(createdControllerAddress, recoverableController.address);
       done();
     }).catch(done);
   });
 
   it("Created controller should have correct state", (done) => {
-    standardController.proxy().then((_proxyAddress) => {
+    recoverableController.proxy().then((_proxyAddress) => {
       assert.equal(_proxyAddress, proxy.address);
-      return standardController.userKey();
+      return recoverableController.userKey();
     }).then((userKey) => {
       assert.equal(userKey, user1);
-      return standardController.recoveryKey();
+      return recoverableController.recoveryKey();
     }).then((rk) => {
       assert.equal(rk, recoveryKey);
       done();

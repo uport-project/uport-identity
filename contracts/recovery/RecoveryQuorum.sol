@@ -1,9 +1,9 @@
 pragma solidity 0.4.8;
-import "../controllers/StandardController.sol";
+import "../controllers/RecoverableController.sol";
 import "../libraries/ArrayLib.sol";
 
 contract RecoveryQuorum {
-  StandardController public controller;
+  RecoverableController public controller;
 
   address[] public delegateAddresses; // needed for iteration of mapping
   mapping (address => Delegate) public delegates;
@@ -18,7 +18,7 @@ contract RecoveryQuorum {
   modifier onlyUserKey(){ if (msg.sender == controller.userKey()) _; }
 
   function RecoveryQuorum(address _controller, address[] _delegates){
-    controller = StandardController(_controller);
+    controller = RecoverableController(_controller);
     for(uint i = 0; i < _delegates.length; i++){
       delegateAddresses.push(_delegates[i]);
       delegates[_delegates[i]] = Delegate({proposedUserKey: 0x0, pendingUntil: 0, deletedAfter: 31536000000000});
