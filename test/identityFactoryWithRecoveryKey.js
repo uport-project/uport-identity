@@ -33,6 +33,7 @@ contract("IdentityFactoryWithRecoveryKey", (accounts) => {
     recoveryUser1 = accounts[2];
     recoveryUser2 = accounts[3];
     recoveryKey = accounts[4];
+    newRecoveryKey = accounts[5];
 
     IdentityFactoryWithRecoveryKey.deployed().then((instance) => {
       identityFactoryWithRecoveryKey = instance
@@ -67,11 +68,38 @@ contract("IdentityFactoryWithRecoveryKey", (accounts) => {
       recoverableController = RecoverableController.at(result.args.controller);
       // Check that the mapping has correct proxy address
       identityFactoryWithRecoveryKey.senderToProxy.call(nobody).then((createdProxyAddress) => {
-        assert(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
+        assert.equal(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
+        return identityFactoryWithRecoveryKey.recoveryToProxy.call(recoveryKey)
+      }).then((createdProxyAddress) => {
+        assert.equal(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
         done();
       }).catch(done);
     });
     identityFactoryWithRecoveryKey.CreateProxyWithControllerAndRecoveryKey(user1, recoveryKey, longTimeLock, shortTimeLock, {from: nobody})
+  });
+
+  it("Should not change recoveryToProxy if incorrect user tries to update it", (done) => {
+    identityFactoryWithRecoveryKey.updateRecoveryMapping(recoveryKey, newRecoveryKey, {from: nobody}).then(() => {
+      return identityFactoryWithRecoveryKey.recoveryToProxy.call(recoveryKey)
+    }).then((createdProxyAddress) => {
+      assert.equal(createdProxyAddress, proxy.address, "Mapping should have the same address as proxy");
+      return identityFactoryWithRecoveryKey.recoveryToProxy.call(newRecoveryKey)
+    }).then((createdProxyAddress) => {
+      assert.notEqual(createdProxyAddress, proxy.address, "Mapping should not have the same address as proxy");
+      done();
+    }).catch(done);
+  });
+
+  it("Should change recoveryToProxy if correct user tries to update it", (done) => {
+    identityFactoryWithRecoveryKey.updateRecoveryMapping(newRecoveryKey, {from: recoveryKey}).then(() => {
+      return identityFactoryWithRecoveryKey.recoveryToProxy.call(newRecoveryKey)
+    }).then((createdProxyAddress) => {
+      assert.equal(createdProxyAddress, proxy.address, "Mapping should have the same address as proxy");
+      return identityFactoryWithRecoveryKey.recoveryToProxy.call(recoveryKey)
+    }).then((createdProxyAddress) => {
+      assert.notEqual(createdProxyAddress, proxy.address, "Mapping should not have the same address as proxy");
+      done();
+    }).catch(done);
   });
 
   it("Created proxy should have correct state", (done) => {
