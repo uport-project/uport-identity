@@ -22,11 +22,4 @@ contract IdentityFactoryWithRecoveryKey {
         senderToProxy[msg.sender] = proxy;
         recoveryToProxy[_recoveryKey] = proxy;
     }
-
-    function updateRecoveryMapping(address newRecoveryKey) {
-        if (recoveryToProxy[msg.sender] != 0) {
-            recoveryToProxy[newRecoveryKey] = recoveryToProxy[msg.sender];
-            delete recoveryToProxy[msg.sender];
-        }
-    }
 }
