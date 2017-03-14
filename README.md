@@ -58,5 +58,5 @@ UportContracts.Registry.deployed().then(function(instance){
 ## Contributing
 Want to contribute to uport-contracts? Cool, please read our [contribution guidelines](./CONTRIBUTING.md) to get an understanding of the process we use for making changes to this repo.
 
-##Known Issues
+## Known Issues
 Web3 version 0.18.3 itself has a bug that is causing a syntax error when using as a node package with browserify. Until web3 version 0.18.4 is published, this code will not work in the browser unless you use dist.js. I made a pull request [here](https://github.com/ethereum/web3.js/pull/563) and the fix has been merged into develop.
