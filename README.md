@@ -1,7 +1,7 @@
-#uPort
+# uPort
 Please read our [Whitepaper](http://whitepaper.uport.me/uPort_whitepaper_DRAFT20161020.pdf) for information on what uPort is, and what is currently possible as far as integration.
 
-##Contracts
+## Contracts
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.
 
 ### Proxy
@@ -17,7 +17,7 @@ This contract plugs into the RecoverableController to provide recovery with a n-
 This contract is used to store information related to your identity.
 
 
-##JavaScript integration
+## JavaScript integration
 Either install the package with npm in your `package.json` file:
 ```
 "uport-contracts": "git://github.com/uport-project/uport-contracts.git#develop"
