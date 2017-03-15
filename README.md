@@ -1,7 +1,7 @@
-#uPort
+# uPort
 Please read our [Whitepaper](http://whitepaper.uport.me/uPort_whitepaper_DRAFT20161020.pdf) for information on what uPort is, and what is currently possible as far as integration.
 
-##Contracts
+## Contracts
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.
 
 ### Proxy
@@ -17,7 +17,7 @@ This contract plugs into the RecoverableController to provide recovery with a n-
 This contract is used to store information related to your identity.
 
 
-##JavaScript Integration
+## JavaScript integration
 Either install the package with npm in your `package.json` file:
 ```
 "uport-contracts": "git://github.com/uport-project/uport-contracts.git#develop"
@@ -54,15 +54,9 @@ UportContracts.Registry.deployed().then(function(instance){
 });
 
 ```
-(todo: add more examples)
 
-## Testing the contracts
-The test script automatically starts an instance of `testrpc`, so simple make sure it is not already running and use:
-```
-$ npm test
-```
+## Contributing
+Want to contribute to uport-contracts? Cool, please read our [contribution guidelines](./CONTRIBUTING.md) to get an understanding of the process we use for making changes to this repo.
 
-##Known Issues
-This is still a work in progress and as of now, the uport-registry used by the uport team is the older version with less functionality found [here](https://github.com/uport-project/uport-registry). 
-
+## Known Issues
 Web3 version 0.18.3 itself has a bug that is causing a syntax error when using as a node package with browserify. Until web3 version 0.18.4 is published, this code will not work in the browser unless you use dist.js. I made a pull request [here](https://github.com/ethereum/web3.js/pull/563) and the fix has been merged into develop.
