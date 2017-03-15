@@ -31,7 +31,6 @@ contract SharedController {
         }
     }
     function removeUser(address oldUser) onlyProxy{
-        uint lastIndex = userAddresses.length - 1;
         int i = ArrayLib.findAddress(oldUser, userAddresses);
         if(i != -1){ ArrayLib.removeAddress(uint(i), userAddresses); }
     }
@@ -40,7 +39,7 @@ contract SharedController {
         suicide(newController);
     }
 //read only
-    function collectedSignatures(bytes32 txHash) returns (uint signatures){
+    function collectedSignatures(bytes32 txHash) constant returns (uint signatures){
         for(uint i = 0 ; i < userAddresses.length ; i++){
             if (txSigners[txHash][userAddresses[i]]){
                 signatures++;
