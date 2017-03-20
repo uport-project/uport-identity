@@ -13,18 +13,30 @@
     "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
     "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
     "dist": "node_modules/.bin/browserify lib.js -o dist.js",
-    "test": "./trufflewrapper"
+    "test": "./trufflewrapper",
+    "lint": "node_modules/.bin/standard"
   },
   "author": "",
   "license": "ISC",
+  "standard": {
+    "globals": [
+        "artifacts",
+        "assert",
+        "before",
+        "contract",
+        "it",
+        "web3"
+    ]
+  },
   "dependencies": {
     "truffle-contract": "^1.1.10"
   },
   "devDependencies": {
     "browserify": "^13.1.1",
-    "eth-signer": "../eth-signer",
+    "eth-signer": "^0.2.2",
     "ethereumjs-testrpc": "^3.0.3",
     "hooked-web3-provider": "^1.0.0",
+    "standard": "^9.0.2",
     "truffle": "^3.1.9"
   }
 }
