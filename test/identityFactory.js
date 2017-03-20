@@ -245,10 +245,3 @@ contract("IdentityFactory", (accounts) => {
     );
   });
 });
-
-
-
-
-
-
-

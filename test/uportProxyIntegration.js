@@ -17,8 +17,8 @@ const SEED1 = 'tackle crystal drum type spin nest wine occur humor grocery worry
 const SEED2 = 'tree clock fly receive mirror scissors away avoid seminar attract wife holiday';
 const LOG_NUMBER_1 = 1234;
 const LOG_NUMBER_2 = 2345;
-
 const PROXY_GAS_OVERHEAD = 7723;
+
 var gasUsedWithProxy;
 var gasUsedWithoutProxy;
 
@@ -28,6 +28,7 @@ contract("Uport proxy integration tests", (accounts) => {
   var proxy;
   var recoverableController;
   var recoveryQuorum;
+  var rpchost;
 
   var delegateDeletedAfter =    0;
   var delegatePendingUntil =    1;
@@ -50,6 +51,7 @@ contract("Uport proxy integration tests", (accounts) => {
     user2Signer = new HDSigner(Phrase.toHDPrivateKey(SEED2));
     user2 = user2Signer.getAddress();
     admin = accounts[0];
+    rpchost = IdentityFactory.currentProvider.host
     delegates = [
         accounts[1],
         accounts[2]
@@ -58,7 +60,7 @@ contract("Uport proxy integration tests", (accounts) => {
     web3.eth.sendTransaction({from: admin, to: user2, value: web3.toWei('1', 'ether')});
 
     var web3Prov = new HookedWeb3Provider({
-      host: 'http://localhost:8545',
+      host: rpchost,
       transaction_signer: new Signer(user1Signer),
     });
     web3.setProvider(web3Prov);
@@ -91,7 +93,7 @@ contract("Uport proxy integration tests", (accounts) => {
     // Set up the new Proxy provider
     proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, recoverableController.address));
     var web3ProxyProvider = new HookedWeb3Provider({
-      host: 'http://localhost:8545',
+      host: rpchost,
       transaction_signer: proxySigner
     });
     TestRegistry.setProvider(web3ProxyProvider);
@@ -120,7 +122,7 @@ contract("Uport proxy integration tests", (accounts) => {
 
       proxySigner = new Signer(new ProxySigner(proxy.address, user1Signer, recoverableController.address));
       var web3ProxyProvider = new HookedWeb3Provider({
-        host: 'http://localhost:8545',
+        host: rpchost,
         transaction_signer: proxySigner
       });
 
@@ -152,7 +154,7 @@ contract("Uport proxy integration tests", (accounts) => {
     }).then(() => {
       proxySigner = new Signer(new ProxySigner(proxy.address, user2Signer, recoverableController.address));
       var web3ProxyProvider = new HookedWeb3Provider({
-        host: 'http://localhost:8545',
+        host: rpchost,
         transaction_signer: proxySigner
       });
       TestRegistry.setProvider(web3ProxyProvider);
@@ -174,7 +176,7 @@ contract("Uport proxy integration tests", (accounts) => {
     // Set up the Proxy provider
 
     var testReg2
-    var web3Prov = new web3.providers.HttpProvider("http://localhost:8545")
+    var web3Prov = new web3.providers.HttpProvider(rpchost)
     TestRegistry.setProvider(web3Prov);
     // Register a number from proxy.address
     TestRegistry.new({from: accounts[0]}).then(tr => {
