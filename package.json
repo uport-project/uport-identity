@@ -19,6 +19,10 @@
   "author": "",
   "license": "ISC",
   "standard": {
+    "ignore": [
+        "dist.js",
+        "lib.js"
+    ],
     "globals": [
         "artifacts",
         "assert",

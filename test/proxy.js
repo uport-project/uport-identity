@@ -1,5 +1,4 @@
 const lightwallet = require('eth-signer')
-
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 
@@ -7,8 +6,8 @@ const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
 
 contract('Proxy', (accounts) => {
-  var proxy
-  var testReg
+  let proxy
+  let testReg
 
   before(() => {
     // Truffle deploys contracts with accounts[0]
@@ -22,7 +21,7 @@ contract('Proxy', (accounts) => {
 
   it('Owner can send transaction', (done) => {
     // Encode the transaction to send to the proxy contract
-    var data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
+    let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
     // Send forward request from the owner
     proxy.forward(testReg.address, 0, '0x' + data, {from: accounts[0]}).then(() => {
       return testReg.registry.call(proxy.address)
@@ -33,7 +32,7 @@ contract('Proxy', (accounts) => {
   })
 
   it('Receives transaction', (done) => {
-    var event = proxy.Received()
+    let event = proxy.Received()
     // Encode the transaction to send to the proxy contract
     event.watch((error, result) => {
       if (error) throw Error(error)
@@ -47,9 +46,9 @@ contract('Proxy', (accounts) => {
 
   it('Event works correctly', (done) => {
     // Encode the transaction to send to the proxy contract
-    var data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
+    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
     // Send forward request from the owner
-    var event = proxy.Forwarded()
+    let event = proxy.Forwarded()
     event.watch((error, result) => {
       if (error) throw Error(error)
       event.stopWatching()
@@ -63,7 +62,7 @@ contract('Proxy', (accounts) => {
 
   it('Non-owner can not send transaction', (done) => {
     // Encode the transaction to send to the proxy contract
-    var data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
+    let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
     // Send forward request from a non-owner
     proxy.forward(testReg.address, 0, '0x' + data, {from: accounts[1]}).then(() => {
       return testReg.registry.call(proxy.address)
@@ -74,9 +73,9 @@ contract('Proxy', (accounts) => {
   })
 
   it('Should throw if function call fails', (done) => {
-    var errorThrown = false
+    let errorThrown = false
     // Encode the transaction to send to the proxy contract
-    var data = lightwallet.txutils._encodeFunctionTxData('testThrow', [], [])
+    let data = lightwallet.txutils._encodeFunctionTxData('testThrow', [], [])
     proxy.forward(testReg.address, 0, '0x' + data, {from: accounts[0]}).catch((e) => {
       errorThrown = true
     }).then(() => {
