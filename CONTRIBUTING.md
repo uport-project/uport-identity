@@ -16,6 +16,11 @@ If you want to run run a specific test you can just add the filename:
 $ npm test test/testName.js
 ```
 
+Also, make sure to run the linter
+```
+$ npm run lint
+```
+
 ## Making a pull request
 Once you have made changes that you want to get into uport-contracts you need to create a pull request. We follow git flow, so make sure to name your branch in the format of `feature/description-of-your-feature` or `hotfix/description-of-your-fix`. Also make sure that your pull request is against the `develop` branch and **not** `master`.
 
