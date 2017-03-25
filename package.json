@@ -12,7 +12,7 @@
     "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
     "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
     "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
-    "dist": "node_modules/.bin/browserify lib.js -o dist.js",
+    "build": "node_modules/.bin/browserify lib.js -o dist.js",
     "test": "./trufflewrapper",
     "lint": "node_modules/.bin/standard"
   },
