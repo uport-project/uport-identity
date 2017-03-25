@@ -57,10 +57,13 @@ contract('IdentityFactoryWithRecoveryKey', (accounts) => {
       recoverableController = RecoverableController.at(result.args.controller)
       // Check that the mapping has correct proxy address
       identityFactoryWithRecoveryKey.senderToProxy.call(nobody).then((createdProxyAddress) => {
-        assert(createdProxyAddress, proxy.address, 'Mapping should have the same address as event')
-        done()
-      }).catch(done)
-    })
+        assert.equal(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
+        return identityFactoryWithRecoveryKey.recoveryToProxy.call(recoveryKey)
+      }).then((createdProxyAddress) => {
+        assert.equal(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
+        done();
+      }).catch(done);
+    });
     identityFactoryWithRecoveryKey.CreateProxyWithControllerAndRecoveryKey(user1, recoveryKey, longTimeLock, shortTimeLock, {from: nobody})
   })
 

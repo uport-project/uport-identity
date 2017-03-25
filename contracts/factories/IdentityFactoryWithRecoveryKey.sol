@@ -6,9 +6,10 @@ contract IdentityFactoryWithRecoveryKey {
         address indexed userKey,
         address proxy,
         address controller,
-        address recoveryKey);
+        address indexed recoveryKey);
 
     mapping(address => address) public senderToProxy;
+    mapping(address => address) public recoveryToProxy;
 
     //cost ~2.4M gas
     function CreateProxyWithControllerAndRecoveryKey(address userKey, address _recoveryKey, uint longTimeLock, uint shortTimeLock) {
@@ -19,5 +20,6 @@ contract IdentityFactoryWithRecoveryKey {
 
         IdentityCreated(userKey, proxy, controller, _recoveryKey);
         senderToProxy[msg.sender] = proxy;
+        recoveryToProxy[_recoveryKey] = proxy;
     }
 }
