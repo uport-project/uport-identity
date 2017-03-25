@@ -6,6 +6,7 @@ const RecoveryQuorum = artifacts.require('RecoveryQuorum')
 contract('IdentityFactory', (accounts) => {
   let identityFactory
   let proxy
+  let recoveryQuorum
   let deployedProxy
   let deployedRecoverableController
   let deployedRecoveryQuorum
@@ -70,6 +71,7 @@ contract('IdentityFactory', (accounts) => {
                    'Created recoveryQuorum should have correct code')
       proxy = Proxy.at(proxyAddress)
       recoverableController = RecoverableController.at(result.args.controller)
+      recoveryQuorum = RecoveryQuorum.at(recoveryQuorumAddress)
       // Check that the mapping has correct proxy address
       identityFactory.senderToProxy.call(nobody).then((createdProxyAddress) => {
         assert(createdProxyAddress, proxy.address, 'Mapping should have the same address as event')
@@ -95,6 +97,16 @@ contract('IdentityFactory', (accounts) => {
       return recoverableController.recoveryKey()
     }).then((recoveryKey) => {
       assert.equal(recoveryKey, recoveryQuorumAddress)
+      done()
+    }).catch(done)
+  })
+
+  it('Created recoveryQuorum should have correct state', (done) => {
+    recoveryQuorum.controller().then(controllerAddress => {
+      assert.equal(controllerAddress, recoverableController.address)
+      return recoveryQuorum.getAddresses()
+    }).then(delegateAddresses => {
+      assert.deepEqual(delegateAddresses, delegates)
       done()
     }).catch(done)
   })
