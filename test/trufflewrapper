@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+./node_modules/.bin/testrpc --accounts 25 --port 8546 > /dev/null & # don't use standard ethereum port
+RPC_PID=$!;
+echo "Starting testrpc"
+until curl -X POST --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":67}' localhost:8546 &> /dev/null;
+do # Wait until testrpc is started before running tests
+    true
+done
+./node_modules/.bin/truffle test $1;
+kill $RPC_PID
