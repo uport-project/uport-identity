@@ -1,5 +1,5 @@
 const lightwallet = require('eth-signer')
-const wait = require('./wait.js')
+const evm_increaseTime = require('./evm_increaseTime.js')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const RecoverableController = artifacts.require('RecoverableController')
@@ -18,8 +18,9 @@ contract('RecoverableController', (accounts) => {
   let admin2
   let admin3
   let nobody
-  let shortTime = 2 // seconds
-  let longTime = 4
+  let creationTime = Date().now/1000;
+  let shortTime = 900 // 15 minutes
+  let longTime = 604800 // 1 week
 
   before(() => {
     user1 = accounts[0]
@@ -43,6 +44,9 @@ contract('RecoverableController', (accounts) => {
       recoverableController = newOWA
       recoverableController.proxy().then((proxyAddress) => {
         assert.equal(proxyAddress, proxy.address)
+        return web3.eth.getBlock("latest")
+      }).then((block) => {
+        creationTime = block.timstamp
         return recoverableController.userKey()
       }).then((userKey) => {
         assert.equal(userKey, user1)
@@ -95,7 +99,7 @@ contract('RecoverableController', (accounts) => {
       assert.equal(userKey, user1, 'UserKey should not change until changeUserKey is called')
       return recoverableController.changeUserKey({from: nobody})
     }).then(() => {
-      return wait(shortTime + 1)
+      return evm_increaseTime(shortTime + 1)
     }).then(() => {
       return recoverableController.userKey()
     }).then((userKey) => {
@@ -138,7 +142,7 @@ contract('RecoverableController', (accounts) => {
       assert.equal(recoveryKey, admin1, 'recovery key should not change until changeRecovery is called')
       return recoverableController.changeRecovery({from: nobody})
     }).then(() => {
-      return wait(longTime + 1)
+      return evm_increaseTime(longTime + 1)
     }).then(() => {
       return recoverableController.recoveryKey()
     }).then((recoveryKey) => {
@@ -181,7 +185,7 @@ contract('RecoverableController', (accounts) => {
       assert.equal(proxyOwner, recoverableController.address, 'proxy should not change until changeController is called')
       return recoverableController.changeController({from: nobody})
     }).then(() => {
-      return wait(longTime + 1)
+      return evm_increaseTime(longTime + 1)
     }).then(() => {
       return proxy.owner()
     }).then((proxyOwner) => {

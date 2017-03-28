@@ -2,3 +2,4 @@ node_modules
 *.log
 notes.txt
 .DS_Store
+testMnemonics.js

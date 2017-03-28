@@ -1,4 +1,4 @@
-const wait = require('./wait.js')
+const evm_increaseTime = require('./evm_increaseTime.js')
 const Proxy = artifacts.require('Proxy')
 const RecoverableController = artifacts.require('RecoverableController')
 const RecoveryQuorum = artifacts.require('RecoveryQuorum')
@@ -17,8 +17,9 @@ contract('RecoveryQuorum', (accounts) => {
   let delegatePendingUntil = 1
   let delegateProposedUserKey = 2
 
-  let shortTimeLock = 2
-  let longTimeLock = 5
+  let creationTime = Date.now()/1000
+  let shortTimeLock = 900 // 15 minutes
+  let longTimeLock = 604800 // 1 week
 
   before(() => {
     user1 = accounts[0]
@@ -55,6 +56,9 @@ contract('RecoveryQuorum', (accounts) => {
     RecoverableController.new(proxy.address, user1, longTimeLock, shortTimeLock, {from: recovery1})
     .then((newRC) => {
       recoverableController = newRC
+      return web3.eth.getBlock("latest")
+    }).then((block) => {
+      creationTime = block.timestamp
       return proxy.transfer(recoverableController.address, {from: accounts[0]})
     }).then(() => {
       return RecoveryQuorum.new(recoverableController.address, delegateList)
@@ -213,7 +217,7 @@ contract('RecoveryQuorum', (accounts) => {
       return recoveryQuorum.delegates.call(accounts[7])
     }).then((delegate) => {
       assert.isAbove(delegate[delegateDeletedAfter].toNumber(), 0, 'Controller userKey should be able to add additional delegates to quorum.')
-      assert.approximately(delegate[delegatePendingUntil].toNumber(), Date.now() / 1000 + longTimeLock, 5)
+      assert.approximately(delegate[delegatePendingUntil].toNumber(), creationTime + longTimeLock, 5)
       return recoveryQuorum.signUserChange(0x123, {from: delegateList[1]})
     }).then(() => {
       return recoveryQuorum.delegates.call(delegateList[1])
@@ -232,7 +236,7 @@ contract('RecoveryQuorum', (accounts) => {
       assert.isAtLeast(delegate[delegateDeletedAfter].toNumber(), 31536000000000, 'Trying to add existing delegate should affect nothing')
       return recoveryQuorum.replaceDelegates([accounts[3], accounts[4]], [], {from: user2})
     }).then(() => {
-      return wait(6)
+      return evm_increaseTime(longTimeLock + 1)
     }).then(() => {
       return recoveryQuorum.replaceDelegates([], [accounts[4]], {from: user2})
     }).then(() => {
@@ -241,7 +245,7 @@ contract('RecoveryQuorum', (accounts) => {
       assert.deepEqual(delegateAddresses, [accounts[7], accounts[6], accounts[5], accounts[4]])
       return recoveryQuorum.replaceDelegates([], [accounts[3]], {from: user2})
     }).then(() => {
-      return wait(6)
+      return evm_increaseTime(longTimeLock + 1)
     }).then(() => {
       return recoveryQuorum.getAddresses.call()
     }).then((delegateAddresses) => {
@@ -253,11 +257,14 @@ contract('RecoveryQuorum', (accounts) => {
   it('Newly added delegate\'s signature should not count towards quorum yet', (done) => {
     recoveryQuorum.replaceDelegates([], [accounts[8]], {from: user2})
     .then(() => {
+      return web3.eth.getBlock("latest")
+    }).then((block) => {
+      creationTime = block.timestamp
       return recoveryQuorum.delegates.call(accounts[8])
     }).then((delegate) => {
       assert.isAbove(delegate[delegateDeletedAfter].toNumber(), 0, 'New delegate should have been added by user')
       assert.equal(delegate[delegateProposedUserKey], 0x0)
-      assert.approximately(delegate[delegatePendingUntil].toNumber(), Date.now() / 1000 + longTimeLock, 5)
+      assert.approximately(delegate[delegatePendingUntil].toNumber(), creationTime + longTimeLock, 5)
       return recoveryQuorum.delegates.call(accounts[7])
     }).then((delegate) => {
       assert.isAbove(delegate[delegateDeletedAfter].toNumber(), 0, 'New delegate should have been added by user')
@@ -306,7 +313,7 @@ contract('RecoveryQuorum', (accounts) => {
       return recoveryQuorum.getAddresses()
     }).then((delegateAddresses) => {
       assert.deepEqual(delegateAddresses, delegateList, 'current delegates are still there, but deletion pending')
-      return wait(6)
+      return evm_increaseTime(longTimeLock + 1)
     }).then(() => {
       return recoveryQuorum.replaceDelegates([], [], {from: user2}) // trigger garbageCollection
     }).then(() => {
