@@ -22,7 +22,7 @@ contract('RecoverableController', (accounts) => {
   let shortTime = 900 // 15 minutes
   let longTime = 604800 // 1 week
 
-  before(() => {
+  before((done) => {
     user1 = accounts[0]
     user2 = accounts[1]
     user3 = accounts[2]
@@ -31,11 +31,12 @@ contract('RecoverableController', (accounts) => {
     admin3 = accounts[5]
     nobody = accounts[6]
     // Truffle deploys contracts with accounts[0]
-    Proxy.deployed().then((instance) => {
+    Proxy.new({from: accounts[0]}).then((instance) => {
       proxy = instance
       return TestRegistry.deployed()
     }).then((instance) => {
       testReg = instance
+      done()
     })
   })
 

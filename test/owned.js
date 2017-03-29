@@ -3,14 +3,14 @@ const Owned = artifacts.require('Owned')
 contract('Owned', (accounts) => {
   let owned
 
-  before(() => {
-    Owned.deployed().then((instance) => {
+  before((done) => {
+    Owned.new({from: accounts[0]}).then(instance => {
       owned = instance
+      done();
     })
   })
 
   it('Is owned by creator', (done) => {
-    // Truffle deploys contracts with accounts[0]
     owned.isOwner.call(accounts[0]).then((isOwner) => {
       assert.isTrue(isOwner, 'Owner should be owner')
       return owned.isOwner.call(accounts[1])

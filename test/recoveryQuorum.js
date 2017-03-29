@@ -21,7 +21,7 @@ contract('RecoveryQuorum', (accounts) => {
   let shortTimeLock = 900 // 15 minutes
   let longTimeLock = 604800 // 1 week
 
-  before(() => {
+  before((done) => {
     user1 = accounts[0]
     user2 = accounts[1]
     recovery1 = accounts[2]
@@ -47,8 +47,9 @@ contract('RecoveryQuorum', (accounts) => {
       accounts[14],
       accounts[15]
     ]
-    Proxy.deployed().then((instance) => {
+    Proxy.new({from: accounts[0]}).then((instance) => {
       proxy = instance
+      done()
     })
   })
 

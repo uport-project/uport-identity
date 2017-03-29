@@ -9,13 +9,14 @@ contract('Proxy', (accounts) => {
   let proxy
   let testReg
 
-  before(() => {
+  before((done) => {
     // Truffle deploys contracts with accounts[0]
-    Proxy.deployed().then((instance) => {
+    Proxy.new({from: accounts[0]}).then((instance) => {
       proxy = instance
       return TestRegistry.deployed()
     }).then((instance) => {
       testReg = instance
+      done()
     })
   })
 
