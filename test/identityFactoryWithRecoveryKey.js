@@ -18,7 +18,7 @@ contract('IdentityFactoryWithRecoveryKey', (accounts) => {
   let shortTimeLock = 2
   let longTimeLock = 7
 
-  before(() => {
+  before((done) => {
     // Truffle deploys contracts with accounts[0]
     user1 = accounts[0]
     nobody = accounts[1] // has no authority
@@ -26,12 +26,13 @@ contract('IdentityFactoryWithRecoveryKey', (accounts) => {
 
     IdentityFactoryWithRecoveryKey.deployed().then((instance) => {
       identityFactoryWithRecoveryKey = instance
-      return Proxy.deployed()
+      return Proxy.new({from: accounts[0]})
     }).then((instance) => {
       deployedProxy = instance
-      return RecoverableController.deployed()
+      return RecoverableController.new({from: accounts[0]})
     }).then((instance) => {
       deployedRecoverableController = instance
+      done()
     })
   })
 
