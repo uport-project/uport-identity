@@ -18,21 +18,9 @@ This contract is used to store information related to your identity.
 
 
 ## JavaScript integration
-Either install the package with npm in your `package.json` file:
+Install the package with npm in your `package.json` file:
 ```
 "uport-contracts": "git://github.com/uport-project/uport-contracts.git#develop"
-```
-or simply download and include `dist.js` in an html file
-```
-<html>
-  <head>
-    <script type="text/javascript" src="dist.js"></script>
-  </head>
-  <body>
-    This page has global access to the `UportContracts` and `Web3` javascript objects.
-  </body>
-</html>
-
 ```
 The library exposes a `UportContracts` object which has all other contract objects nested in it (i.e. `UportContracts.Registry`). These objects are built using truffle-contract [see full API](https://github.com/trufflesuite/truffle-contract). They have promise-based functions corresponding to their solidity functions, and once initialized with a [web3](https://github.com/ethereum/web3.js/) `provider`, will know their deployed address corresponding to the provided network.
 
