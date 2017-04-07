@@ -1,10 +1,30 @@
-# uPort
+# uPort Identity Contracts
 Please read our [Whitepaper](http://whitepaper.uport.me) for information on what uPort is, and what is currently possible as far as integration.
+
+## Contract Deployments
+### Mainnet
+| Contract                       | Address                                      |
+| -------------------------------|----------------------------------------------|
+| ArrayLib                       | `0x5bfa4582b0c48cb375b9e8322b57ac025965c148` |
+| IdentityFactory                | `0x12e627125abcfa989de831572f198577780d7127` |
+| IdentityFactoryWithRecoveryKey | (not deployed)                               |
+
+### Ropsten testnet (id:3)
+| Contract                       | Address                                      |
+| -------------------------------|----------------------------------------------|
+| ArrayLib                       | `0x957eb298a72167367fa210fc1aa3faba1d2b629c` |
+| IdentityFactory                | `0x1c9d9e1962985c9b8101777cae25c46279fe2a9c` |
+| IdentityFactoryWithRecoveryKey | (not deployed?)                               |
+
 
 ## Contracts
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.
 
 ### IdentityFactory
+(need description)
+
+### IdentityFactoryWithRecoveryKey
+(need description)
 
 ### Proxy
 This is the main identity contract. All your transactions are forwarded through this contract which acts as your persistent identifier.

@@ -2,6 +2,7 @@
   "name": "uport-identity",
   "version": "1.0.0",
   "description": "uPort Contracts for identity",
+  "main": "index.js",
   "directories": {
     "test": "test"
   },
@@ -20,7 +21,11 @@
     "type": "git",
     "url": "git+https://github.com/uport-project/uport-identity.git"
   },
-  "dependencies": {
+  "bugs": {
+    "url": "https://github.com/uport-project/uport-identity/issues"
+  },
+  "homepage": "https://github.com/uport-project/uport-identity#readme",
+  "devDependencies": {
     "eth-signer": "^0.2.2",
     "ethereumjs-testrpc": "^3.0.3",
     "node-plantuml": "^0.5.0",
