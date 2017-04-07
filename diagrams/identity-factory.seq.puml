@@ -1,0 +1,39 @@
+@startuml
+participant IdentityFactory as if
+participant Proxy as p
+participant RecoverableController as rc
+participant RecoveryQuorum as rq
+
+->if:CreateProxyWithControllerAndRecovery()
+
+if->p: new()
+activate p
+p-->if:proxy
+deactivate p
+
+if->rc: new()
+activate rc
+rc-->if:controller
+deactivate rc
+
+if->p:transfer(controller)
+activate p
+p-->if
+deactivate p
+
+
+if->rq:new()
+activate rq
+rq-->if:recoveryQuorum
+deactivate rq
+
+if->rc:changeRecoveryFromRecovery(recoveryQuorum)
+activate rq
+rq-->if
+deactivate rq
+
+if-->o]: <<Event>> IdentityCreated()
+if->if:senderToProxy[msg.sender] = proxy;
+
+
+@enduml

@@ -1,10 +1,24 @@
-# Contributing to uport-contracts
+# Contributing
 We `<3` contributors!
 
-This document describes guidelines for contributing to uport-contracts as well as the process of assuring the security of all contracts. They are meant to make life easier for us, but also to help you understand how stuff gets into the master branch.
+This document describes guidelines for contributing  as well as the process of assuring the security of all contracts. They are meant to make life easier for us, but also to help you understand how stuff gets into the master branch.
+
+## Prepare
+Before working with the contracts you need to install all the dependencies. You can do this with
+
+```
+$ yarn install
+```
+
+## Compile
+To compile the contracts just run:
+```
+$ npm run compile
+```
+
 
 ## Testing
-All aspects of the contracts need to be tested. To do this we use `truffle` and `testrpc`. Right now we only have tests written in javascript, but in the future we plan on adding tests written in solidity as well.
+All aspects of the contracts need to be tested. To do this we use `truffle` and `testrpc` behind the scenes. Right now we only have tests written in javascript, but in the future we plan on adding tests written in solidity as well.
 
 To execute the tests you simply run:
 ```
@@ -16,13 +30,11 @@ If you want to run run a specific test you can just add the filename:
 $ npm test test/testName.js
 ```
 
-Also, make sure to run the linter
-```
-$ npm run lint
-```
+## Diagrams
+Diagrams are made with PlantUML.
 
 ## Making a pull request
-Once you have made changes that you want to get into uport-contracts you need to create a pull request. We follow git flow, so make sure to name your branch in the format of `feature/description-of-your-feature` or `hotfix/description-of-your-fix`. Also make sure that your pull request is against the `develop` branch and **not** `master`.
+Once you have made changes that you want to get into, you need to create a pull request. We follow git flow, so make sure to name your branch in the format of `feature/description-of-your-feature` or `hotfix/description-of-your-fix`. Also make sure that your pull request is against the `develop` branch and **not** `master`.
 
 ## Reviewing process
 The contracts in this repo are an essential part of the uport ecosystem. Therefore it is very important that they are properly reviewed to minimize the risk of potential bugs and exploits.

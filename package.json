@@ -1,46 +1,30 @@
 {
-  "name": "uport-contracts",
-  "version": "0.0.1",
-  "private": true,
-  "description": "",
+  "name": "uport-identity",
+  "version": "1.0.0",
+  "description": "uPort Contracts for identity",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "truffle": "node_modules/.bin/truffle",
-    "truffle-compile": "node_modules/.bin/truffle compile",
-    "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
-    "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
-    "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
-    "build": "node_modules/.bin/browserify lib.js -o dist.js",
-    "test": "./test/trufflewrapper",
-    "lint": "node_modules/.bin/standard"
+    "compile": "./node_modules/.bin/truffle compile",
+    "_deploy": "./node_modules/.bin/truffle migrate --network ",
+    "deploy-mainnet": "npm run _deploy mainnet",
+    "deploy-infuranet": "npm run _deploy infuranet",
+    "deploy-ropsten": "npm run _deploy ropsten",
+    "deploy-local": "npm run _deploy local",
+    "test": "./node_modules/.bin/truffle test --network in_memory",
+    "diagrams": "bash scripts/make-diagrams.bash"
   },
-  "author": "",
   "license": "ISC",
-  "standard": {
-    "ignore": [
-        "dist.js",
-        "lib.js"
-    ],
-    "globals": [
-        "artifacts",
-        "assert",
-        "before",
-        "contract",
-        "it",
-        "web3"
-    ]
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uport-project/uport-identity.git"
   },
   "dependencies": {
-    "truffle-contract": "^1.1.10"
-  },
-  "devDependencies": {
-    "browserify": "^13.1.1",
     "eth-signer": "^0.2.2",
     "ethereumjs-testrpc": "^3.0.3",
-    "hooked-web3-provider": "^1.0.0",
-    "standard": "^9.0.2",
-    "truffle": "^3.1.9"
+    "node-plantuml": "^0.5.0",
+    "truffle": "3.1.2",
+    "truffle-contract": "^1.1.10"
   }
 }
