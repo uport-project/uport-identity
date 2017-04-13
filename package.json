@@ -26,8 +26,10 @@
   },
   "homepage": "https://github.com/uport-project/uport-identity#readme",
   "devDependencies": {
+    "bluebird": "^3.5.0",
     "eth-signer": "^0.2.2",
     "ethereumjs-testrpc": "^3.0.3",
+    "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
     "truffle": "3.1.2",
     "truffle-contract": "^1.1.10",

@@ -1,6 +1,8 @@
 const lightwallet = require('eth-signer')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
+const Promise = require('bluebird')
+const ethJSABI = require("ethjs-abi")
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
@@ -32,33 +34,37 @@ contract('Proxy', (accounts) => {
     }).catch(done)
   })
 
-  it('Receives transaction', (done) => {
-    let event = proxy.Received()
-    // Encode the transaction to send to the proxy contract
-    event.watch((error, result) => {
-      if (error) throw Error(error)
-      event.stopWatching()
-      assert.equal(result.args.sender, accounts[1])
-      assert.equal(result.args.value, web3.toWei('1', 'ether'))
+  it('Emits event on received transaction', (done) => {
+    web3.eth = Promise.promisifyAll(web3.eth)
+    web3.eth.sendTransactionAsync({
+      from: accounts[1],
+      to: proxy.address,
+      value: web3.toWei('1', 'ether')
+    }).then(txHash => {
+      return web3.eth.getTransactionReceiptAsync(txHash)
+    }).then(result => {
+      let log = result.logs[0]
+      // the abi for the Received event
+      let eventAbi = proxy.abi[6]
+      let event = ethJSABI.decodeEvent(eventAbi, log.data, log.topics) // [log.topics[1], log.topics[0]])
+      assert.equal(event.sender, accounts[1])
+      assert.equal(web3.fromWei(event.value, 'ether'), 1)
       done()
     })
-    web3.eth.sendTransaction({from: accounts[1], to: proxy.address, value: web3.toWei('1', 'ether')})
   })
 
   it('Event works correctly', (done) => {
     // Encode the transaction to send to the proxy contract
     let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
     // Send forward request from the owner
-    let event = proxy.Forwarded()
-    event.watch((error, result) => {
-      if (error) throw Error(error)
-      event.stopWatching()
-      assert.equal(result.args.destination, testReg.address)
-      assert.equal(result.args.value, 0)
-      assert.equal(result.args.data, data)
+    proxy.forward(testReg.address, 0, data, {from: accounts[0]}).then(tx => {
+      let log=tx.logs[0]
+      assert.equal(log.event, 'Forwarded', 'Should emit a "Forwarded" event');
+      assert.equal(log.args.destination, testReg.address)
+      assert.equal(log.args.value.toNumber(), 0)
+      assert.equal(log.args.data, data)
       done()
     })
-    proxy.forward(testReg.address, 0, data, {from: accounts[0]})
   })
 
   it('Non-owner can not send transaction', (done) => {
