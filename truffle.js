@@ -2,7 +2,7 @@
 var HDWalletProvider = require("truffle-hdwallet-provider");
 function getNmemonic(){
   try{
-    return require('fs').readFileSync("./seed", "utf8");
+    return require('fs').readFileSync("./seed", "utf8").trim();
   } catch(err){
     return "";
   }
@@ -32,7 +32,7 @@ module.exports = {
     },
     kovan: {
       provider: new HDWalletProvider(getNmemonic(), "https://kovan.infura.io/"),
-      network_id: "*"
+      network_id: 42
     },
     mainnet: {
       provider: new HDWalletProvider(getNmemonic(), "https://mainnet.infura.io/"),

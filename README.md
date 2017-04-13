@@ -16,6 +16,12 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 | IdentityFactory                | `0x1c9d9e1962985c9b8101777cae25c46279fe2a9c` |
 | IdentityFactoryWithRecoveryKey | (not deployed?)                               |
 
+### Kovan testnet (id:42)
+| Contract                       | Address                                      |
+| -------------------------------|----------------------------------------------|
+| ArrayLib                       | (not deployed?)  
+| IdentityFactory                | (not deployed?)  
+| IdentityFactoryWithRecoveryKey | (not deployed?)                               |
 
 ## Contracts
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.

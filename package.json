@@ -30,6 +30,7 @@
     "ethereumjs-testrpc": "^3.0.3",
     "node-plantuml": "^0.5.0",
     "truffle": "3.1.2",
-    "truffle-contract": "^1.1.10"
+    "truffle-contract": "^1.1.10",
+    "truffle-hdwallet-provider": "0.0.3"
   }
 }
