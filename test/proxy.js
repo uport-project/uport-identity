@@ -3,6 +3,7 @@ const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const Promise = require('bluebird')
 const ethJSABI = require("ethjs-abi")
+web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
@@ -35,7 +36,6 @@ contract('Proxy', (accounts) => {
   })
 
   it('Emits event on received transaction', (done) => {
-    web3.eth = Promise.promisifyAll(web3.eth)
     web3.eth.sendTransactionAsync({
       from: accounts[1],
       to: proxy.address,

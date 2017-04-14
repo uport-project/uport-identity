@@ -1,8 +1,10 @@
 const lightwallet = require('eth-signer')
-const evm_increaseTime = require('./evm_increaseTime.js')
+const evm_increaseTime = require('./evmIncreaseTime.js')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const RecoverableController = artifacts.require('RecoverableController')
+const Promise = require('bluebird')
+web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
@@ -43,22 +45,22 @@ contract('RecoverableController', (accounts) => {
   it('Correctly deploys contract', (done) => {
     RecoverableController.new(proxy.address, user1, longTime, shortTime).then((newOWA) => {
       recoverableController = newOWA
-      recoverableController.proxy().then((proxyAddress) => {
-        assert.equal(proxyAddress, proxy.address)
-        return web3.eth.getBlock("latest")
-      }).then((block) => {
-        creationTime = block.timstamp
-        return recoverableController.userKey()
-      }).then((userKey) => {
-        assert.equal(userKey, user1)
-        return recoverableController.changeRecoveryFromRecovery(admin1)
-      }).then(() => {
-        return recoverableController.recoveryKey()
-      }).then((recoveryKey) => {
-        assert.equal(recoveryKey, admin1)
-        done()
-      }).catch(done)
-    })
+      return recoverableController.proxy()
+    }).then(proxyAddress => {
+      assert.equal(proxyAddress, proxy.address)
+      return web3.eth.getBlockAsync("latest")
+    }).then((block) => {
+      creationTime = block.timstamp
+      return recoverableController.userKey()
+    }).then((userKey) => {
+      assert.equal(userKey, user1)
+      return recoverableController.changeRecoveryFromRecovery(admin1)
+    }).then(() => {
+      return recoverableController.recoveryKey()
+    }).then((recoveryKey) => {
+      assert.equal(recoveryKey, admin1)
+      done()
+    }).catch(done)
   })
 
   it('Only sends transactions from correct user', (done) => {
