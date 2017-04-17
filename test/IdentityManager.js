@@ -17,7 +17,6 @@ contract('IdentityManager', (accounts) => {
   let user3
   let nobody
 
-  let proxyAddress
   let recoveryKey
 
   before((done) => {
@@ -174,6 +173,47 @@ contract('IdentityManager', (accounts) => {
       return testReg.registry.call(proxy.address)
     }).then((regData) => {
       assert.equal(regData.toNumber(), LOG_NUMBER_2, 'User3 can now send transaction')
+      done()
+    }).catch(done)
+  })
+
+  it('Allows removing of owners', (done) => {
+    identityManager.addOwner(proxy.address, user2, {from: user1}).then(() => {
+      return evm_increaseTime(1)
+    }).then(() => {
+      let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
+      return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user1})
+    }).then(() => {
+      // Verify that the proxy address is logged as the sender
+      return testReg.registry.call(proxy.address)
+    }).then((regData) => {
+      assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction')
+    }).then(() => {
+      const event = identityManager.OwnerRemoved({identity: proxy.address})
+      event.watch((error, result) => {
+        if (error) throw Error(error)
+        event.stopWatching()
+        assert.equal(result.args.owner,
+                    user1,
+                   'Owner key is set in event')
+        assert.equal(result.args.instigator,
+                    user2,
+                   'Instigator key is set in event')
+      })
+      return identityManager.removeOwner(proxy.address, user1, {from: user2})
+     }).then((tx) => {
+      return evm_increaseTime(1)
+    }).then(() => {
+      // Encode the transaction to send to the Owner contract
+      let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
+      return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user1})
+    }).then((tx) => {
+      return evm_increaseTime(1)
+    }).then(() => {
+      // Verify that the proxy address is logged as the sender
+      return testReg.registry.call(proxy.address)
+    }).then((regData) => {
+      assert.notEqual(regData.toNumber(), LOG_NUMBER_2, 'User1 can not send transaction now')
       done()
     }).catch(done)
   })
