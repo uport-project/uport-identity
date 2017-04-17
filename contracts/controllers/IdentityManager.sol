@@ -27,7 +27,7 @@ contract IdentityManager {
   mapping(address => address) recoveryKeys;
 
   modifier onlyOwner(address identity) { 
-    if (owners[identity][msg.sender] > 0 && owners[identity][msg.sender] < now ) _; 
+    if (owners[identity][msg.sender] > 0 && owners[identity][msg.sender] <= now ) _; 
   }
 
   modifier onlyRecovery(address identity) { 
@@ -35,6 +35,7 @@ contract IdentityManager {
   }
 
   // Factory function
+  // gas 289,311
   function CreateIdentity(address owner, address recoveryKey) {
     Proxy identity = new Proxy();
     owners[identity][owner] = now;
