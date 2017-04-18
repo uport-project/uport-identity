@@ -2,6 +2,8 @@ const evm_increaseTime = require('./evmIncreaseTime.js')
 const Proxy = artifacts.require('Proxy')
 const RecoverableController = artifacts.require('RecoverableController')
 const RecoveryQuorum = artifacts.require('RecoveryQuorum')
+const Promise = require('bluebird')
+web3.eth = Promise.promisifyAll(web3.eth)
 
 contract('RecoveryQuorum', (accounts) => {
   let recoverableController
@@ -57,7 +59,7 @@ contract('RecoveryQuorum', (accounts) => {
     RecoverableController.new(proxy.address, user1, longTimeLock, shortTimeLock, {from: recovery1})
     .then((newRC) => {
       recoverableController = newRC
-      return web3.eth.getBlock("latest")
+      return web3.eth.getBlockAsync("latest")
     }).then((block) => {
       creationTime = block.timestamp
       return proxy.transfer(recoverableController.address, {from: accounts[0]})
@@ -188,9 +190,10 @@ contract('RecoveryQuorum', (accounts) => {
   })
 
   it('Only controller user can add delegates to quorum', (done) => {
-    web3.eth.sendTransaction({from: accounts[0], to: user2, value: web3.toWei('10', 'ether')})
-    Proxy.new({from: accounts[0]})
-    .then((newPX) => {
+    web3.eth.sendTransactionAsync({from: accounts[0], to: user2, value: web3.toWei('10', 'ether')})
+    .then(() => {
+      return Proxy.new({from: accounts[0]})
+    }).then((newPX) => {
       proxy = newPX
       return RecoverableController.new(proxy.address, user2, longTimeLock, shortTimeLock, {from: recovery1})
     }).then((newRC) => {
@@ -258,7 +261,7 @@ contract('RecoveryQuorum', (accounts) => {
   it('Newly added delegate\'s signature should not count towards quorum yet', (done) => {
     recoveryQuorum.replaceDelegates([], [accounts[8]], {from: user2})
     .then(() => {
-      return web3.eth.getBlock("latest")
+      return web3.eth.getBlockAsync("latest")
     }).then((block) => {
       creationTime = block.timestamp
       return recoveryQuorum.delegates.call(accounts[8])

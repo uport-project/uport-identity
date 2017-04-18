@@ -13,8 +13,8 @@ var TestRPC = require("ethereumjs-testrpc");
 
 module.exports = {
   networks: {
-     in_memory: {
-      provider: TestRPC.provider(),
+    in_memory: {
+      provider: TestRPC.provider({total_accounts: 25}),
       network_id: "*",
     },
     local: {
