@@ -1,4 +1,4 @@
-const evm_increaseTime = require('./evm_increaseTime.js')
+const evm_increaseTime = require('./evmIncreaseTime.js')
 const Proxy = artifacts.require('Proxy')
 const RecoverableController = artifacts.require('RecoverableController')
 const RecoveryQuorum = artifacts.require('RecoveryQuorum')
