@@ -1,5 +1,5 @@
 pragma solidity ^0.4.4;
-import "../controllers/RecoverableController.sol";
+import "./RecoverableController.sol";
 
 contract IdentityFactoryWithRecoveryKey {
     event IdentityCreated(
