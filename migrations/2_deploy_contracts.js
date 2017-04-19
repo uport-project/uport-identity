@@ -1,9 +1,9 @@
-const ArrayLib = artifacts.require('./other/ArrayLib.sol')
-const TestRegistry = artifacts.require('./other/TestRegistry.sol')
-const IdentityFactory = artifacts.require('./other/IdentityFactory.sol')
-const IdentityFactoryWithRecoveryKey = artifacts.require('./other/IdentityFactoryWithRecoveryKey.sol')
+const ArrayLib = artifacts.require('./libs/ArrayLib.sol')
+const TestRegistry = artifacts.require('./misc/TestRegistry.sol')
+const IdentityFactory = artifacts.require('./IdentityFactory.sol')
+const IdentityFactoryWithRecoveryKey = artifacts.require('./IdentityFactoryWithRecoveryKey.sol')
 
-const RecoveryQuorum = artifacts.require('./other/RecoveryQuorum.sol')
+const RecoveryQuorum = artifacts.require('./RecoveryQuorum.sol')
 
 module.exports = function (deployer, network) {
   deployer.deploy(ArrayLib)
