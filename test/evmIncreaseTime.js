@@ -6,7 +6,7 @@ module.exports = function (seconds) {
         method: "evm_increaseTime",
         params: [seconds],
         id: 0
-      }, 
+      },
       resolve
     )
   })

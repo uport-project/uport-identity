@@ -1,4 +1,4 @@
-pragma solidity ^0.4.4;
+pragma solidity ^0.4.8;
 
 // This contract is only used for testing purposes.
 contract TestRegistry {
@@ -12,5 +12,4 @@ contract TestRegistry {
   function testThrow() {
       throw;
   }
-
 }
