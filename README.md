@@ -24,6 +24,22 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |IdentityFactoryWithRecoveryKey|[0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d](https://etherscan.io/address/0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d)|
 
 
+## Using the contracts
+To use the contract we provide truffle artifacts. You can use `truffle-contract` to utilize these.
+```javascript
+const uportIdentity = require('uport-identity')
+const Contract = require('truffle-contract')
+
+let IdentityFactory = Contract(uportIdentity.IdentityFactory)
+let identityFactory = IdentityFactory.deployed()
+```
+You can also use web3.
+```javascript
+let networkId = 1
+let IdentityFactory = web3.eth.contract(uportIdentity.IdentityFactory.abi)
+let identityFactory = IdentityFactory.at(uportIdentity.IdentityFactory.networks[networkId].address)
+```
+
 ## Contracts
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.
 
