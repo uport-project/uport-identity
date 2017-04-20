@@ -1,20 +1,17 @@
-const Owned = artifacts.require('./libraries/Owned.sol')
-const Proxy = artifacts.require('./libraries/Proxy.sol')
-const TestRegistry = artifacts.require('./other/TestRegistry.sol')
-const RecoverableController = artifacts.require('./other/RecoverableController.sol')
-const ArrayLib = artifacts.require('./other/ArrayLib.sol')
-const RecoveryQuorum = artifacts.require('./other/RecoveryQuorum.sol')
-const IdentityFactory = artifacts.require('./other/IdentityFactory.sol')
-const IdentityFactoryWithRecoveryKey = artifacts.require('./other/IdentityFactoryWithRecoveryKey.sol')
+const ArrayLib = artifacts.require('./libs/ArrayLib.sol')
+const TestRegistry = artifacts.require('./misc/TestRegistry.sol')
+const IdentityFactory = artifacts.require('./IdentityFactory.sol')
+const IdentityFactoryWithRecoveryKey = artifacts.require('./IdentityFactoryWithRecoveryKey.sol')
 
-module.exports = function(deployer) {
-  deployer.deploy(Owned);
-  deployer.deploy(Proxy);
-  deployer.deploy(TestRegistry);
-  deployer.deploy(RecoverableController);
-  deployer.deploy(ArrayLib);
+const RecoveryQuorum = artifacts.require('./RecoveryQuorum.sol')
+
+module.exports = function (deployer, network) {
+  deployer.deploy(ArrayLib)
   deployer.link(ArrayLib, [RecoveryQuorum, IdentityFactory])
-  deployer.deploy(RecoveryQuorum);
-  deployer.deploy(IdentityFactory);
-  deployer.deploy(IdentityFactoryWithRecoveryKey);
-};
+  deployer.deploy(IdentityFactory)
+  deployer.deploy(IdentityFactoryWithRecoveryKey)
+
+  if (network == 'in_memory') {
+    deployer.deploy(TestRegistry)
+  }
+}

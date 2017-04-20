@@ -1,30 +1,39 @@
 {
-  "name": "uport-contracts",
-  "version": "0.0.1",
-  "private": true,
-  "description": "",
+  "name": "uport-identity",
+  "version": "1.0.0",
+  "description": "uPort Contracts for identity",
+  "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "truffle": "node_modules/.bin/truffle",
-    "truffle-compile": "node_modules/.bin/truffle compile",
-    "truffle-migrate-ropsten": "node_modules/.bin/truffle migrate --network ropsten",
-    "truffle-migrate-ethereum": "node_modules/.bin/truffle migrate --network ethereum",
-    "truffle-migrate-testrpc": "node_modules/.bin/truffle migrate --network testrpc",
-    "dist": "node_modules/.bin/browserify lib.js -o dist.js",
-    "test": "node_modules/.bin/testrpc --accounts 25 > /dev/null & TPID=$! && sleep 4 && node_modules/.bin/truffle test && kill $TPID"
+    "compile": "./node_modules/.bin/truffle compile",
+    "_deploy": "./node_modules/.bin/truffle migrate --network ",
+    "deploy-mainnet": "npm run _deploy mainnet",
+    "deploy-infuranet": "npm run _deploy infuranet",
+    "deploy-ropsten": "npm run _deploy ropsten",
+    "deploy-local": "npm run _deploy local",
+    "generate-readme": "./scripts/generate-readme.js",
+    "test": "./node_modules/.bin/truffle test --network in_memory",
+    "diagrams": "bash scripts/make-diagrams.bash"
   },
-  "author": "",
   "license": "ISC",
-  "dependencies": {
-    "truffle-contract": "^1.1.10"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uport-project/uport-identity.git"
   },
+  "bugs": {
+    "url": "https://github.com/uport-project/uport-identity/issues"
+  },
+  "homepage": "https://github.com/uport-project/uport-identity#readme",
   "devDependencies": {
-    "browserify": "^13.1.1",
-    "eth-signer": "^0.2.1",
+    "bluebird": "^3.5.0",
+    "eth-signer": "^0.2.2",
     "ethereumjs-testrpc": "^3.0.3",
-    "hooked-web3-provider": "^1.0.0",
-    "truffle": "^3.1.9"
+    "ethjs-abi": "^0.1.9",
+    "node-plantuml": "^0.5.0",
+    "truffle": "3.1.2",
+    "truffle-contract": "^1.1.10",
+    "truffle-hdwallet-provider": "0.0.3"
   }
 }

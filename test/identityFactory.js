@@ -1,254 +1,119 @@
-require('./helpers.js')()
-
 const IdentityFactory = artifacts.require('IdentityFactory')
 const Proxy = artifacts.require('Proxy')
 const RecoverableController = artifacts.require('RecoverableController')
 const RecoveryQuorum = artifacts.require('RecoveryQuorum')
+const Promise = require('bluebird')
+web3.eth = Promise.promisifyAll(web3.eth)
 
-contract("IdentityFactory", (accounts) => {
-  var identityFactory;
-  var proxy;
-  var deployedProxy;
-  var deployedRecoverableController;
-  var recoverableController;
-  var testReg;
-  var user1;
-  var admin;
+function compareCode(addr1, addr2) {
+  let c1, c2
+  return new Promise((resolve, reject) => {
+    web3.eth.getCodeAsync(addr1).then(code => {
+      c1 = code
+      return web3.eth.getCodeAsync(addr2)
+    }).then(code => {
+      c2 = code
+      assert.equal(c1, c2, 'the deployed contract has incorrect code')
+      resolve()
+    })
+  })
+}
 
-  var contractAddresses;
-  var proxyAddress;
-  var recoverableControllerAddress;
-  var recoveryQuorumAddress;
+contract('IdentityFactory', (accounts) => {
+  let identityFactory
+  let proxy
+  let recoveryQuorum
+  let deployedProxy
+  let deployedRecoverableController
+  let deployedRecoveryQuorum
+  let recoverableController
+  let user1
+  let delegate1
+  let delegate2
+  let delegate3
+  let delegate4
+  let delegates
+  let nobody
 
-  var delegateDeletedAfter =    0;
-  var delegatePendingUntil =    1;
-  var delegateProposedUserKey = 2;
+  let proxyAddress
+  let recoverableControllerAddress
+  let recoveryQuorumAddress
 
-  var shortTimeLock = 2;
-  var longTimeLock = 7;
+  let shortTimeLock = 2
+  let longTimeLock = 7
 
-  before(() => {
+  before((done) => {
     // Truffle deploys contracts with accounts[0]
-    user1 = accounts[0];
-    nobody = accounts[1];//has no authority
-    recoveryUser1 = accounts[2];
-    recoveryUser2 = accounts[3];
-    delegate1 = accounts[4];
-    delegate2 = accounts[5];
-    delegate3 = accounts[6];
-    delegate4 = accounts[7];
-    delegates = [delegate1, delegate2, delegate3, delegate4];
+    user1 = accounts[0]
+    nobody = accounts[1] // has no authority
+    delegate1 = accounts[4]
+    delegate2 = accounts[5]
+    delegate3 = accounts[6]
+    delegate4 = accounts[7]
+    delegates = [delegate1, delegate2, delegate3, delegate4]
 
-    delegate5 = accounts[8];
-    delegate6 = accounts[9];
     IdentityFactory.deployed().then((instance) => {
       identityFactory = instance
-      return Proxy.deployed()
+      return Proxy.new({from: accounts[0]})
     }).then((instance) => {
       deployedProxy = instance
-      return RecoverableController.deployed()
+      return RecoverableController.new({from: accounts[0]})
     }).then((instance) => {
       deployedRecoverableController = instance
-      return RecoveryQuorum.deployed()
+      return RecoveryQuorum.new({from: accounts[0]})
     }).then((instance) => {
       deployedRecoveryQuorum = instance
+      done()
     })
+  })
 
-  });
-
-  it("Correctly creates proxy, controller, and recovery contracts", (done) => {
-    var event = identityFactory.IdentityCreated({creator: nobody})
-    event.watch((error, result) => {
-      event.stopWatching();
-      // Check that event has addresses to correct contracts
-      proxyAddress = result.args.proxy;
-      recoverableControllerAddress = result.args.controller;
-      recoveryQuorumAddress = result.args.recoveryQuorum;
-
-      assert.equal(web3.eth.getCode(proxyAddress),
-                   web3.eth.getCode(deployedProxy.address),
-                   "Created proxy should have correct code");
-      assert.equal(web3.eth.getCode(recoverableControllerAddress),
-                   web3.eth.getCode(deployedRecoverableController.address),
-                   "Created controller should have correct code");
-      assert.equal(web3.eth.getCode(recoveryQuorumAddress),
-                   web3.eth.getCode(deployedRecoveryQuorum.address),
-                   "Created recoveryQuorum should have correct code");
-      proxy = Proxy.at(proxyAddress);
-      recoverableController = RecoverableController.at(result.args.controller);
-      // Check that the mapping has correct proxy address
-      identityFactory.senderToProxy.call(nobody).then((createdProxyAddress) => {
-        assert(createdProxyAddress, proxy.address, "Mapping should have the same address as event");
-        done();
-      }).catch(done);
-    });
+  it('Correctly creates proxy, controller, and recovery contracts', (done) => {
     identityFactory.CreateProxyWithControllerAndRecovery(user1, delegates, longTimeLock, shortTimeLock, {from: nobody})
-  });
+    .then( (tx) => {
+      let log=tx.logs[0];
+      assert.equal(log.event,"IdentityCreated","wrong event");
+      proxyAddress = log.args.proxy
+      recoverableControllerAddress = log.args.controller
+      recoveryQuorumAddress = log.args.recoveryQuorum
 
-  it("Created proxy should have correct state", (done) => {
+      proxy = Proxy.at(proxyAddress)
+      recoverableController = RecoverableController.at(recoverableControllerAddress)
+      recoveryQuorum = RecoveryQuorum.at(recoveryQuorumAddress)
+      return compareCode(proxyAddress, deployedProxy.address)
+    }).then(() => {
+      return compareCode(recoverableControllerAddress, deployedRecoverableController.address)
+    }).then(() => {
+      return compareCode(recoveryQuorumAddress, deployedRecoveryQuorum.address)
+    }).then(done).catch(done)
+  })
+
+  it('Created proxy should have correct state', (done) => {
     proxy.owner.call().then((createdControllerAddress) => {
-      assert.equal(createdControllerAddress, recoverableController.address);
-      done();
-    }).catch(done);
-  });
+      assert.equal(createdControllerAddress, recoverableController.address)
+      done()
+    }).catch(done)
+  })
 
-  it("Created controller should have correct state", (done) => {
+  it('Created controller should have correct state', (done) => {
     recoverableController.proxy().then((_proxyAddress) => {
-      assert.equal(_proxyAddress, proxy.address);
-      return recoverableController.userKey();
+      assert.equal(_proxyAddress, proxy.address)
+      return recoverableController.userKey()
     }).then((userKey) => {
-      assert.equal(userKey, user1);
-      return recoverableController.recoveryKey();
+      assert.equal(userKey, user1)
+      return recoverableController.recoveryKey()
     }).then((recoveryKey) => {
-      assert.equal(recoveryKey, recoveryQuorumAddress);
-      done();
-    }).catch(done);
-  });
+      assert.equal(recoveryKey, recoveryQuorumAddress)
+      done()
+    }).catch(done)
+  })
 
-  it("Created ID should have the following behavior", (done) => {
-    var event = identityFactory.IdentityCreated({creator: nobody})
-    event.watch((error, result) => {
-      event.stopWatching();
-      proxy = Proxy.at(result.args['proxy']);
-      controller = RecoverableController.at(result.args['controller']);
-      quorum = RecoveryQuorum.at(result.args['recoveryQuorum']);
-      quorum.signUserChange(recoveryUser2, {from: user1}).then(() => {
-        return controller.userKey();
-      }).then((userKey) => {
-        assert.equal(userKey, user1, "non delegate signs -> userKey shouldnt change");
-        return quorum.collectedSignatures.call(recoveryUser2)
-      }).then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 0, "non delegate signs -> collectedSigs shouldnt increment");
-        return quorum.replaceDelegates([], [delegate2], {from: user1})
-      }).then(() => {
-        return quorum.signUserChange(recoveryUser2, {from: delegate2})
-      }).then(() => {
-        return quorum.delegates.call(delegate2)
-      }).then((delegate) => {
-        assert.approximately(delegate[delegatePendingUntil].toNumber(), Date.now()/1000 + longTimeLock, 2, "added delegate has the correct state");
-        assert.equal(delegate[delegateProposedUserKey], recoveryUser2, "added delegate has the correct state");
-        return quorum.collectedSignatures.call(recoveryUser2)
-      }).then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 0, "pending delegate signs -> collectedSigs shouldnt reflect that yet");
-        return quorum.changeUserKey(recoveryUser2, {from: nobody})
-      }).then(() => {
-        return controller.userKey()
-      }).then((userKey) => {
-        assert.equal(userKey, user1, "changeUserKey has no affect until the pendingDelegate has waited");
-        return wait(longTimeLock + 1)
-      }).then(() => {
-        return quorum.delegates.call(delegate2)
-      }).then((delegate) => {
-        assert.equal(delegate[delegateProposedUserKey], recoveryUser2);
-        assert.isBelow(delegate[delegatePendingUntil].toNumber(), Date.now()/1000);
-        assert.equal(delegate[delegateProposedUserKey], recoveryUser2);
-        //some sort of caching issue unless I call collectedSignatures *as a transaction* first
-        return quorum.collectedSignatures(recoveryUser2, {from: nobody})
-      }).then(() => {
-        return quorum.collectedSignatures.call(recoveryUser2)
-      }).then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 1, "after timeLock period collectedSigs should reflect the vote");
-        return quorum.signUserChange(recoveryUser2, {from: delegate1})
-      }).then(() => {
-        return controller.userKey()
-      }).then((userKey) => {
-        assert.equal(userKey, recoveryUser2, "changeUserKey should affect userKey after delegate has waited long enough")
-        return quorum.collectedSignatures.call(recoveryUser2)
-      }).then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 0, "after the recovery, signatures reset");
-        done();
-      }).catch(done);
-    })
-
-    identityFactory.CreateProxyWithControllerAndRecovery(
-      user1,//userKey
-      [delegate1, delegate3],//delegates
-      longTimeLock,
-      shortTimeLock,
-      {from: nobody}
-    );
-  });
-
-  it("Created ID should have the following behavior", (done) => {
-    var event = identityFactory.IdentityCreated({creator: nobody})
-    event.watch((error, result) => {
-      event.stopWatching();
-      proxy = Proxy.at(result.args['proxy']);
-      controller = RecoverableController.at(result.args['controller']);
-      quorum = RecoveryQuorum.at(result.args['recoveryQuorum']);
-      quorum.replaceDelegates([], [delegate5, delegate6], {from: user1}).then(() => {})
-      .then(() => {return quorum.signUserChange(recoveryUser2, {from:delegate5})})//pending
-      .then(() => {return quorum.signUserChange(recoveryUser2, {from:delegate6})})//pending
-      .then(() => {return quorum.collectedSignatures.call(recoveryUser2)})
-      .then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 0, "pending delegate votes dont count yet")
-        return quorum.signUserChange(recoveryUser2, {from:delegate1})})//OG delegate
-      .then(() => {return quorum.signUserChange(recoveryUser2, {from:delegate2})})//OG delegate
-      .then(() => {return quorum.changeUserKey(recoveryUser2, {from:nobody})})
-      .then(() => {return controller.userKey()})
-      .then((userKey) => {
-        assert.equal(userKey, user1, "shouldnt change because 2 of the votes are pending")
-        return quorum.collectedSignatures.call(recoveryUser2)})
-      .then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 2, "because 2 of the 4 votes are pending")
-        return quorum.signUserChange(recoveryUser2, {from:delegate1})})//delegate1 signing twice
-      .then(() => {return controller.userKey()})
-      .then((userKey) => {
-        assert.equal(userKey, user1, "shouldnt change because delegate1 already signed")
-        return quorum.collectedSignatures.call(recoveryUser2)})
-      .then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 2, "shoudnt change either, delegate1 already signed")
-        return quorum.signUserChange(recoveryUser1, {from:delegate1})})//delegate1 changes vote
-      .then(() => {return quorum.signUserChange(recoveryUser2, {from:delegate3})})//all votes have reset at this point
-      .then(() => {return wait(longTimeLock + 1)})
-      .then(() => {return quorum.collectedSignatures(recoveryUser2, {from: nobody})})//web3 caching hack
-      .then(() => {return quorum.collectedSignatures.call(recoveryUser2)})
-      .then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 4, "the votes from delegates 2, 3, 5 and 6. timelock are now over on 5 and 6")
-        return quorum.changeUserKey(recoveryUser1, {from:nobody})//recovUser has 1 vote only
-      })
-      .then(() => {return controller.userKey()})
-      .then((userKey) => {
-        assert.equal(userKey, user1, "shouldnt change because recoveryUser1 only has 1 vote (recoveryUser2 has 3)")
-        return quorum.changeUserKey(recoveryUser2, {from:nobody})//userKey changes, all votes reset
-      })
-      .then(() => {return controller.userKey()})
-      .then((userKey) => {
-        assert.equal(userKey, recoveryUser2, "works this time, because recoveryUser2 has 3 votes")
-        return quorum.collectedSignatures(recoveryUser2)})//
-      .then(() => {return quorum.signUserChange(recoveryUser1, {from:delegate5})})//all votes have reset at this point
-      .then(() => {return quorum.signUserChange(recoveryUser1, {from:delegate6})})//2nd vote for recoveryUser1
-      .then(() => {return quorum.collectedSignatures.call(recoveryUser1)})
-      .then((collectedSigs) => {
-        assert.equal(collectedSigs.toNumber(), 2, "only 2 because the votes (particulary delegate1's) get reset after a recovery")
-        return quorum.changeUserKey(recoveryUser2, {from:nobody})})//not enough votes
-      .then(() => {return controller.userKey()})
-      .then((userKey) => {
-        assert.equal(userKey, recoveryUser2, "still recoveryUser2 from above. Votes reset after a recovery. Only 2 votes (not enough)")
-        //lets say recoveryUser2 is now stolen. theif tries to delete people before delegates can recover account
-        return quorum.replaceDelegates([delegate1, delegate2, delegate5, delegate6], [], {from:recoveryUser2})})//removing
-      .then(() => {return quorum.signUserChange(recoveryUser1, {from:delegate2})})
-      .then(() => {return quorum.signUserChange(recoveryUser1, {from:delegate1})})//the last signature needed, triggers change
-      .then(() => {return controller.userKey()})
-      .then((userKey) => {
-        assert.equal(userKey, recoveryUser1, "recovery still goes through. theif cant remove delegates immediately ")
-        done();
-      }).catch(done);
-    })
-
-    identityFactory.CreateProxyWithControllerAndRecovery(
-      user1,//userKey
-      delegates,// #1,2,3, and 4
-      longTimeLock,
-      shortTimeLock,
-      {from: nobody}
-    );
-  });
-});
-
-
-
-
-
-
-
+  it('Created recoveryQuorum should have correct state', (done) => {
+    recoveryQuorum.controller().then(controllerAddress => {
+      assert.equal(controllerAddress, recoverableController.address)
+      return recoveryQuorum.getAddresses()
+    }).then(delegateAddresses => {
+      assert.deepEqual(delegateAddresses, delegates)
+      done()
+    }).catch(done)
+  })
+})

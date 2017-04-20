@@ -1,28 +1,7 @@
 # uPort Identity Contracts
 Please read our [Whitepaper](http://whitepaper.uport.me) for information on what uPort is, and what is currently possible as far as integration.
 
-## Contract Deployments
-### Mainnet (id: 1)
-|Contract|Address|
-| --|--|
-|ArrayLib|[0x5bfa4582b0c48cb375b9e8322b57ac025965c148](https://etherscan.io/address/0x5bfa4582b0c48cb375b9e8322b57ac025965c148)|
-|IdentityFactory|[0x12e627125abcfa989de831572f198577780d7127](https://etherscan.io/address/0x12e627125abcfa989de831572f198577780d7127)|
-|IdentityFactoryWithRecoveryKey|(not deployed)|
-
-### Ropsten testnet (id: 3)
-|Contract|Address|
-| --|--|
-|ArrayLib|[0x957eb298a72167367fa210fc1aa3faba1d2b629c](https://etherscan.io/address/0x957eb298a72167367fa210fc1aa3faba1d2b629c)|
-|IdentityFactory|[0x1c9d9e1962985c9b8101777cae25c46279fe2a9c](https://etherscan.io/address/0x1c9d9e1962985c9b8101777cae25c46279fe2a9c)|
-|IdentityFactoryWithRecoveryKey|(not deployed)|
-
-### Kovan testnet (id: 42)
-|Contract|Address|
-| --|--|
-|ArrayLib|(not deployed)|
-|IdentityFactory|(not deployed)|
-|IdentityFactoryWithRecoveryKey|[0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d](https://etherscan.io/address/0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d)|
-
+<contract-deployments>
 
 ## Using the contracts
 To use the contract we provide truffle artifacts. You can use `truffle-contract` to utilize these.

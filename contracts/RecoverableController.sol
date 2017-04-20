@@ -1,5 +1,5 @@
 pragma solidity 0.4.8;
-import "../proxies/Proxy.sol";
+import "./Proxy.sol";
 
 contract RecoverableController {
   uint    public version;
