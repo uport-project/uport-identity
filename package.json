@@ -13,6 +13,7 @@
     "deploy-infuranet": "npm run _deploy infuranet",
     "deploy-ropsten": "npm run _deploy ropsten",
     "deploy-local": "npm run _deploy local",
+    "generate-readme": "./scripts/generate-readme.js",
     "test": "./node_modules/.bin/truffle test --network in_memory",
     "diagrams": "bash scripts/make-diagrams.bash"
   },

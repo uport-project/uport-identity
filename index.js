@@ -1,4 +1,5 @@
 module.exports = {
+  ArrayLib:                       require('./build/contracts/ArrayLib.json'),
   IdentityFactory:                require('./build/contracts/IdentityFactory.json'),
   IdentityFactoryWithRecoveryKey: require('./build/contracts/IdentityFactoryWithRecoveryKey.json'),
   RecoverableController:          require('./build/contracts/RecoverableController.json'),
