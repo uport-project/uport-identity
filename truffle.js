@@ -18,8 +18,7 @@ module.exports = {
       network_id: "*",
     },
     local: {
-      host: "localhost",
-      port: 8545,
+      provider: new HDWalletProvider(getNmemonic(), "http://localhost:8545"),
       network_id: "*" // Match any network id
     },
     ropsten: {

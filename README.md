@@ -14,13 +14,13 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 | --|--|
 |ArrayLib|[0x957eb298a72167367fa210fc1aa3faba1d2b629c](https://etherscan.io/address/0x957eb298a72167367fa210fc1aa3faba1d2b629c)|
 |IdentityFactory|[0x1c9d9e1962985c9b8101777cae25c46279fe2a9c](https://etherscan.io/address/0x1c9d9e1962985c9b8101777cae25c46279fe2a9c)|
-|IdentityFactoryWithRecoveryKey|(not deployed)|
+|IdentityFactoryWithRecoveryKey|[0xf018e9f0c04440b4a13f7075d3ffea0c3293eb1e](https://etherscan.io/address/0xf018e9f0c04440b4a13f7075d3ffea0c3293eb1e)|
 
 ### Kovan testnet (id: 42)
 |Contract|Address|
 | --|--|
-|ArrayLib|(not deployed)|
-|IdentityFactory|(not deployed)|
+|ArrayLib|[0x6a841ba0ea1a88cfbc085220fc6b65973afca431](https://etherscan.io/address/0x6a841ba0ea1a88cfbc085220fc6b65973afca431)|
+|IdentityFactory|[0xd7dc3926bc6089a5be4815215ceaa6e707591023](https://etherscan.io/address/0xd7dc3926bc6089a5be4815215ceaa6e707591023)|
 |IdentityFactoryWithRecoveryKey|[0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d](https://etherscan.io/address/0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d)|
 
 

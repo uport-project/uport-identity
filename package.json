@@ -12,6 +12,7 @@
     "deploy-mainnet": "npm run _deploy mainnet",
     "deploy-infuranet": "npm run _deploy infuranet",
     "deploy-ropsten": "npm run _deploy ropsten",
+    "deploy-kovan": "npm run _deploy kovan",
     "deploy-local": "npm run _deploy local",
     "generate-readme": "./scripts/generate-readme.js",
     "test": "./node_modules/.bin/truffle test --network in_memory",
