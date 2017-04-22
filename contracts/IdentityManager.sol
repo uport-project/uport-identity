@@ -1,5 +1,5 @@
 pragma solidity ^0.4.4;
-import "../proxies/Proxy.sol";
+import "./Proxy.sol";
 
 contract IdentityManager {
   event IdentityCreated(
@@ -27,15 +27,18 @@ contract IdentityManager {
   mapping(address => address) recoveryKeys;
 
   modifier onlyOwner(address identity) { 
-    if (owners[identity][msg.sender] > 0 && owners[identity][msg.sender] <= now ) _; 
+    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + 1 hours) <= now ) _ ;
+    else throw; 
   }
 
   modifier onlyOlderOwner(address identity) { 
-    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + 1 days) <= now) _; 
+    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + 1 days) <= now) _ ;
+    else throw;
   }
 
   modifier onlyRecovery(address identity) { 
-    if (recoveryKeys[identity] == msg.sender) _; 
+    if (recoveryKeys[identity] == msg.sender) _ ;
+    else throw;
   }
 
   // Factory function
