@@ -1,8 +1,11 @@
 const lightwallet = require('eth-signer')
-const evm_increaseTime = require('./evm_increaseTime.js')
+const evm_increaseTime = require('./evmIncreaseTime.js')
 const IdentityManager = artifacts.require('IdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
+const Promise = require('bluebird')
+const compareCode = require('./compareCode')
+web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
@@ -39,43 +42,38 @@ contract('IdentityManager', (accounts) => {
       return TestRegistry.deployed()
     }).then((instance) => {
       testReg = instance
-      const event = identityManager.IdentityCreated({creator: nobody})
-      event.watch((error, result) => {
-        if (error) throw Error(error)
-        event.stopWatching()
-        proxy = Proxy.at(result.args.identity)
-        done()
-      })
-      identityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+      return identityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+    }).then(tx => {
+      const log = tx.logs[0]
+      assert.equal(log.event, 'IdentityCreated', 'wrong event')
+      proxy = Proxy.at(log.args.identity)
+      done()
     })
   })
 
   it('Correctly creates Identity', (done) => {
-    const event = identityManager.IdentityCreated({creator: nobody})
-    event.watch((error, result) => {
-      if (error) throw Error(error)
-      event.stopWatching()
-      // Check that event has addresses to correct contracts
-      assert.equal(web3.eth.getCode(result.args.identity),
-                   web3.eth.getCode(deployedProxy.address),
-                   'Created proxy should have correct code')
-      assert.equal(result.args.owner,
+    let log
+    identityManager.CreateIdentity(user1, recoveryKey, {from: nobody}).then(tx => {
+      log = tx.logs[0]
+      assert.equal(log.event, 'IdentityCreated', 'wrong event')
+
+      assert.equal(log.args.owner,
                    user1,
                    'Owner key is set in event')
-      assert.equal(result.args.recoveryKey,
+      assert.equal(log.args.recoveryKey,
                    recoveryKey,
                    'Recovery key is set in event')
-      assert.equal(result.args.creator,
+      assert.equal(log.args.creator,
                    nobody,
                    'Creator is set in event')
       // Check that the mapping has correct proxy address
-      Proxy.at(result.args.identity).owner.call().then((proxyOwner) => {
+
+      return compareCode(log.args.identity, deployedProxy.address)
+    }).then(() => {
+      Proxy.at(log.args.identity).owner.call().then((proxyOwner) => {
         assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
         done()
       }).catch(done)
-    })
-    identityManager.CreateIdentity(user1, recoveryKey, {from: nobody}).then(tx => {
-      // console.log(tx)
     })
   })
 

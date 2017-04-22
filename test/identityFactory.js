@@ -3,21 +3,9 @@ const Proxy = artifacts.require('Proxy')
 const RecoverableController = artifacts.require('RecoverableController')
 const RecoveryQuorum = artifacts.require('RecoveryQuorum')
 const Promise = require('bluebird')
+const compareCode = require('./compareCode')
 web3.eth = Promise.promisifyAll(web3.eth)
 
-function compareCode(addr1, addr2) {
-  let c1, c2
-  return new Promise((resolve, reject) => {
-    web3.eth.getCodeAsync(addr1).then(code => {
-      c1 = code
-      return web3.eth.getCodeAsync(addr2)
-    }).then(code => {
-      c2 = code
-      assert.equal(c1, c2, 'the deployed contract has incorrect code')
-      resolve()
-    })
-  })
-}
 
 contract('IdentityFactory', (accounts) => {
   let identityFactory
