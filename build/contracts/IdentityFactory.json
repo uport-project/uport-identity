@@ -146,6 +146,42 @@
       "address": "0x1c9d9e1962985c9b8101777cae25c46279fe2a9c",
       "updated_at": 1487622652021
     },
+    "42": {
+      "events": {
+        "0xc36800ebd6079fdafc3a7100d0d1172815751804a6d1b7eb365b85f6c9c80e61": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "userKey",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "controller",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "recoveryQuorum",
+              "type": "address"
+            }
+          ],
+          "name": "IdentityCreated",
+          "type": "event"
+        }
+      },
+      "links": {
+        "ArrayLib": "0x6a841ba0ea1a88cfbc085220fc6b65973afca431"
+      },
+      "address": "0xd7dc3926bc6089a5be4815215ceaa6e707591023",
+      "updated_at": 1492791709022
+    },
     "1488001965459": {
       "events": {
         "0xc36800ebd6079fdafc3a7100d0d1172815751804a6d1b7eb365b85f6c9c80e61": {

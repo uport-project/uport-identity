@@ -40,7 +40,13 @@ function createContractString(artifact, id) {
   let wrapAddr = '(not deployed)'
   if (artifact.networks[id]) {
     let address = artifact.networks[id].address
-    wrapAddr = '[' + address +'](https://etherscan.io/address/' + address + ')'
+    let netPrefix = ''
+    if (id === 3) {
+      netPrefix = 'ropsten.'
+    } else if (id === 42) {
+      netPrefix = 'kovan.'
+    }
+    wrapAddr = '[' + address +'](https://' + netPrefix + 'etherscan.io/address/' + address + ')'
   }
   return '|' + artifact.contract_name + '|' + wrapAddr + '|\n'
 }
