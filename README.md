@@ -1,4 +1,9 @@
 # uPort Identity Contracts
+
+DISCLAIMER: This contracts have been security audited but not all the recomendations have been applied.
+
+
+
 Please read our [Whitepaper](http://whitepaper.uport.me) for information on what uPort is, and what is currently possible as far as integration.
 
 ## Contract Deployments
