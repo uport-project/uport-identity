@@ -14,7 +14,7 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 | --|--|
 |ArrayLib|[0x957eb298a72167367fa210fc1aa3faba1d2b629c](https://ropsten.etherscan.io/address/0x957eb298a72167367fa210fc1aa3faba1d2b629c)|
 |IdentityFactory|[0x1c9d9e1962985c9b8101777cae25c46279fe2a9c](https://ropsten.etherscan.io/address/0x1c9d9e1962985c9b8101777cae25c46279fe2a9c)|
-|IdentityFactoryWithRecoveryKey|[0xf018e9f0c04440b4a13f7075d3ffea0c3293eb1e](https://ropsten.etherscan.io/address/0xf018e9f0c04440b4a13f7075d3ffea0c3293eb1e)|
+|IdentityFactoryWithRecoveryKey|[0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7](https://ropsten.etherscan.io/address/0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7)|
 
 ### Kovan testnet (id: 42)
 |Contract|Address|
