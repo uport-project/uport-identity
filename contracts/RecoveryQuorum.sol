@@ -24,6 +24,7 @@ contract RecoveryQuorum {
       delegates[_delegates[i]] = Delegate({proposedUserKey: 0x0, pendingUntil: 0, deletedAfter: 31536000000000});
     }
   }
+
   function signUserChange(address proposedUserKey) {
     if(delegateRecordExists(delegates[msg.sender])) {
       delegates[msg.sender].proposedUserKey = proposedUserKey;
@@ -31,6 +32,7 @@ contract RecoveryQuorum {
       RecoveryEvent("signUserChange", msg.sender);
     }
   }
+
   function changeUserKey(address newUserKey) {
     if(collectedSignatures(newUserKey) >= neededSignatures()){
       controller.changeUserKeyFromRecovery(newUserKey);
@@ -54,6 +56,7 @@ contract RecoveryQuorum {
     }
     RecoveryEvent("replaceDelegates", msg.sender);
   }
+
   function collectedSignatures(address _proposedUserKey) returns (uint signatures){
     for(uint i = 0 ; i < delegateAddresses.length ; i++){
       if (delegateHasValidSignature(delegates[delegateAddresses[i]]) && delegates[delegateAddresses[i]].proposedUserKey == _proposedUserKey){
@@ -71,12 +74,14 @@ contract RecoveryQuorum {
     }
     return currentDelegateCount/2 + 1;
   }
+
   function addDelegate(address delegate) private {
     if(!delegateRecordExists(delegates[delegate]) && delegateAddresses.length < 15) {
       delegates[delegate] = Delegate({proposedUserKey: 0x0, pendingUntil: now + controller.longTimeLock(), deletedAfter: 31536000000000});
       delegateAddresses.push(delegate);
     }
   }
+
   function removeDelegate(address delegate) private {
     if(delegates[delegate].deletedAfter > controller.longTimeLock() + now){ 
       //remove right away if they are still pending
@@ -87,6 +92,7 @@ contract RecoveryQuorum {
       }
     }
   }
+
   function garbageCollect() private{
     uint i = 0;
     while(i < delegateAddresses.length){
@@ -98,15 +104,19 @@ contract RecoveryQuorum {
       }else{i++;}
     }
   }
+
   function delegateRecordExists(Delegate d) private returns (bool){
       return d.deletedAfter != 0;
   }
+
   function delegateIsDeleted(Delegate d) private returns (bool){
       return d.deletedAfter <= now; //doesnt check record existence
   }
+
   function delegateIsCurrent(Delegate d) private returns (bool){
       return delegateRecordExists(d) && !delegateIsDeleted(d) && now > d.pendingUntil;
   }
+
   function delegateHasValidSignature(Delegate d) private returns (bool){
       return delegateIsCurrent(d) && d.proposedUserKey != 0x0;
   }
