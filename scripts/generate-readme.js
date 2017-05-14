@@ -20,6 +20,8 @@ lines.on('line', line => {
     writeContractInfo(1)
     outStream.write('### Ropsten testnet (id: 3)\n')
     writeContractInfo(3)
+    outStream.write('### Rinkeby testnet (id: 3)\n')
+    writeContractInfo(4)
     outStream.write('### Kovan testnet (id: 42)\n')
     writeContractInfo(42)
   } else {
@@ -43,6 +45,8 @@ function createContractString(artifact, id) {
     let netPrefix = ''
     if (id === 3) {
       netPrefix = 'ropsten.'
+    } else if (id === 4) {
+      netPrefix = 'rinkeby.'
     } else if (id === 42) {
       netPrefix = 'kovan.'
     }
