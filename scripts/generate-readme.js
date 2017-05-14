@@ -20,7 +20,7 @@ lines.on('line', line => {
     writeContractInfo(1)
     outStream.write('### Ropsten testnet (id: 3)\n')
     writeContractInfo(3)
-    outStream.write('### Rinkeby testnet (id: 3)\n')
+    outStream.write('### Rinkeby testnet (id: 4)\n')
     writeContractInfo(4)
     outStream.write('### Kovan testnet (id: 42)\n')
     writeContractInfo(42)
