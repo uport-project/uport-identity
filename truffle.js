@@ -26,6 +26,10 @@ module.exports = {
       provider: new HDWalletProvider(getNmemonic(), "https://ropsten.infura.io/"),
       network_id: 3
     },
+    rinkeby: {
+      provider: new HDWalletProvider(getNmemonic(), "https://rinkeby.infura.io/"),
+      network_id: 4
+    },
     infuranet: {
       provider: new HDWalletProvider(getNmemonic(), "https://infuranet.infura.io/"),
       network_id: "*"
