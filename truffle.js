@@ -1,5 +1,7 @@
 //HD Wallet for keyless servers (infura)
-var HDWalletProvider = require("truffle-hdwallet-provider");
+const HDWalletProvider = require("truffle-hdwallet-provider");
+const TestRPC = require("ethereumjs-testrpc");
+
 function getNmemonic(){
   try{
     return require('fs').readFileSync("./seed", "utf8").trim();
@@ -8,14 +10,18 @@ function getNmemonic(){
   }
 }
 
-var TestRPC = require("ethereumjs-testrpc");
-
+let provider
 
 module.exports = {
   networks: {
     in_memory: {
-      provider: TestRPC.provider({total_accounts: 25}),
-      network_id: "*",
+      get provider() {
+        if (!provider) {
+          provider = TestRPC.provider({total_accounts: 25})
+        }
+        return provider
+      },
+      network_id: "*"
     },
     local: {
       host: "localhost",
@@ -23,23 +29,48 @@ module.exports = {
       network_id: "*" // Match any network id
     },
     ropsten: {
-      provider: new HDWalletProvider(getNmemonic(), "https://ropsten.infura.io/"),
+      get provider() {
+        if (!provider) {
+          provider = new HDWalletProvider(getNmemonic(), "https://ropsten.infura.io/")
+        }
+        return provider
+      },
       network_id: 3
     },
     rinkeby: {
-      provider: new HDWalletProvider(getNmemonic(), "https://rinkeby.infura.io/"),
+      get provider() {
+        if (!provider) {
+          provider = new HDWalletProvider(getNmemonic(), "https://rinkeby.infura.io/")
+        }
+        return provider
+      },
       network_id: 4
     },
     infuranet: {
-      provider: new HDWalletProvider(getNmemonic(), "https://infuranet.infura.io/"),
+      get provider() {
+        if (!provider) {
+          provider = new HDWalletProvider(getNmemonic(), "https://infuranet.infura.io/")
+        }
+        return provider
+      },
       network_id: "*"
     },
     kovan: {
-      provider: new HDWalletProvider(getNmemonic(), "https://kovan.infura.io/"),
+      get provider() {
+        if (!provider) {
+          provider = new HDWalletProvider(getNmemonic(), "https://kovan.infura.io/")
+        }
+        return provider
+      },
       network_id: 42
     },
     mainnet: {
-      provider: new HDWalletProvider(getNmemonic(), "https://mainnet.infura.io/"),
+      get provider() {
+        if (!provider) {
+          provider = new HDWalletProvider(getNmemonic(), "https://mainnet.infura.io/")
+        }
+        return provider
+      },
       network_id: 1
     }
   }
