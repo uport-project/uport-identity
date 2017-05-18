@@ -45,7 +45,7 @@ contract IdentityManager {
   modifier rateLimited() {
     if (limiter[msg.sender] < (now - 1 hours)) {
       limiter[msg.sender] = now;
-      _;
+      _ ;
     } else throw;
   }
 
