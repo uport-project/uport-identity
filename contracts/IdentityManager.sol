@@ -58,6 +58,16 @@ contract IdentityManager {
     IdentityCreated(identity, msg.sender, owner,  recoveryKey);
   }
 
+  // An identity Proxy can use this to register itself with the IdentityManager
+  // Note they also have to change the owner of the Proxy over to this, but after calling this
+  function registerIdentity(address owner, address recoveryKey) {
+    if (owners[msg.sender][owner] > 0 || recoveryKeys[msg.sender] > 0 ) throw; // Deny any funny business
+    owners[msg.sender][owner] = now - 1 days; // This is to ensure original owner has full power from day one
+    recoveryKeys[msg.sender] = recoveryKey;
+    IdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
+  }
+
+
   function forwardTo(Proxy identity, address destination, uint value, bytes data) onlyOwner(identity) {
     identity.forward(destination, value, data);
   }
