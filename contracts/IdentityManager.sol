@@ -64,7 +64,7 @@ contract IdentityManager {
 
   // an owner can add a new device instantly
   function addOwner(Proxy identity, address newOwner) onlyOlderOwner(identity) rateLimited {
-    owners[identity][newOwner] = now;
+    owners[identity][newOwner] = now + 1 days;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
