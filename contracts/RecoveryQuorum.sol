@@ -62,7 +62,7 @@ contract RecoveryQuorum {
         RecoveryEvent("replaceDelegates", msg.sender);
     }
 
-    function collectedSignatures(address _proposedUserKey) returns (uint signatures) {
+    function collectedSignatures(address _proposedUserKey) constant returns (uint signatures) {
         for(uint i = 0 ; i < delegateAddresses.length ; i++) {
             if (delegateHasValidSignature(delegates[delegateAddresses[i]])
                     && delegates[delegateAddresses[i]].proposedUserKey == _proposedUserKey) {
@@ -75,7 +75,7 @@ contract RecoveryQuorum {
         return delegateAddresses;
     }
 
-    function neededSignatures() returns (uint) {
+    function neededSignatures() constant returns (uint) {
         uint currentDelegateCount; //always 0 at this point
         for(uint i = 0 ; i < delegateAddresses.length ; i++) {
             if(delegateIsCurrent(delegates[delegateAddresses[i]])) {
