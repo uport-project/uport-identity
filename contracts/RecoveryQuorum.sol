@@ -5,6 +5,7 @@ import "./libs/ArrayLib.sol";
 contract RecoveryQuorum {
     RecoverableController public controller;
     uint constant MAX_DELEGATES = 15;
+    uint constant NEVER = 31536000000000; // large number that acts as inf
 
     address[] public delegateAddresses; // needed for iteration of mapping
     mapping (address => Delegate) public delegates;
@@ -28,7 +29,7 @@ contract RecoveryQuorum {
             delegates[_delegates[i]] = Delegate({
                 proposedUserKey: 0x0,
                 pendingUntil: 0,
-                deletedAfter: 31536000000000
+                deletedAfter: NEVER
             });
         }
     }
@@ -94,7 +95,7 @@ contract RecoveryQuorum {
             delegates[delegate] = Delegate({
                 proposedUserKey: 0x0,
                 pendingUntil: now + controller.longTimeLock(),
-                deletedAfter: 31536000000000
+                deletedAfter: NEVER
             });
             delegateAddresses.push(delegate);
         }
