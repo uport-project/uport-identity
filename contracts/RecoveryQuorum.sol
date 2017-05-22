@@ -96,11 +96,9 @@ contract RecoveryQuorum {
 
   function garbageCollect() private {
     uint i = 0;
-    while(i < delegateAddresses.length){
-      if(delegateIsDeleted(delegates[delegateAddresses[i]])){
-        delegates[delegateAddresses[i]].deletedAfter = 0;
-        delegates[delegateAddresses[i]].pendingUntil = 0;
-        delegates[delegateAddresses[i]].proposedUserKey = 0;
+    while(i < delegateAddresses.length) {
+      if(delegateIsDeleted(delegates[delegateAddresses[i]])) {
+        delete delegates[delegateAddresses[i]];
         ArrayLib.removeAddress(i, delegateAddresses);
       } else { i++; }
     }
