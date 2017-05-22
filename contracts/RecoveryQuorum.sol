@@ -20,7 +20,10 @@ contract RecoveryQuorum {
 
     function RecoveryQuorum(address _controller, address[] _delegates) {
         controller = RecoverableController(_controller);
-        for(uint i = 0; i < MAX_DELEGATES; i++) {
+        for(uint i = 0; i < _delegates.length; i++) {
+            if (i >= MAX_DELEGATES) {
+              break;
+            }
             delegateAddresses.push(_delegates[i]);
             delegates[_delegates[i]] = Delegate({
                 proposedUserKey: 0x0,
