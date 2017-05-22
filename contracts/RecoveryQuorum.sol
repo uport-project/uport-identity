@@ -33,7 +33,7 @@ contract RecoveryQuorum {
         }
     }
 
-    function signUserChange(address proposedUserKey) {
+    function signUserChange(address proposedUserKey) public {
         if(delegateRecordExists(delegates[msg.sender])) {
             delegates[msg.sender].proposedUserKey = proposedUserKey;
             changeUserKey(proposedUserKey);
@@ -41,7 +41,7 @@ contract RecoveryQuorum {
         }
     }
 
-    function changeUserKey(address newUserKey) {
+    function changeUserKey(address newUserKey) public {
         if(collectedSignatures(newUserKey) >= neededSignatures()) {
             controller.changeUserKeyFromRecovery(newUserKey);
             for(uint i = 0 ; i < delegateAddresses.length ; i++) {
