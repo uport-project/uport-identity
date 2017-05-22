@@ -4,6 +4,7 @@ import "./libs/ArrayLib.sol";
 
 contract RecoveryQuorum {
   RecoverableController public controller;
+  uint constant MAX_DELEGATES = 15;
 
   address[] public delegateAddresses; // needed for iteration of mapping
   mapping (address => Delegate) public delegates;
@@ -19,7 +20,7 @@ contract RecoveryQuorum {
 
   function RecoveryQuorum(address _controller, address[] _delegates){
     controller = RecoverableController(_controller);
-    for(uint i = 0; i < _delegates.length; i++){
+    for(uint i = 0; i < MAX_DELEGATES; i++){
       delegateAddresses.push(_delegates[i]);
       delegates[_delegates[i]] = Delegate({proposedUserKey: 0x0, pendingUntil: 0, deletedAfter: 31536000000000});
     }
@@ -76,24 +77,24 @@ contract RecoveryQuorum {
   }
 
   function addDelegate(address delegate) private {
-    if(!delegateRecordExists(delegates[delegate]) && delegateAddresses.length < 15) {
+    if(!delegateRecordExists(delegates[delegate]) && delegateAddresses.length < MAX_DELEGATES) {
       delegates[delegate] = Delegate({proposedUserKey: 0x0, pendingUntil: now + controller.longTimeLock(), deletedAfter: 31536000000000});
       delegateAddresses.push(delegate);
     }
   }
 
   function removeDelegate(address delegate) private {
-    if(delegates[delegate].deletedAfter > controller.longTimeLock() + now){ 
+    if(delegates[delegate].deletedAfter > controller.longTimeLock() + now) {
       //remove right away if they are still pending
-      if(delegates[delegate].pendingUntil > now){ 
+      if(delegates[delegate].pendingUntil > now) {
         delegates[delegate].deletedAfter = now;
-      } else{
+      } else {
         delegates[delegate].deletedAfter = controller.longTimeLock() + now;
       }
     }
   }
 
-  function garbageCollect() private{
+  function garbageCollect() private {
     uint i = 0;
     while(i < delegateAddresses.length){
       if(delegateIsDeleted(delegates[delegateAddresses[i]])){
@@ -101,7 +102,7 @@ contract RecoveryQuorum {
         delegates[delegateAddresses[i]].pendingUntil = 0;
         delegates[delegateAddresses[i]].proposedUserKey = 0;
         ArrayLib.removeAddress(i, delegateAddresses);
-      }else{i++;}
+      } else { i++; }
     }
   }
 
