@@ -1,6 +1,10 @@
 //HD Wallet for keyless servers (infura)
-var HDWalletProvider = require("truffle-hdwallet-provider");
-function getNmemonic(){
+const HDWalletProvider = require("truffle-hdwallet-provider");
+const TestRPC = require("ethereumjs-testrpc");
+
+let provider
+
+function getNmemonic() {
   try{
     return require('fs').readFileSync("./seed", "utf8").trim();
   } catch(err){
@@ -8,14 +12,24 @@ function getNmemonic(){
   }
 }
 
-var TestRPC = require("ethereumjs-testrpc");
+function getProvider(rpcUrl) {
+  if (!provider) {
+    provider = new HDWalletProvider(getNmemonic(), rpcUrl)
+  }
+  return provider
+}
 
 
 module.exports = {
   networks: {
     in_memory: {
-      provider: TestRPC.provider({total_accounts: 25}),
-      network_id: "*",
+      get provider() {
+        if (!provider) {
+          provider = TestRPC.provider({total_accounts: 25})
+        }
+        return provider
+      },
+      network_id: "*"
     },
     local: {
       host: "localhost",
@@ -23,23 +37,33 @@ module.exports = {
       network_id: "*" // Match any network id
     },
     ropsten: {
-      provider: new HDWalletProvider(getNmemonic(), "https://ropsten.infura.io/"),
+      get provider() {
+        return getProvider("https://ropsten.infura.io/")
+      },
       network_id: 3
     },
     rinkeby: {
-      provider: new HDWalletProvider(getNmemonic(), "https://rinkeby.infura.io/"),
+      get provider() {
+        return getProvider("https://rinkeby.infura.io/")
+      },
       network_id: 4
     },
     infuranet: {
-      provider: new HDWalletProvider(getNmemonic(), "https://infuranet.infura.io/"),
+      get provider() {
+        return getProvider("https://infuranet.infura.io/")
+      },
       network_id: "*"
     },
     kovan: {
-      provider: new HDWalletProvider(getNmemonic(), "https://kovan.infura.io/"),
+      get provider() {
+        return getProvider("https://kovan.infura.io/")
+      },
       network_id: 42
     },
     mainnet: {
-      provider: new HDWalletProvider(getNmemonic(), "https://mainnet.infura.io/"),
+      get provider() {
+        return getProvider("https://mainnet.infura.io/")
+      },
       network_id: 1
     }
   }
