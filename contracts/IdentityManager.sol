@@ -2,8 +2,6 @@ pragma solidity 0.4.8;
 import "./Proxy.sol";
 
 contract IdentityManager {
-  uint adminTimeLock;
-  uint userTimeLock;
   uint adminRate;
 
   event IdentityCreated(
@@ -32,13 +30,8 @@ contract IdentityManager {
   mapping(address => mapping(address => uint)) limiter;
 
   modifier onlyOwner(address identity) { 
-    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + userTimeLock) <= now ) _ ;
+    if (owners[identity][msg.sender] > 0 && owners[identity][msg.sender] <= now ) _ ;
     else throw; 
-  }
-
-  modifier onlyOlderOwner(address identity) { 
-    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + adminTimeLock) <= now) _ ;
-    else throw;
   }
 
   modifier onlyRecovery(address identity) { 
@@ -54,12 +47,8 @@ contract IdentityManager {
   }
 
   // Instantiate IdentityManager with the following limits:
-  // - userTimeLock - Time before new owner can control proxy
-  // - adminTimeLock - Time before new owner can add/remove owners
   // - adminRate - Time period used for rate limiting a given key for admin functionality
-  function IdentityManager(uint _userTimeLock, uint _adminTimeLock, uint _adminRate) {
-    adminTimeLock = _adminTimeLock;
-    userTimeLock = _userTimeLock;
+  function IdentityManager(uint _adminRate) {
     adminRate = _adminRate;
   }
 
@@ -67,7 +56,7 @@ contract IdentityManager {
   // gas 289,311
   function CreateIdentity(address owner, address recoveryKey) {
     Proxy identity = new Proxy();
-    owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
+    owners[identity][owner] = now; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
     IdentityCreated(identity, msg.sender, owner,  recoveryKey);
   }
@@ -76,7 +65,7 @@ contract IdentityManager {
   // Note they also have to change the owner of the Proxy over to this, but after calling this
   function registerIdentity(address owner, address recoveryKey) {
     if (owners[msg.sender][owner] > 0 || recoveryKeys[msg.sender] > 0 ) throw; // Deny any funny business
-    owners[msg.sender][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
+    owners[msg.sender][owner] = now; // This is to ensure original owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
     IdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
   }
@@ -87,28 +76,30 @@ contract IdentityManager {
   }
 
   // an owner can add a new device instantly
-  function addOwner(Proxy identity, address newOwner) onlyOlderOwner(identity) rateLimited(identity) {
+  function addOwner(Proxy identity, address newOwner) onlyOwner(identity) rateLimited(identity) {
     owners[identity][newOwner] = now;
+    limiter[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
   // a recovery key owner can add a new device with 1 days wait time
   function addOwnerForRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited(identity) {
     if (owners[identity][newOwner] > 0) throw;
-    owners[identity][newOwner] = now;
+    owners[identity][newOwner] = now + adminRate;
+    limiter[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
   // an owner can remove another owner instantly
-  function removeOwner(Proxy identity, address owner) onlyOlderOwner(identity) rateLimited(identity) {
-    owners[identity][owner] = 0;
+  function removeOwner(Proxy identity, address owner) onlyOwner(identity) rateLimited(identity) {
+    delete owners[identity][owner];
     OwnerRemoved(identity, owner, msg.sender);
   }
 
   // an owner can add change the recoverykey whenever they want to
-  function changeRecovery(Proxy identity, address recoveryKey) onlyOlderOwner(identity) rateLimited(identity) {
+  function changeRecovery(Proxy identity, address recoveryKey) onlyOwner(identity) rateLimited(identity) {
     recoveryKeys[identity] = recoveryKey;
+    limiter[identity][recoveryKey] = now;
     RecoveryChanged(identity, recoveryKey, msg.sender);
   }
-
 }
