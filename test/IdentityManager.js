@@ -245,152 +245,151 @@ contract('IdentityManager', (accounts) => {
             done()
           })
         })
+
+        it('can remove other owner yet', (done) => {
+          identityManager.removeOwner(proxy.address, user1, {from: user2}).then(tx => {
+            const log = tx.logs[0]
+            assert.equal(log.args.owner,
+                        user1,
+                        'Owner key is set in event')
+            assert.equal(log.args.instigator,
+                        user2,
+                        'Instigator key is set in event')
+            done()
+          }).catch(error => {
+            console.log(error)
+            done()
+          })
+        })
+
+        it('can change recoveryKey yet', (done) => {
+          identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user2}).then(tx => {
+            const log = tx.logs[0]
+            assert.equal(log.args.recoveryKey,
+                        recoveryKey2,
+                        'recoveryKey key is set in event')
+            assert.equal(log.args.instigator,
+                        user2,
+                        'Instigator key is set in event')
+            done()
+          }).catch(error => {
+            console.log(error)
+            done()
+          })
+        })
       })
     })
 
-    // it('Allows recoveryKey to add owner', (done) => {
-    //   const event = identityManager.OwnerAdded({identity: proxy.address})
-    //   event.watch((error, result) => {
-    //     if (error) throw Error(error)
-    //     event.stopWatching()
-    //     assert.equal(result.args.owner,
-    //                 user3,
-    //                 'Owner key is set in event')
-    //     assert.equal(result.args.instigator,
-    //                 recoveryKey,
-    //                 'Instigator key is set in event')
-    //   })
-    //   identityManager.addOwnerForRecovery(proxy.address, user3, {from: recoveryKey}).then(() => {
-    //     // Encode the transaction to send to the Owner contract
-    //     let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-    //     return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user1})
-    //   }).then(() => {
-    //     // Verify that the proxy address is logged as the sender
-    //     return testReg.registry.call(proxy.address)
-    //   }).then((regData) => {
-    //     assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction')
+    describe('new owner added by recoveryKey', () => {
+      beforeEach(done => {
+        identityManager.addOwnerForRecovery(proxy.address, user2, {from: recoveryKey}).then((tx) => {
+          // console.log(tx)
+          done()
+        }).catch(error => {
+          console.log(error)
+          done()
+        })
+      })
 
-    //     // Encode the transaction to send to the Owner contract
-    //     let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
-    //     return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user3})
-    //   }).then((tx) => {
-    //     // Verify that the proxy address is logged as the sender
-    //     return testReg.registry.call(proxy.address)
-    //   }).then((regData) => {
-    //     assert.notEqual(regData.toNumber(), LOG_NUMBER_2, 'User3 should not yet be able to send transaction')
+      it('within userTimeLock is not allowed transactions', (done) => {
+        // Encode the transaction to send to the Owner contract
+        let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
+        identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user2}).then(() => {
+          assert.isNotOk(true, 'This should have thrown an error in contract')
+          done()
+        }).catch((error) => {
+          assert.match(error, /invalid JUMP/, 'throws an error')
+          done()
+        })
+      })
 
-    //     return evm_increaseTime(86400)
-    //   }).then(() => {
-    //     // Encode the transaction to send to the Owner contract
-    //     let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
-    //     return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user3})
-    //   }).then((tx) => {
-    //     // Verify that the proxy address is logged as the sender
-    //     return testReg.registry.call(proxy.address)
-    //   }).then((regData) => {
-    //     assert.equal(regData.toNumber(), LOG_NUMBER_2, 'User3 can now send transaction')
-    //     done()
-    //   }).catch(done)
-    // })
+      describe('after userTimeLock', () => {
+        beforeEach(() => evm_increaseTime(userTimeLock))
+        it('Allow transactions', (done) => {
+          // Encode the transaction to send to the Owner contract
+          let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
+          identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user2}).then((tx) => {
+            // Verify that the proxy address is logged as the sender
+            return testReg.registry.call(proxy.address)
+          }).then((regData) => {
+            assert.equal(regData.toNumber(), LOG_NUMBER_2, 'User2 should be able to send transaction')
+            done()
+          }).catch(done)
+        })
 
-//     it('Allows removing of owners', (done) => {
-//       identityManager.addOwner(proxy.address, user2, {from: user1}).then(() => {
-//         return evm_increaseTime(1)
-//       }).then(() => {
-//         let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-//         return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user2})
-//       }).then(() => {
-//         // Verify that the proxy address is logged as the sender
-//         return testReg.registry.call(proxy.address)
-//       }).then((regData) => {
-//         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User2 should be able to send transaction')
-//       }).then(() => {
-//         const event = identityManager.OwnerRemoved({identity: proxy.address})
-//         event.watch((error, result) => {
-//           if (error) throw Error(error)
-//           event.stopWatching()
-//           assert.equal(result.args.owner,
-//                       user2,
-//                     'Owner key is set in event')
-//           assert.equal(result.args.instigator,
-//                       user1,
-//                     'Instigator key is set in event')
-//         })
-//         return identityManager.removeOwner(proxy.address, user2, {from: user1})
-//       }).then((tx) => {
-//         return evm_increaseTime(1)
-//       }).then(() => {
-//         // Encode the transaction to send to the Owner contract
-//         let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
-//         return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user2})
-//       }).then((tx) => {
-//         return evm_increaseTime(1)
-//       }).then(() => {
-//         // Verify that the proxy address is logged as the sender
-//         return testReg.registry.call(proxy.address)
-//       }).then((regData) => {
-//         assert.notEqual(regData.toNumber(), LOG_NUMBER_2, 'User2 can not send transaction now')
-//         done()
-//       }).catch(done)
-//     })
+        it('can not add other owner yet', (done) => {
+          identityManager.addOwner(proxy.address, user4, {from: user2}).catch((error) => {
+            assert.match(error, /invalid JUMP/, 'throws an error')
+            done()
+          })
+        })
 
-//     it('Allows changing of recoveryKey', (done) => {
-//       const event = identityManager.RecoveryChanged({identity: proxy.address})
-//       event.watch((error, result) => {
-//         if (error) throw Error(error)
-//         event.stopWatching()
-//         assert.equal(result.args.recoveryKey,
-//                     recoveryKey2,
-//                     'New recovery key is set in event')
-//         assert.equal(result.args.instigator,
-//                     user1,
-//                     'Instigator key is set in event')
-//       })
-//       identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user1}).then(() => {
-//         return evm_increaseTime(1)
-//       }).then(() => {
-//         identityManager.OwnerAdded({identity: proxy.address}).watch((error, result) => {
-//           if (error) throw Error(error)
-//           event.stopWatching()
-//           assert.equal(result.args.owner,
-//                       user4,
-//                       'New owner is set in event')
-//           assert.equal(result.args.instigator,
-//                       recoveryKey2,
-//                       'Instigator key is set in event')
-//         })
-//         return identityManager.addOwnerForRecovery(proxy.address, user4, {from: recoveryKey2})
-//       }).then(() => {
-//         // Encode the transaction to send to the Owner contract
-//         let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-//         return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user1})
-//       }).then(() => {
-//         // Verify that the proxy address is logged as the sender
-//         return testReg.registry.call(proxy.address)
-//       }).then((regData) => {
-//         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction')
+        it('can not remove other owner yet', (done) => {
+          identityManager.removeOwner(proxy.address, user1, {from: user2}).catch((error) => {
+            assert.match(error, /invalid JUMP/, 'throws an error')
+            done()
+          })
+        })
 
-//         // Encode the transaction to send to the Owner contract
-//         let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
-//         return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user4})
-//       }).then((tx) => {
-//         // Verify that the proxy address is logged as the sender
-//         return testReg.registry.call(proxy.address)
-//       }).then((regData) => {
-//         assert.notEqual(regData.toNumber(), LOG_NUMBER_2, 'user4 should not yet be able to send transaction')
+        it('can not change recoveryKey yet', (done) => {
+          identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user2}).catch((error) => {
+            assert.match(error, /invalid JUMP/, 'throws an error')
+            done()
+          })
+        })
+      })
 
-//         return evm_increaseTime(86401)
-//       }).then(() => {
-//         // Encode the transaction to send to the Owner contract
-//         let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
-//         return identityManager.forwardTo(proxy.address, testReg.address, 0, data, {from: user4})
-//       }).then((tx) => {
-//         // Verify that the proxy address is logged as the sender
-//         return testReg.registry.call(proxy.address)
-//       }).then((regData) => {
-//         assert.equal(regData.toNumber(), LOG_NUMBER_2, 'User4 can now send transaction')
-//         done()
-//       }).catch(done)
-//     })
+      describe('after adminTimeLock', () => {
+        beforeEach(() => evm_increaseTime(adminTimeLock))
+
+        it('can add new owner', (done) => {
+          identityManager.addOwner(proxy.address, user3, {from: user2}).then(tx => {
+            const log = tx.logs[0]
+            assert.equal(log.args.owner,
+                        user3,
+                        'Owner key is set in event')
+            assert.equal(log.args.instigator,
+                        user2,
+                        'Instigator key is set in event')
+            done()
+          }).catch(error => {
+            console.log(error)
+            done()
+          })
+        })
+
+        it('can remove other owner yet', (done) => {
+          identityManager.removeOwner(proxy.address, user1, {from: user2}).then(tx => {
+            const log = tx.logs[0]
+            assert.equal(log.args.owner,
+                        user1,
+                        'Owner key is set in event')
+            assert.equal(log.args.instigator,
+                        user2,
+                        'Instigator key is set in event')
+            done()
+          }).catch(error => {
+            console.log(error)
+            done()
+          })
+        })
+
+        it('can change recoveryKey yet', (done) => {
+          identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user2}).then(tx => {
+            const log = tx.logs[0]
+            assert.equal(log.args.recoveryKey,
+                        recoveryKey2,
+                        'recoveryKey key is set in event')
+            assert.equal(log.args.instigator,
+                        user2,
+                        'Instigator key is set in event')
+            done()
+          }).catch(error => {
+            console.log(error)
+            done()
+          })
+        })
+      })
+    })
   })
 })
