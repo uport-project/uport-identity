@@ -171,7 +171,7 @@ contract('IdentityManager', (accounts) => {
     describe('new owner added by owner', () => {
       beforeEach(done => {
         identityManager.addOwner(proxy.address, user2, {from: user1}).then((tx) => {
-          console.log(tx)
+          // console.log(tx)
           done()
         }).catch(error => {
           console.log(error)

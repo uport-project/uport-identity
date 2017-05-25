@@ -29,7 +29,7 @@ contract IdentityManager {
 
   mapping(address => mapping(address => uint)) owners;
   mapping(address => address) recoveryKeys;
-  mapping(address => uint) limiter;
+  mapping(address => mapping(address => uint)) limiter;
 
   modifier onlyOwner(address identity) { 
     if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + userTimeLock) <= now ) _ ;
@@ -46,9 +46,9 @@ contract IdentityManager {
     else throw;
   }
 
-  modifier rateLimited() {
-    if (limiter[msg.sender] < (now - adminRate)) {
-      limiter[msg.sender] = now;
+  modifier rateLimited(Proxy identity) {
+    if (limiter[identity][msg.sender] < (now - adminRate)) {
+      limiter[identity][msg.sender] = now;
       _ ;
     } else throw;
   }
@@ -87,26 +87,26 @@ contract IdentityManager {
   }
 
   // an owner can add a new device instantly
-  function addOwner(Proxy identity, address newOwner) onlyOlderOwner(identity) rateLimited {
-    owners[identity][newOwner] = now + adminTimeLock;
+  function addOwner(Proxy identity, address newOwner) onlyOlderOwner(identity) rateLimited(identity) {
+    owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
   // a recovery key owner can add a new device with 1 days wait time
-  function addOwnerForRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited {
+  function addOwnerForRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited(identity) {
     if (owners[identity][newOwner] > 0) throw;
-    owners[identity][newOwner] = now + adminTimeLock;
+    owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
   // an owner can remove another owner instantly
-  function removeOwner(Proxy identity, address owner) onlyOlderOwner(identity) rateLimited {
+  function removeOwner(Proxy identity, address owner) onlyOlderOwner(identity) rateLimited(identity) {
     owners[identity][owner] = 0;
     OwnerRemoved(identity, owner, msg.sender);
   }
 
   // an owner can add change the recoverykey whenever they want to
-  function changeRecovery(Proxy identity, address recoveryKey) onlyOlderOwner(identity) rateLimited {
+  function changeRecovery(Proxy identity, address recoveryKey) onlyOlderOwner(identity) rateLimited(identity) {
     recoveryKeys[identity] = recoveryKey;
     RecoveryChanged(identity, recoveryKey, msg.sender);
   }
