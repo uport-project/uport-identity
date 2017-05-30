@@ -1,4 +1,4 @@
-const RecoveryQuorumFactory = artifacts.require('./RecoveryQuorumFactory')
+const RecoveryQuorumFactory = artifacts.require('RecoveryQuorumFactory')
 const RecoveryQuorum = artifacts.require('RecoveryQuorum')
 const Promise = require('bluebird')
 web3.eth = Promise.promisifyAll(web3.eth)
@@ -40,15 +40,15 @@ contract('RecoveryQuorumFactory', (accounts) => {
     RecoveryQuorumFactory.deployed().then((instance) => {
       recoveryQuorumFactory = instance
       return RecoveryQuorum.new({from: accounts[0]})
-    }).then((instance)) => {
-      deployedRecoveryQuorum= instance
+    }).then((instance) => {
+      deployedRecoveryQuorum = instance
       done()
-    }
+    })
   })
 
   it('Correctly creates recovery contracts', (done) => {
     recoveryQuorumFactory.CreateRecoveryQuorum(user1, delegates).then((tx) => {
-      let log=tx.logs[0];
+      let log = tx.logs[0];
       assert.equal(log.event,"RecoveryQuorumCreated","wrong event");
       recoveryQuorumAddress = log.args.recoveryQuorum
       recoveryQuorum = RecoveryQuorum.at(recoveryQuorumAddress)
@@ -58,10 +58,7 @@ contract('RecoveryQuorumFactory', (accounts) => {
 
 
   it('Created recoveryQuorum should have correct state', (done) => {
-    recoveryQuorum.controller().then(controllerAddress => {
-      assert.equal(controllerAddress, recoverableController.address)
-      return recoveryQuorum.getAddresses()
-    }).then(delegateAddresses => {
+    recoveryQuorum.getAddresses().then(delegateAddresses => {
       assert.deepEqual(delegateAddresses, delegates)
       done()
     }).catch(done)
