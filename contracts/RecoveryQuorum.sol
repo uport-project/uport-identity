@@ -1,4 +1,4 @@
-pragma solidity 0.4.8;
+pragma solidity ^0.4.8;
 import "./RecoverableController.sol";
 import "./libs/ArrayLib.sol";
 
@@ -36,7 +36,7 @@ contract RecoveryQuorum {
       controller.changeUserKeyFromRecovery(newUserKey);
       for(uint i = 0 ; i < delegateAddresses.length ; i++){
         //remove any pending delegates after a recovery
-        if(delegates[delegateAddresses[i]].pendingUntil > now){ 
+        if(delegates[delegateAddresses[i]].pendingUntil > now){
             delegates[delegateAddresses[i]].deletedAfter = now;
         }
         delete delegates[delegateAddresses[i]].proposedUserKey;
@@ -78,9 +78,9 @@ contract RecoveryQuorum {
     }
   }
   function removeDelegate(address delegate) private {
-    if(delegates[delegate].deletedAfter > controller.longTimeLock() + now){ 
+    if(delegates[delegate].deletedAfter > controller.longTimeLock() + now){
       //remove right away if they are still pending
-      if(delegates[delegate].pendingUntil > now){ 
+      if(delegates[delegate].pendingUntil > now){
         delegates[delegate].deletedAfter = now;
       } else{
         delegates[delegate].deletedAfter = controller.longTimeLock() + now;
