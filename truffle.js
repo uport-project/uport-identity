@@ -41,6 +41,10 @@ module.exports = {
     mainnet: {
       provider: new HDWalletProvider(getNmemonic(), "https://mainnet.infura.io/"),
       network_id: 1
+    },
+    brazilnet: {
+      provider: new HDWalletProvider(getNmemonic(), "http://40.112.210.184:8545/"),
+      network_id: 6487
     }
   }
 };
