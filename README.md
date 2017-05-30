@@ -30,6 +30,13 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |IdentityFactory|[0xd7dc3926bc6089a5be4815215ceaa6e707591023](https://kovan.etherscan.io/address/0xd7dc3926bc6089a5be4815215ceaa6e707591023)|
 |IdentityFactoryWithRecoveryKey|[0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d](https://kovan.etherscan.io/address/0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d)|
 
+### Brazil testnet (id: 6487)
+|Contract|Address|
+| --|--|
+|ArrayLib|[0x47d224f31f693c1efd717dc86f3e6ca5af532e9b](http://40.112.210.184:8080/account/0x47d224f31f693c1efd717dc86f3e6ca5af532e9b)|
+|IdentityFactory|[0xa8c8337c3deba6d8f96a3efd1ccd00250a34b14e](http://40.112.210.184:8080/account/0xa8c8337c3deba6d8f96a3efd1ccd00250a34b14e)|
+|IdentityFactoryWithRecoveryKey|[0xe8294a32046afc953132c04075c6e784308f54a2](http://40.112.210.184:8080/account/0xe8294a32046afc953132c04075c6e784308f54a2)|
+
 
 ## Using the contracts
 To use the contract we provide truffle artifacts. You can use `truffle-contract` to utilize these.

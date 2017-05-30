@@ -24,6 +24,8 @@ lines.on('line', line => {
     writeContractInfo(4)
     outStream.write('### Kovan testnet (id: 42)\n')
     writeContractInfo(42)
+    outStream.write('### Brazil testnet (id: 6487)\n')
+    writeContractInfo(6487)
   } else {
     outStream.write(line + '\n')
   }
@@ -49,6 +51,8 @@ function createContractString(artifact, id) {
       netPrefix = 'rinkeby.'
     } else if (id === 42) {
       netPrefix = 'kovan.'
+    } else if (id === 6487) {
+      netPrefix = 'brazilnet.'
     }
     wrapAddr = '[' + address +'](https://' + netPrefix + 'etherscan.io/address/' + address + ')'
   }
