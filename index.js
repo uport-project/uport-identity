@@ -5,5 +5,5 @@ module.exports = {
   IdentityManager:                require('./build/contracts/IdentityManager.json'),
   RecoverableController:          require('./build/contracts/RecoverableController.json'),
   Proxy:                          require('./build/contracts/Proxy.json'),
-  RecoveryQuorum:                 require('./build/contracts/Proxy.json'),
+  RecoveryQuorum:                 require('./build/contracts/RecoveryQuorum.json'),
 }
