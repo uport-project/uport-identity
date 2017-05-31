@@ -1,6 +1,6 @@
 {
   "name": "uport-identity",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "uPort Contracts for identity",
   "main": "index.js",
   "directories": {
