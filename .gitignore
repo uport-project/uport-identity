@@ -3,3 +3,4 @@ node_modules
 notes.txt
 .DS_Store
 seed
+build/contracts/TestRegistry.json

@@ -13,7 +13,7 @@
 // }
 
 // VERSION 2
-pragma solidity ^0.4.8;
+pragma solidity 0.4.8;
 import "./libs/Owned.sol";
 contract Proxy is Owned {
   event Forwarded (address indexed destination, uint value, bytes data );
