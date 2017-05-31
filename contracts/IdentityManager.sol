@@ -55,15 +55,15 @@ contract IdentityManager {
     identity.forward(destination, value, data);
   }
 
-  function metaTxForwardTo(Proxy identity, uint8 sigV, bytes32 sigR, bytes32 sigS, address destination, uint value, bytes data) {
+  function metaTxForwardTo(uint8 sigV, bytes32 sigR, bytes32 sigS, Proxy identity, address destination, uint value, bytes data) {
 
     uint nonce = nonces[identity];
-    bytes32 h = sha3(bytes32(nonce), destination, bytes32(value), data);
+    bytes32 h = sha3(this, 'forwardTo', nonce, identity, destination, value, data);
     address addressFromSig = ecrecover(h,sigV,sigR,sigS);
 
     if (owners[identity][addressFromSig] > 0) {
       nonces[identity]++;
-      identity.forward(destination, value, data);      
+      identity.forward(destination, value, data);
     }
   }
 
@@ -74,10 +74,10 @@ contract IdentityManager {
   }
 
   // an owner can add a new device instantly
-  function metaTxAddOwner(Proxy identity, uint8 sigV, bytes32 sigR, bytes32 sigS, address newOwner) {
+  function metaTxAddOwner(uint8 sigV, bytes32 sigR, bytes32 sigS, Proxy identity, address newOwner) {
 
     uint nonce = nonces[identity];
-    bytes32 h = sha3(bytes32(nonce), newOwner);
+    bytes32 h = sha3(this, 'addOwner', nonce, identity, newOwner);
     address addressFromSig = ecrecover(h,sigV,sigR,sigS);
 
     if (owners[identity][addressFromSig] > 0 && (owners[identity][addressFromSig] + 1 days) <= now) {
@@ -88,12 +88,26 @@ contract IdentityManager {
     }
   }
 
-
   // a recovery key owner can add a new device with 1 days wait time
   function addOwnerForRecovery(Proxy identity, address newOwner) onlyRecovery(identity) {
     if (owners[identity][newOwner] > 0) throw;
     owners[identity][newOwner] = now + 1 days;
     OwnerAdded(identity, newOwner, msg.sender);
+  }
+
+  function metaTxAddOwnerForRecovery(uint8 sigV, bytes32 sigR, bytes32 sigS, Proxy identity, address newOwner) {
+
+    uint nonce = nonces[identity];
+    bytes32 h = sha3(this, 'addOwnerForRecovery', nonce, identity, newOwner);
+    address addressFromSig = ecrecover(h,sigV,sigR,sigS);
+
+    if (owners[identity][newOwner] > 0) throw;
+
+    if (recoveryKeys[identity] == addressFromSig) {
+      nonces[identity]++;
+      owners[identity][newOwner] = now + 1 days;
+      OwnerAdded(identity, newOwner, addressFromSig);
+    }
   }
 
   // an owner can remove another owner instantly
@@ -102,11 +116,10 @@ contract IdentityManager {
     OwnerRemoved(identity, owner, msg.sender);
   }
 
-  // an owner can remove another owner instantly
-  function metaTxRemoveOwner(Proxy identity, uint8 sigV, bytes32 sigR, bytes32 sigS, address owner) {
+  function metaTxRemoveOwner(uint8 sigV, bytes32 sigR, bytes32 sigS, Proxy identity, address owner) {
 
     uint nonce = nonces[identity];
-    bytes32 h = sha3(bytes32(nonce), owner);
+    bytes32 h = sha3(this, 'removeOwner', nonce, identity, owner);
     address addressFromSig = ecrecover(h,sigV,sigR,sigS);
 
     if (owners[identity][addressFromSig] > 0 && (owners[identity][addressFromSig] + 1 days) <= now) {
@@ -117,11 +130,22 @@ contract IdentityManager {
     }
   }
 
-
   // an owner can add change the recoverykey whenever they want to
   function changeRecovery(Proxy identity, address recoveryKey) onlyOlderOwner(identity) {
     recoveryKeys[identity] = recoveryKey;
     RecoveryChanged(identity, recoveryKey, msg.sender);
   }
 
+  function metaTxChangeRecovery(uint8 sigV, bytes32 sigR, bytes32 sigS, Proxy identity, address recoveryKey) {
+
+    uint nonce = nonces[identity];
+    bytes32 h = sha3(this, 'changeRecovery', nonce, recoveryKey);
+    address addressFromSig = ecrecover(h,sigV,sigR,sigS);
+
+    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + 1 days) <= now) {
+      nonces[identity]++;
+      recoveryKeys[identity] = recoveryKey;
+      RecoveryChanged(identity, recoveryKey, msg.sender);
+    }
+  }
 }

@@ -29,9 +29,11 @@
   "devDependencies": {
     "bluebird": "^3.5.0",
     "eth-signer": "^0.2.2",
+    "eth-lightwallet": "*",
     "ethereumjs-testrpc": "^3.0.3",
     "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
+    "solidity-sha3": "^0.4.1",
     "truffle": "3.1.2",
     "truffle-contract": "^1.1.10",
     "truffle-hdwallet-provider": "0.0.3"
