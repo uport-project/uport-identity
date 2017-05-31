@@ -1,5 +1,8 @@
 # Release notes
 
+## v1.0.5
+Fixed small bug in js-lib
+
 ## v1.0.4
 Deployed contracts on Rinkeby testnet.
 
