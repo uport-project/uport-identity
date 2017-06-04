@@ -4,7 +4,6 @@ import "./IdentityManager.sol";
 import "./Proxy.sol";
 
 contract RecoveryManager {
-    IdentityManager identityManager;
     
     struct Delegate {
         bool exists;
@@ -14,14 +13,13 @@ contract RecoveryManager {
     struct RecoveryIdentity {
         bool exists;
         uint neededSignatures;
+        IdentityManager identityManager;
         mapping (address => Delegate)  delegates;
         address[] delegateAddresses; // needed for iteration of mapping
     }
     
-    //Create RecoveryManager w/ partner _identityManager
-    function RecoveryManager (address _identityManager) {
-        identityManager = IdentityManager(_identityManager);
-    }
+    //Create RecoveryManager
+    function RecoveryManager () {}
     
     //Proxy address => RecoveryIdentity
     mapping (address => RecoveryIdentity) recoveryIdentities;
@@ -32,12 +30,13 @@ contract RecoveryManager {
         else throw;
     }
     
-    function createRecovery(address identity, address[] _delegates) {
+    function createRecovery(address identityManager, address identity, address[] _delegates) {
         RecoveryIdentity recovIden = recoveryIdentities[identity];
         if (recovIden.exists) throw; //overwrite protection
         
         recovIden.exists = true;
         recovIden.neededSignatures = _delegates.length/2 + 1;
+        recovIden.identityManager = IdentityManager(identityManager);
         
         for (uint i = 0; i < _delegates.length; i++) {
             recovIden.delegateAddresses.push(_delegates[i]);
@@ -56,7 +55,7 @@ contract RecoveryManager {
     function changeUserKey(address identity, address newUserKey) {
         RecoveryIdentity iden = recoveryIdentities[identity];
         if (collectedSignatures(identity, newUserKey) >= iden.neededSignatures) {
-            identityManager.addOwnerForRecovery(Proxy(identity), newUserKey);     
+            iden.identityManager.addOwnerForRecovery(Proxy(identity), newUserKey);     
             deleteProposedKeys(identity);
         }
     }
