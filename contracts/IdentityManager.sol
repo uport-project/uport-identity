@@ -1,6 +1,5 @@
 pragma solidity 0.4.8;
 import "./Proxy.sol";
-import "./RecoveryManager.sol";
 
 contract IdentityManager {
   uint adminTimeLock;
@@ -32,17 +31,17 @@ contract IdentityManager {
   mapping(address => address) recoveryKeys;
   mapping(address => mapping(address => uint)) limiter;
 
-  modifier onlyOwner(address identity) {
+  modifier onlyOwner(address identity) { 
     if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + userTimeLock) <= now ) _ ;
-    else throw;
+    else throw; 
   }
 
-  modifier onlyOlderOwner(address identity) {
+  modifier onlyOlderOwner(address identity) { 
     if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + adminTimeLock) <= now) _ ;
     else throw;
   }
 
-  modifier onlyRecovery(address identity) {
+  modifier onlyRecovery(address identity) { 
     if (recoveryKeys[identity] == msg.sender) _ ;
     else throw;
   }
@@ -112,10 +111,4 @@ contract IdentityManager {
     RecoveryChanged(identity, recoveryKey, msg.sender);
   }
 
-  //This function allows this contract to work only w/ the
-  //Recovery Manager.
-  function changeDelegates(Proxy identity, address[] newDelegates) onlyOlderOwner(identity) rateLimited(identity) {
-    RecoveryManager(recoveryKeys[identity]).updateRecoveryDelegates(identity, newDelegates);
-    //Add Event
-  }
 }
