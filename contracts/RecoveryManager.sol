@@ -4,6 +4,20 @@ import "./IdentityManager.sol";
 import "./Proxy.sol";
 
 contract RecoveryManager {
+    event RecoveryIdentityCreated(
+         address indexed IdentityManager,
+         address indexed identity, 
+         address initiatedBy);
+
+    event SignUserChange(
+        address indexed identity, 
+        address indexed initiatedBy,
+        address newKey);
+        
+    event ChangeUserKey(
+        address indexed identity,
+        address indexed initatedBy,
+        address newKey);
     
     struct Delegate {
         bool exists;
@@ -42,11 +56,13 @@ contract RecoveryManager {
             recovIden.delegateAddresses.push(_delegates[i]);
             recovIden.delegates[_delegates[i]] = Delegate({exists: true, proposedUserKey: address(0)});
         }
+        RecoveryIdentityCreated(identityManager, identity, msg.sender);
     }
     
     //Delegate calls this to vote for a new owner
     function signUserChange(address identity, address proposedUserKey) onlyDelegate(identity) {
         recoveryIdentities[identity].delegates[msg.sender].proposedUserKey = proposedUserKey;
+        SignUserChange(identity, msg.sender, proposedUserKey);
         changeUserKey(identity, proposedUserKey);
     }
   
@@ -57,6 +73,7 @@ contract RecoveryManager {
         if (collectedSignatures(identity, newUserKey) >= iden.neededSignatures) {
             iden.identityManager.addOwnerForRecovery(Proxy(identity), newUserKey);     
             deleteProposedKeys(identity);
+            ChangeUserKey(identity, msg.sender, newUserKey);
         }
     }
     
