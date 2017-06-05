@@ -30,6 +30,8 @@ contract IdentityManager {
   mapping(address => mapping(address => uint)) owners;
   mapping(address => address) recoveryKeys;
   mapping(address => mapping(address => uint)) limiter;
+  mapping(address => uint) migrationInitiated;
+  mapping(address => address) migrationNewAddress;
 
   modifier onlyOwner(address identity) { 
     if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + userTimeLock) <= now ) _ ;
@@ -111,4 +113,25 @@ contract IdentityManager {
     RecoveryChanged(identity, recoveryKey, msg.sender);
   }
 
+  // an owner can migrate away to a new IdentityManager
+  function initiateMigration(Proxy identity, address newIdManager) onlyOlderOwner(identity) {
+    migrationInitiated[identity] = now;
+    migrationNewAddress[identity] = newIdManager;
+  }
+
+  // any owner can cancel a migration
+  function cancelMigration(Proxy identity, address newIdManager) onlyOwner(identity) {
+    migrationInitiated[identity] = 0;
+    migrationNewAddress[identity] = 0;
+  }
+
+  // owner needs to finalize migration once adminTimeLock time has passed
+  function finalizeMigration(Proxy identity, address newIdManager) onlyOlderOwner(identity) {
+    if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
+      migrationInitiated[identity] = 0;
+      migrationNewAddress[identity] = 0;
+      identity.transfer(migrationNewAddress[identity]);
+    }
+  }
 }
+
