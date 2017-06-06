@@ -6,4 +6,5 @@ module.exports = {
   RecoverableController:          require('./build/contracts/RecoverableController.json'),
   Proxy:                          require('./build/contracts/Proxy.json'),
   RecoveryQuorum:                 require('./build/contracts/Proxy.json'),
+  RecoverableController:          require('./build/contracts/RecoveryManager.json'),
 }
