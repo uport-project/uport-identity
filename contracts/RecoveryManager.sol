@@ -7,7 +7,7 @@ contract RecoveryManager {
     event RecoveryIdentityCreated(
          address indexed IdentityManager,
          address indexed identity, 
-         address initiatedBy);
+         address indexed initiatedBy);
 
     event SignUserChange(
         address indexed identity, 
@@ -16,7 +16,7 @@ contract RecoveryManager {
         
     event ChangeUserKey(
         address indexed identity,
-        address indexed initatedBy,
+        address indexed initiatedBy,
         address newKey);
     
     struct Delegate {
