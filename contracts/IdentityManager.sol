@@ -26,6 +26,21 @@ contract IdentityManager {
     address indexed identity,
     address indexed recoveryKey,
     address instigator);
+    
+  event MigrationInitiated(
+    address indexed identity,
+    address indexed newIdManager,
+    address instigator);
+    
+  event MigrationCanceled(
+    address indexed identity,
+    address indexed newIdManager,
+    address instigator);
+    
+   event MigrationFinalized(
+    address indexed identity,
+    address indexed newIdManager,
+    address instigator);
 
   mapping(address => mapping(address => uint)) owners;
   mapping(address => address) recoveryKeys;
@@ -117,20 +132,27 @@ contract IdentityManager {
   function initiateMigration(Proxy identity, address newIdManager) onlyOlderOwner(identity) {
     migrationInitiated[identity] = now;
     migrationNewAddress[identity] = newIdManager;
+    MigrationInitiated(identity, newIdManager, msg.sender);
   }
 
   // any owner can cancel a migration
-  function cancelMigration(Proxy identity, address newIdManager) onlyOwner(identity) {
+  function cancelMigration(Proxy identity) onlyOwner(identity) {
+    address canceledManager = migrationNewAddress[identity];
     migrationInitiated[identity] = 0;
     migrationNewAddress[identity] = 0;
+    MigrationCanceled(identity, canceledManager, msg.sender);
   }
 
   // owner needs to finalize migration once adminTimeLock time has passed
-  function finalizeMigration(Proxy identity, address newIdManager) onlyOlderOwner(identity) {
+  // WARNING: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
+  // Not doing so risks the proxy becoming stuck. 
+  function finalizeMigration(Proxy identity) onlyOlderOwner(identity) {
     if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
+      address newIdManager = migrationNewAddress[identity];
       migrationInitiated[identity] = 0;
       migrationNewAddress[identity] = 0;
-      identity.transfer(migrationNewAddress[identity]);
+      identity.transfer(newIdManager);
+      MigrationFinalized(identity, newIdManager, msg.sender);
     }
   }
 }
