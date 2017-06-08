@@ -83,6 +83,7 @@ contract IdentityManager {
   // Factory function
   // gas 289,311
   function CreateIdentity(address owner, address recoveryKey) {
+    if (recoveryKey == address(0)) throw;
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
@@ -92,6 +93,7 @@ contract IdentityManager {
   // An identity Proxy can use this to register itself with the IdentityManager
   // Note they also have to change the owner of the Proxy over to this, but after calling this
   function registerIdentity(address owner, address recoveryKey) {
+    if (recoveryKey == address(0)) throw;
     if (owners[msg.sender][owner] > 0 || recoveryKeys[msg.sender] > 0 ) throw; // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
@@ -124,6 +126,7 @@ contract IdentityManager {
 
   // an owner can add change the recoverykey whenever they want to
   function changeRecovery(Proxy identity, address recoveryKey) onlyOlderOwner(identity) rateLimited(identity) {
+    if (recoveryKey == address(0)) throw;
     recoveryKeys[identity] = recoveryKey;
     RecoveryChanged(identity, recoveryKey, msg.sender);
   }
