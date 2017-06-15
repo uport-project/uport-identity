@@ -37,5 +37,8 @@
     "truffle": "3.1.2",
     "truffle-contract": "^1.1.10",
     "truffle-hdwallet-provider": "0.0.3"
+  },
+  "dependencies": {
+    "eth-lightwallet": "^2.5.4"
   }
 }
