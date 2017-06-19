@@ -31,9 +31,6 @@ contract RecoveryManager {
         address[] delegateAddresses; // needed for iteration of mapping
     }
     
-    //Create RecoveryManager
-    function RecoveryManager () {}
-    
     //Proxy address => RecoveryIdentity
     mapping (address => RecoveryIdentity) recoveryIdentities;
     
