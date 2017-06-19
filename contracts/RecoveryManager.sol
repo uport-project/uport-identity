@@ -25,7 +25,6 @@ contract RecoveryManager {
     }
     
     struct RecoveryIdentity {
-        bool exists;
         uint neededSignatures;
         IdentityManager identityManager;
         mapping (address => Delegate)  delegates;
@@ -46,7 +45,7 @@ contract RecoveryManager {
     
     function createRecovery(address identityManager, address identity, address[] _delegates) {
         RecoveryIdentity recovIden = recoveryIdentities[identity];
-        if (recovIden.exists) throw; //overwrite protection
+        if (recovIden.neededSignatures > 0) throw; //overwrite protection
         
         recovIden.exists = true;
         recovIden.neededSignatures = _delegates.length/2 + 1;
