@@ -75,7 +75,7 @@ contract RecoveryManager {
     
     //HELPER FUNCTIONS
     
-    function getAddresses(address identity) constant returns (address[]) {
+    function getDelegates(address identity) constant returns (address[]) {
         return recoveryIdentities[identity].delegateAddresses; 
     }
     
