@@ -12,40 +12,30 @@ function getRanomNumber() {
   return Math.floor(Math.random() * (10000 - 1)) + 1;
 }
 
-function testProxyTx(testReg, proxy, fromAccount, shouldEqual) {
-  return new Promise((resolve, reject) => {
-    let testNum = getRanomNumber()
-    // Encode the transaction to send to the proxy contract
-    let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
-    // Send forward request from the owner
-    proxy.forward(testReg.address, 0, '0x' + data, {from: fromAccount}).then(() => {
-      return testReg.registry.call(proxy.address)
-    }).then(regData => {
-      if (shouldEqual) {
-        assert.equal(regData.toNumber(), testNum)
-      } else {
-        assert.notEqual(regData.toNumber(), testNum)
-      }
-      resolve()
-    })
-  })
+async function testProxyTx(testReg, proxy, fromAccount, shouldEqual) {
+  let testNum = getRanomNumber()
+  // Encode the transaction to send to the proxy contract
+  let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
+  // Send forward request from the owner
+  await proxy.forward(testReg.address, 0, '0x' + data, {from: fromAccount})
+  let regData = await testReg.registry.call(proxy.address)
+  if (shouldEqual) {
+    assert.equal(regData.toNumber(), testNum)
+  } else {
+    assert.notEqual(regData.toNumber(), testNum)
+  }
 }
 
-function testProxyLongTx(testReg, proxy, fromAccount) {
-  return new Promise((resolve, reject) => {
-    let testNum = getRanomNumber()
-    // Encode the transaction to send to the proxy contract
-    let data = lightwallet.txutils._encodeFunctionTxData('reallyLongFunctionName',
-                                                         ['uint256', 'address', 'string', 'uint256'],
-                                                         [testNum, fromAccount, 'testStrThatIsQuiteLong', testNum])
-    // Send forward request from the owner
-    proxy.forward(testReg.address, 0, '0x' + data, {from: fromAccount}).then(() => {
-      return testReg.registry.call(fromAccount)
-    }).then(regData => {
-      assert.equal(regData.toNumber(), testNum)
-      resolve()
-    })
-  })
+async function testProxyLongTx(testReg, proxy, fromAccount) {
+  let testNum = getRanomNumber()
+  // Encode the transaction to send to the proxy contract
+  let data = lightwallet.txutils._encodeFunctionTxData('reallyLongFunctionName',
+                                                       ['uint256', 'address', 'string', 'uint256'],
+                                                       [testNum, fromAccount, 'testStrThatIsQuiteLong', testNum])
+  // Send forward request from the owner
+  await proxy.forward(testReg.address, 0, '0x' + data, {from: fromAccount})
+  let regData = await testReg.registry.call(fromAccount)
+  assert.equal(regData.toNumber(), testNum)
 }
 
 contract('Proxy', (accounts) => {
@@ -55,192 +45,155 @@ contract('Proxy', (accounts) => {
   let ownerProxy2 = accounts[1]
   let testReg
 
-  before((done) => {
+  before(async function() {
     // Truffle deploys contracts with accounts[0]
-    Proxy.new({from: ownerProxy1}).then(instance => {
-      proxy1 = instance
-      return Proxy.new({from: ownerProxy2})
-    }).then(instance => {
-      proxy2 = instance
-      return TestRegistry.deployed()
-    }).then(instance => {
-      testReg = instance
-      done()
-    })
+    proxy1 = await Proxy.new({from: ownerProxy1})
+    proxy2 = await Proxy.new({from: ownerProxy2})
+    testReg = await TestRegistry.deployed()
   })
 
-  it('Owner can send transaction', (done) => {
-    testProxyTx(testReg, proxy1, ownerProxy1, true).then(() => {
-      return testProxyTx(testReg, proxy2, ownerProxy2, true)
-    }).then(() => {
-      done()
-    }).catch(done)
+  it('Owner can send transaction', async function() {
+    await testProxyTx(testReg, proxy1, ownerProxy1, true)
+    await testProxyTx(testReg, proxy2, ownerProxy2, true)
   })
 
-  it('Non-owner can not send transaction', (done) => {
-    testProxyTx(testReg, proxy1, ownerProxy2, false).then(() => {
-      return testProxyTx(testReg, proxy2, ownerProxy1, false)
-    }).then(() => {
-      done()
-    }).catch(done)
+  it('Non-owner can not send transaction', async function() {
+    await testProxyTx(testReg, proxy1, ownerProxy2, false)
+    await testProxyTx(testReg, proxy2, ownerProxy1, false)
   })
 
-  it('Transactions with a lot of data works', (done) => {
-    testProxyLongTx(testReg, proxy1, ownerProxy1, true).then(() => {
-      return testProxyTx(testReg, proxy2, ownerProxy2, true)
-    }).then(() => {
-      done()
-    }).catch(done)
+  it('Transactions with a lot of data works', async function() {
+    await testProxyLongTx(testReg, proxy1, ownerProxy1, true)
+    await testProxyTx(testReg, proxy2, ownerProxy2, true)
   })
 
-  it('Emits event on received transaction', (done) => {
+  it('Emits event on received transaction', async function() {
     let ethToSend = 10
-    web3.eth.sendTransactionAsync({
+    let txHash = await web3.eth.sendTransactionAsync({
       from: accounts[1],
       to: proxy1.address,
       value: web3.toWei(ethToSend, 'ether')
-    }).then(txHash => {
-      return web3.eth.getTransactionReceiptAsync(txHash)
-    }).then(result => {
-      let log = result.logs[0]
-      // the abi for the Received event
-      let eventAbi = proxy1.abi[6]
-      let event = ethJSABI.decodeEvent(eventAbi, log.data, log.topics) // [log.topics[1], log.topics[0]])
-      assert.equal(event.sender, accounts[1])
-      assert.equal(web3.fromWei(event.value, 'ether'), ethToSend)
-      return web3.eth.getBalanceAsync(proxy1.address)
-    }).then(balance => {
-      assert.equal(web3.fromWei(balance, 'ether').toNumber(), ethToSend, 'Balance should be updated')
-      done()
     })
+    let receipt = await web3.eth.getTransactionReceiptAsync(txHash)
+    let log = receipt.logs[0]
+    // the abi for the Received event
+    let eventAbi = proxy1.abi[6]
+    let event = ethJSABI.decodeEvent(eventAbi, log.data, log.topics) // [log.topics[1], log.topics[0]])
+    assert.equal(event.sender, accounts[1])
+    assert.equal(web3.fromWei(event.value, 'ether'), ethToSend)
+    let balance = await web3.eth.getBalanceAsync(proxy1.address)
+    assert.equal(web3.fromWei(balance, 'ether').toNumber(), ethToSend, 'Balance should be updated')
   })
 
-  it('Event emitted on tx from proxy', (done) => {
+  it('Event emitted on tx from proxy', async function() {
     // Encode the transaction to send to the proxy contract
     let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
     // Send forward request from the owner
-    proxy1.forward(testReg.address, 0, data, {from: accounts[0]}).then(tx => {
-      let log=tx.logs[0]
-      assert.equal(log.event, 'Forwarded', 'Should emit a "Forwarded" event');
-      assert.equal(log.args.destination, testReg.address)
-      assert.equal(log.args.value.toNumber(), 0)
-      assert.equal(log.args.data, data)
-      done()
-    })
+    let tx = await proxy1.forward(testReg.address, 0, data, {from: accounts[0]})
+    let log = tx.logs[0]
+    assert.equal(log.event, 'Forwarded', 'Should emit a "Forwarded" event');
+    assert.equal(log.args.destination, testReg.address)
+    assert.equal(log.args.value.toNumber(), 0)
+    assert.equal(log.args.data, data)
   })
 
-  it('Should send ether correctly', (done) => {
+  it('Should send ether correctly', async function() {
     let initialBalance
     let ethToSend = 2
     let receiver = accounts[3]
-    web3.eth.getBalanceAsync(receiver).then(balance => {
-      initialBalance = web3.fromWei(balance, 'ether').toNumber()
-      return proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
-    }).then(tx => {
-      let log=tx.logs[0]
-      assert.equal(web3.fromWei(log.args.value, 'ether').toNumber(), ethToSend, 'Event should show correct amount of ether')
-      return web3.eth.getBalanceAsync(receiver)
-    }).then(balance => {
-      let newBalance = initialBalance + ethToSend
-      assert.equal(web3.fromWei(balance, 'ether').toNumber(), newBalance, 'Balance should be updated')
-      done()
-    })
+    let balance = await web3.eth.getBalanceAsync(receiver)
+    initialBalance = web3.fromWei(balance, 'ether').toNumber()
+    let tx = await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
+    let log = tx.logs[0]
+    assert.equal(web3.fromWei(log.args.value, 'ether').toNumber(), ethToSend, 'Event should show correct amount of ether')
+
+    balance = await web3.eth.getBalanceAsync(receiver)
+    let newBalance = initialBalance + ethToSend
+    assert.equal(web3.fromWei(balance, 'ether').toNumber(), newBalance, 'Balance should be updated')
   })
 
-  it('Should send small amount of ether correctly', (done) => {
+  it('Should send small amount of ether correctly', async function() {
     let initialBalance
     let weiToSend = 1
     let receiver = accounts[4]
-    web3.eth.getBalanceAsync(receiver).then(balance => {
-      initialBalance = balance
-      return proxy1.forward(receiver, weiToSend, '0x0', {from: ownerProxy1})
-    }).then(tx => {
-      let log=tx.logs[0]
-      assert.equal(log.args.value.toNumber(), weiToSend, 'Event should show correct amount of ether')
-      return web3.eth.getBalanceAsync(receiver)
-    }).then(balance => {
-      let newBalance = initialBalance.plus(weiToSend)
-      assert.isTrue(balance.equals(newBalance), 'Balance should be updated')
-      done()
-    })
+    let balance = await web3.eth.getBalanceAsync(receiver)
+    initialBalance = balance
+    let tx = await proxy1.forward(receiver, weiToSend, '0x0', {from: ownerProxy1})
+    let log = tx.logs[0]
+    assert.equal(log.args.value.toNumber(), weiToSend, 'Event should show correct amount of ether')
+
+    balance = await web3.eth.getBalanceAsync(receiver)
+    let newBalance = initialBalance.plus(weiToSend)
+    assert.isTrue(balance.equals(newBalance), 'Balance should be updated')
   })
 
-  it('Should throw if sending to much ether', (done) => {
+  it('Should throw if sending to much ether', async function() {
     let ethToSend = 20
     let receiver = accounts[3]
     let proxyBalance
-    web3.eth.getBalanceAsync(proxy1.address).then(balance => {
-      proxyBalance = web3.fromWei(balance, 'ether').toNumber()
-      return proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
-    }).catch(e => {
+    let balance = await web3.eth.getBalanceAsync(proxy1.address)
+    proxyBalance = web3.fromWei(balance, 'ether').toNumber()
+
+    try {
+      await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
+    } catch(e) {
       errorThrown = true
-    }).then(() => {
-      assert.isTrue(errorThrown, 'An error should have been thrown')
-      return web3.eth.getBalanceAsync(proxy1.address)
-    }).then(balance => {
-      assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
-      done()
-    })
+    }
+    assert.isTrue(errorThrown, 'An error should have been thrown')
+    balance = await web3.eth.getBalanceAsync(proxy1.address)
+    assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
 
-  it('Should throw if sending negative ether', (done) => {
+  it('Should throw if sending negative ether', async function() {
     let ethToSend = -2
     let receiver = accounts[3]
     let proxyBalance
-    web3.eth.getBalanceAsync(proxy1.address).then(balance => {
-      proxyBalance = web3.fromWei(balance, 'ether').toNumber()
-      return proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
-    }).catch(e => {
+    let balance = await web3.eth.getBalanceAsync(proxy1.address)
+    proxyBalance = web3.fromWei(balance, 'ether').toNumber()
+    try {
+      await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
+    } catch(e) {
       errorThrown = true
-    }).then(() => {
-      assert.isTrue(errorThrown, 'An error should have been thrown')
-      return web3.eth.getBalanceAsync(proxy1.address)
-    }).then(balance => {
-      assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
-      done()
-    })
+    }
+    assert.isTrue(errorThrown, 'An error should have been thrown')
+    balance = await web3.eth.getBalanceAsync(proxy1.address)
+    assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
 
-  it('Should throw if sending zero ether', (done) => {
+  it('Should throw if sending zero ether', async function() {
     let ethToSend = -2
     let receiver = accounts[3]
     let proxyBalance
-    web3.eth.getBalanceAsync(proxy1.address).then(balance => {
-      proxyBalance = web3.fromWei(balance, 'ether').toNumber()
-      return proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
-    }).catch(e => {
+    let balance = await web3.eth.getBalanceAsync(proxy1.address)
+    proxyBalance = web3.fromWei(balance, 'ether').toNumber()
+    try {
+      await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
+    } catch(e) {
       errorThrown = true
-    }).then(() => {
-      assert.isTrue(errorThrown, 'An error should have been thrown')
-      return web3.eth.getBalanceAsync(proxy1.address)
-    }).then(balance => {
-      assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
-      done()
-    })
+    }
+    assert.isTrue(errorThrown, 'An error should have been thrown')
+    bal = await web3.eth.getBalanceAsync(proxy1.address)
+    assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
 
-  it('Should be able to empty out proxy from ether', (done) => {
+  it('Should be able to empty out proxy from ether', async function() {
     let initialBalance
     let receiver = accounts[5]
-    web3.eth.getBalanceAsync(proxy1.address).then(balance => {
-      return proxy1.forward(receiver, balance, '0x0', {from: ownerProxy1})
-    }).then(tx => {
-      return web3.eth.getBalanceAsync(proxy1.address)
-    }).then(balance => {
-      assert.isTrue(balance.isZero(), 'Balance should be zero')
-      done()
-    })
+    let balance = await web3.eth.getBalanceAsync(proxy1.address)
+    let tx = await proxy1.forward(receiver, balance, '0x0', {from: ownerProxy1})
+    balance = await web3.eth.getBalanceAsync(proxy1.address)
+    assert.isTrue(balance.isZero(), 'Balance should be zero')
   })
 
-  it('Should throw if function call fails', (done) => {
+  it('Should throw if function call fails', async function() {
     let errorThrown = false
     // Encode the transaction to send to the proxy contract
     let data = lightwallet.txutils._encodeFunctionTxData('testThrow', [], [])
-    proxy1.forward(testReg.address, 0, '0x' + data, {from: accounts[0]}).catch(e => {
+    try {
+      await proxy1.forward(testReg.address, 0, '0x' + data, {from: accounts[0]})
+    } catch(e) {
       errorThrown = true
-    }).then(() => {
-      assert.isTrue(errorThrown, 'An error should have been thrown')
-      done()
-    }).catch(done)
+    }
+    assert.isTrue(errorThrown, 'An error should have been thrown')
   })
 })

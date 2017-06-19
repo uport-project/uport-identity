@@ -1,22 +1,7 @@
 const IdentityFactoryWithRecoveryKey = artifacts.require('IdentityFactoryWithRecoveryKey')
 const Proxy = artifacts.require('Proxy')
 const RecoverableController = artifacts.require('RecoverableController')
-const Promise = require('bluebird')
-web3.eth = Promise.promisifyAll(web3.eth)
-
-function compareCode(addr1, addr2) {
-  let c1, c2
-  return new Promise((resolve, reject) => {
-    web3.eth.getCodeAsync(addr1).then(code => {
-      c1 = code
-      return web3.eth.getCodeAsync(addr2)
-    }).then(code => {
-      c2 = code
-      assert.equal(c1, c2, 'the deployed contract has incorrect code')
-      resolve()
-    })
-  })
-}
+const compareCode = require('./compareCode')
 
 contract('IdentityFactoryWithRecoveryKey', (accounts) => {
   let proxy
@@ -34,58 +19,42 @@ contract('IdentityFactoryWithRecoveryKey', (accounts) => {
   let shortTimeLock = 2
   let longTimeLock = 7
 
-  before((done) => {
+  before(async function() {
     // Truffle deploys contracts with accounts[0]
     user1 = accounts[0]
     nobody = accounts[1] // has no authority
     recoveryKey = accounts[4]
 
-    IdentityFactoryWithRecoveryKey.deployed().then((instance) => {
-      identityFactoryWithRecoveryKey = instance
-      return Proxy.new({from: accounts[0]})
-    }).then((instance) => {
-      deployedProxy = instance
-      return RecoverableController.new({from: accounts[0]})
-    }).then((instance) => {
-      deployedRecoverableController = instance
-      done()
-    })
+    identityFactoryWithRecoveryKey = await IdentityFactoryWithRecoveryKey.deployed()
+    deployedProxy = await Proxy.new({from: accounts[0]})
+    deployedRecoverableController = await RecoverableController.new({from: accounts[0]})
   })
 
-  it('Correctly creates proxy and controller', (done) => {
-    identityFactoryWithRecoveryKey.CreateProxyWithControllerAndRecoveryKey(user1, recoveryKey, longTimeLock, shortTimeLock, {from: nobody})
-    .then( (tx) => {
-      let log=tx.logs[0];
-      assert.equal(log.event,"IdentityCreated","wrong event");
-      proxyAddress = log.args.proxy
-      recoverableControllerAddress = log.args.controller
-      recoveryQuorumAddress = log.args.recoveryQuorum
+  it('Correctly creates proxy and controller', async function() {
+    let tx = await identityFactoryWithRecoveryKey.CreateProxyWithControllerAndRecoveryKey(user1, recoveryKey, longTimeLock, shortTimeLock, {from: nobody})
+    let log=tx.logs[0];
+    assert.equal(log.event,"IdentityCreated","wrong event");
+    proxyAddress = log.args.proxy
+    recoverableControllerAddress = log.args.controller
+    recoveryQuorumAddress = log.args.recoveryQuorum
 
-      proxy = Proxy.at(proxyAddress)
-      recoverableController = RecoverableController.at(recoverableControllerAddress)
-      return compareCode(proxyAddress, deployedProxy.address)
-    }).then(() => {
-      return compareCode(recoverableControllerAddress, deployedRecoverableController.address)
-    }).then(done).catch(done)
+    proxy = Proxy.at(proxyAddress)
+    recoverableController = RecoverableController.at(recoverableControllerAddress)
+    await compareCode(proxyAddress, deployedProxy.address)
+    await compareCode(recoverableControllerAddress, deployedRecoverableController.address)
   })
 
-  it('Created proxy should have correct state', (done) => {
-    proxy.owner.call().then((createdControllerAddress) => {
-      assert.equal(createdControllerAddress, recoverableController.address)
-      done()
-    }).catch(done)
+  it('Created proxy should have correct state', async function() {
+    let createdControllerAddress = await proxy.owner.call()
+    assert.equal(createdControllerAddress, recoverableController.address)
   })
 
-  it('Created controller should have correct state', (done) => {
-    recoverableController.proxy().then((_proxyAddress) => {
-      assert.equal(_proxyAddress, proxy.address)
-      return recoverableController.userKey()
-    }).then((userKey) => {
-      assert.equal(userKey, user1)
-      return recoverableController.recoveryKey()
-    }).then((rk) => {
-      assert.equal(rk, recoveryKey)
-      done()
-    }).catch(done)
+  it('Created controller should have correct state', async function() {
+    let _proxyAddress = await recoverableController.proxy()
+    assert.equal(_proxyAddress, proxy.address)
+    let userKey = await recoverableController.userKey()
+    assert.equal(userKey, user1)
+    let rk = await recoverableController.recoveryKey()
+    assert.equal(rk, recoveryKey)
   })
 })
