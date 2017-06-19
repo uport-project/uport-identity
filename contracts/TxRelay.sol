@@ -32,10 +32,11 @@ contract TxRelay {
    */
   function relayMetaTx(uint8 sigV, bytes32 sigR, bytes32 sigS,
                        address destination, bytes data,
-                       address claimedSender) {
+                       address claimedSender, uint blockTimeout) {
+    if (block.number > blockTimeout) throw;
 
     // relay :: nonce :: destination :: data :: relayer
-    bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
+    bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender, blockTimeout);
     address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
     nonce[claimedSender]++;
@@ -48,7 +49,6 @@ contract TxRelay {
     //In the future, this should output an event? This would have some overhead.
     if (!destination.call(data)) {}
   }
-
 
   /*
    * @dev Compares the first arg of a function call to an address
@@ -71,5 +71,10 @@ contract TxRelay {
  */
   function getNonce(address add) constant returns (uint) {
     return nonce[add];
+  }
+
+  //Testing; I am a fool and can't get web3 to cooperate.
+  function getBlock() constant returns (uint) {
+    return block.number;
   }
 }
