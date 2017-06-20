@@ -13,15 +13,22 @@ function getRanomNumber() {
 }
 
 async function testProxyTx(testReg, proxy, fromAccount, shouldEqual) {
+  let errorThrown = false
   let testNum = getRanomNumber()
   // Encode the transaction to send to the proxy contract
   let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
   // Send forward request from the owner
-  await proxy.forward(testReg.address, 0, '0x' + data, {from: fromAccount})
+  try {
+    await proxy.forward(testReg.address, 0, '0x' + data, {from: fromAccount})
+  } catch (e) {
+    errorThrown = true
+  }
   let regData = await testReg.registry.call(proxy.address)
   if (shouldEqual) {
+    assert.isFalse(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
+    assert.isTrue(errorThrown, 'An error should have been thrown')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -128,6 +135,7 @@ contract('Proxy', (accounts) => {
   })
 
   it('Should throw if sending to much ether', async function() {
+    let errorThrown = false
     let ethToSend = 20
     let receiver = accounts[3]
     let proxyBalance
@@ -145,6 +153,7 @@ contract('Proxy', (accounts) => {
   })
 
   it('Should throw if sending negative ether', async function() {
+    let errorThrown = false
     let ethToSend = -2
     let receiver = accounts[3]
     let proxyBalance
@@ -161,6 +170,7 @@ contract('Proxy', (accounts) => {
   })
 
   it('Should throw if sending zero ether', async function() {
+    let errorThrown = false
     let ethToSend = -2
     let receiver = accounts[3]
     let proxyBalance

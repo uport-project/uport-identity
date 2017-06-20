@@ -15,7 +15,12 @@ contract('Owned', (accounts) => {
   })
 
   it('Non-owner can not change owner', async function() {
-    await owned.transfer(accounts[1], {from: accounts[1]})
+    try {
+      await owned.transfer(accounts[1], {from: accounts[1]})
+    } catch (e) {
+      errorThrown = true
+    }
+    assert.isTrue(errorThrown, 'An error should have been thrown')
     let isOwner = await owned.isOwner.call(accounts[1])
     assert.isFalse(isOwner, 'Owner should not be changed')
   })
