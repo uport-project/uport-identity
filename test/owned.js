@@ -30,4 +30,10 @@ contract('Owned', (accounts) => {
     let isOwner = await owned.isOwner.call(accounts[1])
     assert.isTrue(isOwner, 'Owner should be changed')
   })
+
+  it('Owner can not change owner to proxy address', async function() {
+    await owned.transfer(owned.address, {from: accounts[1]})
+    let isOwner = await owned.isOwner.call(owned.address)
+    assert.isFalse(isOwner, 'Owner should not be changed')
+  })
 })

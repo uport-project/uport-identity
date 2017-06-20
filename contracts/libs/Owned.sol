@@ -13,5 +13,9 @@ contract Owned {
 
   function isOwner(address addr) public returns(bool) { return addr == owner; }
 
-  function transfer(address _owner) onlyOwner { owner = _owner; }
+  function transfer(address _owner) onlyOwner {
+    if (_owner != address(this)) {
+      owner = _owner;
+    }
+  }
 }
