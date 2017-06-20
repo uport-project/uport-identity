@@ -4,7 +4,7 @@ import "./Proxy.sol";
 contract RecoverableController {
   uint    public version;
   Proxy   public proxy;
-  
+
   address public userKey;
   address public proposedUserKey;
   uint    public proposedUserKeyPendingUntil;
@@ -73,7 +73,7 @@ contract RecoverableController {
       RecoveryEvent("changeUserKey", msg.sender);
     }
   }
-  
+
   function changeRecoveryFromRecovery(address _recoveryKey) onlyRecoveryKey{ recoveryKey = _recoveryKey; }
   function changeUserKeyFromRecovery(address _userKey) onlyRecoveryKey{
     delete proposedUserKey;

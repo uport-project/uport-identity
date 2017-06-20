@@ -29,6 +29,9 @@
   },
   "homepage": "https://github.com/uport-project/uport-identity#readme",
   "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
     "bluebird": "^3.5.0",
     "eth-signer": "^0.2.2",
     "ethereumjs-testrpc": "^3.0.3",
