@@ -26,18 +26,18 @@ contract IdentityManager {
     address indexed identity,
     address indexed recoveryKey,
     address instigator);
-    
+
   event MigrationInitiated(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
-    
+
   event MigrationCanceled(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
-    
-   event MigrationFinalized(
+
+  event MigrationFinalized(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
@@ -48,22 +48,22 @@ contract IdentityManager {
   mapping(address => uint) migrationInitiated;
   mapping(address => address) migrationNewAddress;
 
-  modifier onlyOwner(address identity) { 
+  modifier onlyOwner(address identity) {
     if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + userTimeLock) <= now ) _ ;
-    else throw; 
+    else throw;
   }
 
-  modifier onlyOlderOwner(address identity) { 
+  modifier onlyOlderOwner(address identity) {
     if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + adminTimeLock) <= now) _ ;
     else throw;
   }
 
-  modifier onlyRecovery(address identity) { 
+  modifier onlyRecovery(address identity) {
     if (recoveryKeys[identity] == msg.sender) _ ;
     else throw;
   }
 
-  modifier rateLimited(Proxy identity) {
+  modifier rateLimited(address identity) {
     if (limiter[identity][msg.sender] < (now - adminRate)) {
       limiter[identity][msg.sender] = now;
       _ ;
@@ -111,8 +111,8 @@ contract IdentityManager {
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
-  // a recovery key owner can add a new device with 1 days wait time
-  function addOwnerForRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited(identity) {
+  // a recovery key owner can add a new device with 'adminRate' wait time
+  function addOwnerFromRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited(identity) {
     if (owners[identity][newOwner] > 0) throw;
     owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
@@ -124,7 +124,7 @@ contract IdentityManager {
     OwnerRemoved(identity, owner, msg.sender);
   }
 
-  // an owner can add change the recoverykey whenever they want to
+  // an owner can change the recoverykey whenever they want to
   function changeRecovery(Proxy identity, address recoveryKey) onlyOlderOwner(identity) rateLimited(identity) {
     if (recoveryKey == address(0)) throw;
     recoveryKeys[identity] = recoveryKey;
@@ -148,7 +148,7 @@ contract IdentityManager {
 
   // owner needs to finalize migration once adminTimeLock time has passed
   // WARNING: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
-  // Not doing so risks the proxy becoming stuck. 
+  // Not doing so risks the proxy becoming stuck.
   function finalizeMigration(Proxy identity) onlyOlderOwner(identity) {
     if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
       address newIdManager = migrationNewAddress[identity];

@@ -78,9 +78,8 @@ contract('IdentityManager', (accounts) => {
                    nobody,
                    'Creator is set in event')
 
-    // TODO find out why this all of a sudden doesn't work
-    //   return compareCode(log.args.identity, deployedProxy.address)
-    // }).then(() => {
+      return compareCode(log.args.identity, deployedProxy.address)
+    }).then(() => {
       return Proxy.at(log.args.identity).owner.call()
     }).then((proxyOwner) => {
       assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
@@ -282,7 +281,7 @@ contract('IdentityManager', (accounts) => {
 
     describe('new owner added by recoveryKey', () => {
       beforeEach(done => {
-        identityManager.addOwnerForRecovery(proxy.address, user2, {from: recoveryKey}).then((tx) => {
+        identityManager.addOwnerFromRecovery(proxy.address, user2, {from: recoveryKey}).then((tx) => {
           // console.log(tx)
           done()
         }).catch(error => {
@@ -358,7 +357,7 @@ contract('IdentityManager', (accounts) => {
           })
         })
 
-        it('can remove other owner yet', (done) => {
+        it('can remove other owner', (done) => {
           identityManager.removeOwner(proxy.address, user1, {from: user2}).then(tx => {
             const log = tx.logs[0]
             assert.equal(log.args.owner,
@@ -374,7 +373,7 @@ contract('IdentityManager', (accounts) => {
           })
         })
 
-        it('can change recoveryKey yet', (done) => {
+        it('can change recoveryKey', (done) => {
           identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user2}).then(tx => {
             const log = tx.logs[0]
             assert.equal(log.args.recoveryKey,
@@ -411,10 +410,7 @@ contract('IdentityManager', (accounts) => {
         assert.equal(log.args.owner, user2, 'wrong owner added')
         assert.equal(log.args.instigator, user1, 'wrong initiator')
         done()
-      }).catch(e => {
-        console.log(e)
-        done()
-      })
+      }).catch(done)
     })
 
     it('correct keys can start transfer', (done) => {
