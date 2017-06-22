@@ -1,0 +1,3 @@
+node_modules
+contracts/misc/Migrations.sol
+contracts/RecoveryQuorum.sol

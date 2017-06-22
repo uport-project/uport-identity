@@ -1,6 +1,7 @@
 pragma solidity 0.4.8;
 import "./RecoverableController.sol";
 
+
 contract IdentityFactoryWithRecoveryKey {
     event IdentityCreated(
         address indexed userKey,
@@ -12,7 +13,7 @@ contract IdentityFactoryWithRecoveryKey {
     mapping(address => address) public recoveryToProxy;
 
     //cost ~2.4M gas
-    function CreateProxyWithControllerAndRecoveryKey(address userKey, address _recoveryKey, uint longTimeLock, uint shortTimeLock) {
+    function createProxyWithControllerAndRecoveryKey(address userKey, address _recoveryKey, uint longTimeLock, uint shortTimeLock) {
         Proxy proxy = new Proxy();
         RecoverableController controller = new RecoverableController(proxy, userKey, longTimeLock, shortTimeLock);
         proxy.transfer(controller);
