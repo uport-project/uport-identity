@@ -312,7 +312,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: user2})
       } catch(error) {
-        assert.isTrue(error.toString().indexOf("invalid JUMP") != -1, 'Should have thrown, did not')
+        assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown an error here')
@@ -323,7 +323,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: nobody})
       } catch(error) {
-        assert.isTrue(error.toString().indexOf("invalid JUMP") != -1, 'Should have thrown, did not')
+        assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown an error here')
@@ -368,7 +368,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.cancelMigration(proxy.address, {from: nobody})
       } catch(error) {
-        assert.isTrue(error.toString().indexOf("invalid JUMP") != -1, 'Should have thrown, did not')
+        assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown error')
@@ -380,7 +380,7 @@ contract('IdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(proxy.address, {from: nobody})
       } catch(error) {
-        assert.isTrue(error.toString().indexOf("invalid JUMP") != -1, 'should have thrown, did not')
+        assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'non-owner should not be able to finalize')
@@ -388,7 +388,7 @@ contract('IdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(proxy.address, {from: user2})
       } catch(error) {
-        assert.isTrue(error.toString().indexOf("invalid JUMP") != -1, 'should have thrown, did not')
+        assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'young owner should not be able to finalize')
