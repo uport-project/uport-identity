@@ -44,7 +44,7 @@ contract('IdentityFactory', (accounts) => {
   })
 
   it('Correctly creates proxy, controller, and recovery contracts', async function() {
-    let tx = await identityFactory.CreateProxyWithControllerAndRecovery(user1, delegates, longTimeLock, shortTimeLock, {from: nobody})
+    let tx = await identityFactory.createProxyWithControllerAndRecovery(user1, delegates, longTimeLock, shortTimeLock, {from: nobody})
     let log=tx.logs[0];
     assert.equal(log.event,"IdentityCreated","wrong event");
     proxyAddress = log.args.proxy
