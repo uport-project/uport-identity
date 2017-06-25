@@ -108,7 +108,7 @@ contract MetaIdentityManager {
   }
 
   // Primary forward function
-  function forwardTo(address sender, Proxy identity, address destination, uint value, bytes data) payable onlyRelay onlyOwner(identity, sender)  {
+  function forwardTo(address sender, Proxy identity, address destination, uint value, bytes data) onlyRelay onlyOwner(identity, sender)  {
     identity.forward(destination, value, data);
   }
 

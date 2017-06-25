@@ -116,6 +116,24 @@ contract('RecoverableController', (accounts) => {
     }).catch(done)
   })
 
+
+
+
+  it('Correctly calculates gas price', (done) => { // userkey is currently user2
+      recoverableController.changeUserKeyFromRecovery(user3, {from: admin1}).then(tx => {
+      console.log("gas used: ", tx.receipt.gasUsed)
+      return recoverableController.userKey()
+    }).then((userKey) => {
+      assert.equal(user3, user3, 'New user should immediately take affect')
+      return recoverableController.changeUserKeyFromRecovery(user2, {from: admin1})
+    }).then(tx => {
+
+      console.log("gas used again: ", tx.receipt.gasUsed)
+      done()
+    }).catch(done)
+  })
+
+
   it('Updates userKey as recovery', (done) => { // userkey is currently user2
     recoverableController.changeUserKeyFromRecovery(user3, {from: user2}).then(() => {
       return recoverableController.userKey()

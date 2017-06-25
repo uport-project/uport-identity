@@ -16,11 +16,11 @@ contract TxRelay {
    * @param data The bytes necessary to call the function in the destination contract.
                  Note, the first encoded argument in data must be msg.sender's address
    */
-  function relayTx(address destination, bytes data) payable {
+  function relayTx(address destination, bytes data) {
     if (!checkAddress(data, msg.sender)) throw;
 
     //As no state is updated before, can just throw in the case of a failed call.
-    if (!destination.call.value(msg.value)(data)) throw;
+    if (!destination.call(data)) throw;
   }
 
   /*
@@ -32,22 +32,21 @@ contract TxRelay {
    */
   function relayMetaTx(uint8 sigV, bytes32 sigR, bytes32 sigS,
                        address destination, bytes data,
-                       address claimedSender, uint blockTimeout) {
-    if (block.number > blockTimeout) throw;
+                       address claimedSender) {
 
-    // relay :: nonce :: destination :: data :: relayer
-    bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender, blockTimeout);
+    // relay :: nonce :: destination :: data :: relayer :: blockTimeout
+    bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
     address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
     nonce[claimedSender]++;
 
-    //Validity Checks (if these throw this time, they will always throw)
     if (claimedSender != addressFromSig) throw;
     if (!checkAddress(data, addressFromSig)) throw;
 
-    //Do not throw, as the nonce should still update to protect against replay attacks
-    //In the future, this should output an event? This would have some overhead.
-    if (!destination.call(data)) {}
+    if (!destination.call(data)) {
+      //Output an event?
+      //Do not throw; want nonce to still update
+    }
   }
 
   /*
@@ -71,10 +70,5 @@ contract TxRelay {
  */
   function getNonce(address add) constant returns (uint) {
     return nonce[add];
-  }
-
-  //Testing; I am a fool and can't get web3 to cooperate.
-  function getBlock() constant returns (uint) {
-    return block.number;
   }
 }

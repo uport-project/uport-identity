@@ -2,6 +2,7 @@ const lightwallet = require('eth-lightwallet')
 const evm_increaseTime = require('./evmIncreaseTime.js')
 const MetaTxRelay = artifacts.require('TxRelay')
 const MetaIdentityManager = artifacts.require('MetaIdentityManager')
+const IdentityManager = artifacts.require('IdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const Promise = require('bluebird')
@@ -9,7 +10,35 @@ const compareCode = require('./compareCode')
 const solsha3 = require('solidity-sha3').default
 web3.eth = Promise.promisifyAll(web3.eth)
 
-let zero = "0000000000000000000000000000000000000000000000000000000000000000"
+
+
+const LOG_NUMBER_1 = 1234
+const LOG_NUMBER_2 = 2345
+
+const userTimeLock = 100;
+const adminTimeLock = 1000;
+const adminRate = 200;
+
+const zero = "0000000000000000000000000000000000000000000000000000000000000000"
+
+function enc(funName, types, params) {
+  return '0x' + lightwallet.txutils._encodeFunctionTxData(funName, types, params)
+}
+
+//Returns random number in [1, 99]
+function getRandomNumber() { //Thanks Oed :~)
+  return Math.floor(Math.random() * (100 - 1)) + 1;
+}
+
+//Returns a random hex string
+function getRandomHexString(length) {
+  var randStr = "";
+  var hexChar = "0123456789abcdef"
+  for (var i = 0; i < length; i++) {
+    randStr += hexChar.charAt(Math.floor(Math.random() * hexChar.length))
+  }
+  return randStr
+}
 
 //Left packs a (hex) string
 function pad(n) {
@@ -26,7 +55,7 @@ function pad(n) {
   }
 }
 
-function signPayload(relayContract, signingAddr, sendingAddress, destination, numBlocks,
+function signPayload(relayContract, signingAddr, sendingAddress, destination,
                     functionName, functionTypes, functionParams, lw, keyFromPw) {
     return new Promise(
         function (resolve, reject) {
@@ -45,36 +74,22 @@ function signPayload(relayContract, signingAddr, sendingAddress, destination, nu
 
             relayContract.getNonce.call(signingAddr).then(currNonce => {
               nonce = currNonce
-              return relayContract.getBlock.call()
-            }).then(currBlock => {
-              //console.log("Current Block:", currBlock)
-              blockTimeout = currBlock.plus(numBlocks)
-              //console.log("Block Timeout:", blockTimeout)
+
               //Tight packing, as Solidity sha3 does
               hashInput = relayContract.address + pad(nonce.toString('16')).slice(2)
                           + destination.slice(2) + data.slice(2) + sendingAddress.slice(2)
-                          + pad(blockTimeout.toString('16')).slice(2)
               hash = solsha3(hashInput)
               sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signingAddr)
               retVal.r = '0x'+sig.r.toString('hex')
               retVal.s = '0x'+sig.s.toString('hex')
               retVal.v = sig.v //Q: Why is this not converted to hex?
               retVal.data = data
-              retVal.blockTimeout = blockTimeout.toString()
               retVal.hash = hash
               retVal.nonce = nonce
               resolve(retVal)
             })
     })
 }
-
-
-const LOG_NUMBER_1 = 1234
-const LOG_NUMBER_2 = 2345
-
-const userTimeLock = 100;
-const adminTimeLock = 1000;
-const adminRate = 200;
 
 contract('IdentityManagerMetaTx', (accounts) => {
   let proxy
@@ -93,6 +108,15 @@ contract('IdentityManagerMetaTx', (accounts) => {
 
   let lw
   let keyFromPw
+
+  let data
+  let types
+  let params
+  let newData
+  let res
+  let regData
+  let p
+  let errorThrown = false;
 
   beforeEach((done) => {
     let seed = "pull rent tower word science patrol economy legal yellow kit frequent fat"
@@ -122,6 +146,7 @@ contract('IdentityManagerMetaTx', (accounts) => {
 
           sender = accounts[0]
           notSender = accounts[1]
+          regularUser = accounts[2]
 
           MetaTxRelay.new().then(instance => {
             txRelay = instance
@@ -145,268 +170,328 @@ contract('IdentityManagerMetaTx', (accounts) => {
       })
   })
 
-  it('Correctly creates Identity', (done) => {
-    let log
-    metaIdentityManager.CreateIdentity(user1, recoveryKey, {from: sender}).then(tx => {
-      log = tx.logs[0]
-      assert.equal(log.event, 'IdentityCreated', 'wrong event')
+  describe("Regular transactions", () => {
+    //Deploy a new Proxy controlled by regular user who does not use meta tx
+    beforeEach(async function() {
+      errorThrown = false
+      metaIdentityManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, txRelay.address)
+      let tx = await metaIdentityManager.CreateIdentity(regularUser, recoveryKey, {from: sender})
+      assert.equal(tx.logs[0].event, 'IdentityCreated', 'Wrong event')
+      proxy = Proxy.at(tx.logs[0].args.identity)
+    })
 
-      assert.equal(log.args.owner,
-                   user1,
-                   'Owner key is set in event')
-      assert.equal(log.args.recoveryKey,
-                   recoveryKey,
-                   'Recovery key is set in event')
-      assert.equal(log.args.creator,
-                   sender,
-                   'Creator is set in event')
-      // Check that the mapping has correct proxy address
+    it('Should forward properly formatted tx', async function() {
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
+      types = ['address', 'address', 'address', 'uint256', 'bytes']
+      params = [regularUser, proxy.address, testReg.address, 0, data]
+      newData = enc('forwardTo', types, params)
 
-      return compareCode(log.args.identity, deployedProxy.address)
-    }).then(() => {
-      Proxy.at(log.args.identity).owner.call().then((proxyOwner) => {
-        assert.equal(proxyOwner, metaIdentityManager.address, 'Proxy owner should be the identity manager')
-        done()
-      }).catch(done)
+      res = await txRelay.checkAddress(newData, regularUser)
+      assert.isTrue(res, "Address is not first parameter")
+
+      await txRelay.relayTx(metaIdentityManager.address, newData, {from: regularUser})
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update properly')
+    })
+
+    it('Should not forward tx from someone lying about address', async function() {
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
+      types = ['address', 'address', 'address', 'uint256', 'bytes']
+      params = [user1, proxy.address, testReg.address, 0, data] //lies about who they are
+      newData = enc('forwardTo', types, params)
+
+      res = await txRelay.checkAddress(newData, regularUser)
+      assert.isFalse(res, "Address is first parameter, should be someone else")
+
+      try {
+        await txRelay.relayTx( metaIdentityManager.address, newData, {from: regularUser})
+      } catch(e) {
+        assert.isFalse(errorThrown, "Sanity check")
+        assert.match(e.message, /invalid JUMP/, "Should have thrown, user lied about address")
+        errorThrown = true
+      }
+
+      assert.isTrue(errorThrown, "Should have thrown, user lied about address")
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), 0, 'Registry updated, should not have')
+    })
+
+    it('Should not forward properly formatted tx with Ether', async function() {
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
+      types = ['address', 'address', 'address', 'uint256', 'bytes']
+      params = [regularUser, proxy.address, testReg.address, 0, data]
+      newData = enc('forwardTo', types, params)
+
+      res = await txRelay.checkAddress(newData, regularUser)
+      assert.isTrue(res, "Address is not first parameter")
+
+      try {
+        await txRelay.relayTx(metaIdentityManager.address, newData, {from: regularUser, value: 100})
+      } catch (e) {
+        assert.isFalse(errorThrown, "Sanity check")
+        assert.match(e.message, /invalid JUMP/, "Should have thrown, cannot forward Ether")
+        errorThrown = true;
+      }
+
+      assert.isTrue(errorThrown, "Should have thrown, cannot forward Ether")
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), 0, 'Registry updated, should not have')
+    })
+
+    it('Should forward tx multiple times', async function() {
+      for (let i = 0; i < 100; i++) {
+        let randNum = getRandomNumber()
+        data = enc('register', ['uint256'], [randNum])
+        types = ['address', 'address', 'address', 'uint256', 'bytes']
+        params = [regularUser, proxy.address, testReg.address, 0, data]
+        newData = enc('forwardTo', types, params)
+
+        await txRelay.relayTx(metaIdentityManager.address, newData, {from: regularUser})
+        regData = await testReg.registry.call(proxy.address)
+        assert.equal(regData.toNumber(), randNum, 'Registry did not update properly')
+      }
     })
   })
 
+  describe("Meta transactions", () => {
+    beforeEach(async function() {
+      errorThrown = false
+    })
 
-  it('Sends transactions initiated by owner', (done) => {
-    // Encode the transaction to send to the Owner contract
-    let p
-    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-    let types = ['address', 'address', 'address', 'uint256', 'bytes']
-    let params = [user1, proxy.address, testReg.address, 0, data]
-    signPayload(txRelay, user1, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw).then(retVal => {
-      p = retVal
-      return txRelay.checkAddress.call(p.data, user1)
-    }).then(res => {
-      assert.isTrue(res, "Address should be included as first input in data")
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, p.blockTimeout, {from: sender})
-    }).then(tx => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction')
-      //Send another transaction, as well as check that nonce is updated.
-      data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
+    it('Should forward properly formatted meta tx', async function() {
+      //Setup data and sign
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
       types = ['address', 'address', 'address', 'uint256', 'bytes']
       params = [user1, proxy.address, testReg.address, 0, data]
-      return signPayload(txRelay, user1, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw)
-    }).then(retVal => {
-      p = retVal
-      assert.equal(p.nonce.toString(), "1", "Nonce did not increment")
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, p.blockTimeout, {from: sender})
-    }).then(tx => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), LOG_NUMBER_2, 'User1 should be able to send another transaction')
-      done()
-    }).catch(done)
-  })
+      p = await signPayload(txRelay, user1, sender, metaIdentityManager.address,
+                                          'forwardTo', types, params, lw, keyFromPw)
 
-  it('Sends properly formatted transactions initiated by non-owner, but MetaIdentityManager stops them', (done) => {
-    let p
-    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-    let types = ['address', 'address', 'address', 'uint256', 'bytes']
-    let params = [user2, proxy.address, testReg.address, 0, data]
-    signPayload(txRelay, user2, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw).then(retVal => {
-      p = retVal
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), 0, 'Should have reset the test registry')
-      return txRelay.checkAddress.call(p.data, user2)
-    }).then(res => {
-      assert.isTrue(res, "Address should be included as first input in data")
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2, p.blockTimeout,  {from: sender})
-    }).then(tx => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), 0, 'User2 should not be able to send transaction')
-      // note: the reason this does not throw an error is that the nonce should be updated.
-      // thus, while the sub call throws, the relay call itself does not.
-      // try again, this time should have a different nonce.
-      data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
+      res = await txRelay.checkAddress.call(p.data, user1)
+      assert.isTrue(res, "Address is not first parameter")
+
+      await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, {from: sender})
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update properly')
+
+      //Setup another transaction
+      data = enc('register', ['uint256'], [LOG_NUMBER_2])
+      types = ['address', 'address', 'address', 'uint256', 'bytes']
+      params = [user1, proxy.address, testReg.address, 0, data]
+      p = await signPayload(txRelay, user1, sender, metaIdentityManager.address, 'forwardTo', types, params, lw, keyFromPw)
+      assert.equal(p.nonce.toString(), "1", "Nonce did not increment")
+
+      await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, {from: sender})
+      regData = await  testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), LOG_NUMBER_2, 'Registry did not update properly')
+    })
+
+
+    it('Should forward properly formatted meta tx, though future calls may fail', async function() {
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
       types = ['address', 'address', 'address', 'uint256', 'bytes']
       params = [user2, proxy.address, testReg.address, 0, data]
-      return signPayload(txRelay, user2, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw)
-    }).then(retVal => {
-      p = retVal
+      p = await signPayload(txRelay, user2, sender, metaIdentityManager.address, 'forwardTo', types, params, lw, keyFromPw)
+
+      res = await txRelay.checkAddress.call(p.data, user2)
+      assert.isTrue(res, "Address is not first parameter")
+
+      //Does not throw as the nonce needs to be updated
+      await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2,  {from: sender})
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), 0, 'Registry updated, should not have')
+
+      //Try another transaction, where nonce should have updated.
+      data = enc('register', ['uint256'], [LOG_NUMBER_2])
+      types = ['address', 'address', 'address', 'uint256', 'bytes']
+      params = [user2, proxy.address, testReg.address, 0, data]
+      p = await signPayload(txRelay, user2, sender, metaIdentityManager.address, 'forwardTo', types, params, lw, keyFromPw)
       assert.equal(p.nonce.toString(), '1', 'Nonce should have updated, even though sub-call failed')
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2, p.blockTimeout, {from: sender})
-    }).then(tx => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), 0, 'User2 should still not be able to send a transaction')
-      done()
-    }).catch(done)
-  })
 
+      await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2, {from: sender})
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), 0, 'Registry updated, should not have')
+    })
 
-  it('Doesn\'t send transactions initiated by someone claiming to be someone else', (done) => {
-    let p
-    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-    let types = ['address', 'address', 'address', 'uint256', 'bytes']
-    let params = [user1, proxy.address, testReg.address, 0, data]
-    //Claim to be user1 by encoding their address, but can only sign w/ user2 key, as they don't have user1's key
-    signPayload(txRelay, user2, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw).then(retVal => {
-      p = retVal
-      return txRelay.checkAddress.call(p.data, user1)
-    }).then(res => {
-      //This will still pass. User should be able to encode anything they want in data.
-      assert.isTrue(res, "Address should be included as first input in data")
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2, p.blockTimeout, {from: sender})
-    }).then(tx => {
-      assert.isTrue(false, "Transaction above should have failed")
-    }).catch(error => {
-      assert.match(error.message, /invalid JUMP/, "should have thrown an error")
-    }).then(() => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), 0, 'Transaction should not have been processed')
-      done()
-    }).catch(done)
-  })
-
-  it('Shouldn\'t allow a relayer other than the one allowed', (done) => {
-    // Encode the transaction to send to the Owner contract
-    let p
-    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-    let types = ['address', 'address', 'address', 'uint256', 'bytes']
-    let params = [user1, proxy.address, testReg.address, 0, data]
-    //Claim to be user1 by encoding their address, but can only sign w/ their key, as they don't have user1's key
-    signPayload(txRelay, user1, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw).then(retVal => {
-      p = retVal
-      return txRelay.checkAddress.call(p.data, user1)
-    }).then(res => {
-      assert.isTrue(res, "Address should be included as first input in data")
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2, p.blockTimeout, {from: notSender, gas: 3000000})
-    }).then(tx => {
-      assert.isTrue(false, "Transaction above should have failed")
-    }).catch(error => {
-      assert.match(error.message, /invalid JUMP/, "should have thrown an error")
-    }).then(() => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), 0, 'Transaction should not have been processed')
-      done()
-    }).catch(done)
-  })
-
-  it('should not allow ether to be sent with a meta-tx ether', (done) => {
-    // Encode the transaction to send to the Owner contract
-    let p
-    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-    let types = ['address', 'address', 'address', 'uint256', 'bytes']
-    let params = [user1, proxy.address, testReg.address, 0, data]
-    signPayload(txRelay, user1, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw).then(retVal => {
-      p = retVal
-      return txRelay.checkAddress.call(p.data, user1)
-    }).then(res => {
-      assert.isTrue(res, "Address should be included as first input in data")
-      //Same as first transaction, and sent with Wei
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, p.blockTimeout, {from: sender, value: 100})
-    }).catch(error => {
-      assert.match(error, /invalid JUMP/, "should have thrown an error as ether was sent")
-    }).then(tx => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), '0', 'User1 should be able to send transaction')
-
-      //Sign again, this time should have a different nonce.
-      data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_2])
+    it('Should not forward meta tx from someone lying about address', async function() {
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
       types = ['address', 'address', 'address', 'uint256', 'bytes']
       params = [user1, proxy.address, testReg.address, 0, data]
-      return signPayload(txRelay, user1, sender, metaIdentityManager.address, 100, 'forwardTo', types, params, lw, keyFromPw)
-    }).then(retVal => {
-      p = retVal
-      assert.equal(p.nonce.toString(), "0", "Nonce should not have incremented, as tx threw.")
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, p.blockTimeout, {from: sender})
-    }).then(tx => {
-      return testReg.registry.call(proxy.address)
-    }).then((regData) => {
-      assert.equal(regData.toNumber(), LOG_NUMBER_2, 'User1 should be able to another transaction')
-      done()
-    }).catch(done)
-  })
+      //Claim to be user1 by encoding their address, but can only sign w/ user2 key, as they don't have user1's key
+      p = await signPayload(txRelay, user2, sender, metaIdentityManager.address, 'forwardTo', types, params, lw, keyFromPw)
+      res = await txRelay.checkAddress.call(p.data, user1)
+      //This will still pass. User should be able to encode anything they want in data.
+      assert.isTrue(res, "Address is not first parameter")
 
-  it('should not send transaction that has timed out', (done) => {
-    // Encode the transaction to send to the Owner contract
-    let p
-    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [LOG_NUMBER_1])
-    let types = ['address', 'address', 'address', 'uint256', 'bytes']
-    let params = [user1, proxy.address, testReg.address, 0, data]
-    //Give it a 0 block leway, then call a function to advance block forward one
-    signPayload(txRelay, user1, sender, metaIdentityManager.address, 0, 'forwardTo', types, params, lw, keyFromPw).then(retVal => {
-      p = retVal
-      //This will throw, but will advance blocks forward by one.
-      return metaIdentityManager.forwardTo(sender, deployedProxy.address, testReg.address, 0, data)
-    }).then(() => {
-      assert.isTrue(false, "should have thrown an error")
-    }).catch(e => {
-      assert.match(e, /invalid JUMP/, 'should have thrown')
-      return txRelay.checkAddress.call(p.data, user1)
-    }).then(res => {
-      assert.isTrue(res, "Address should be included as first input in data")
-      return txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, p.blockTimeout, {from: sender})
-    }).then(tx => {
-      assert.isTrue(false, 'should have thrown an error')
-    }).catch(e => {
-      assert.match(e, /invalid JUMP/, 'should have thrown')
-      done()
-    }).catch(done)
-  })
+      try {
+        await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2, {from: sender})
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "Should have thrown, user lied about address")
+        errorThrown = true
+      }
 
+      assert.isTrue(errorThrown, "Should have thrown, user lied about address")
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), 0, 'Registry updated, should not have')
+    })
 
-  //Issues w/ getting account to unlock as it is not a truffle account. will
-  //fix this later.
-  /*
-  it('Should allow ether to be sent with a regular transaction?', (done) => {
-    //Deposit money in the proxy contract
-    //this will call the fallback as there is no function w/ this signature, but need to ecode address
-    let data = '0x' + lightwallet.txutils._encodeFunctionTxData('randomName', ['address'], [user1])
-    txRelay.checkAddress.call(data, user1).then(res => {
-      assert.isTrue(res, "no data provided")
-      return txRelay.checkAddress.call(data, user2)
-    }).then(res => {
-      assert.isFalse(res, "should not be valid address")
-      return txRelay.relayTx(proxy.address, data, {from: user1, value: 100})
-    }).then((tx) => {
-      console.log(tx)
-      // Verify that the proxy address is logged as the sender
-      done()
-    }).catch(done)
-  }) */
+    it('Should not forward meta tx from a dishonest relayer', async function() {
+      // Encode the transaction to send to the Owner contract
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
+      types = ['address', 'address', 'address', 'uint256', 'bytes']
+      params = [user1, proxy.address, testReg.address, 0, data]
+      //Claim to be user1 by encoding their address, but can only sign w/ their key, as they don't have user1's key
+      p = await signPayload(txRelay, user1, sender, metaIdentityManager.address, 'forwardTo', types, params, lw, keyFromPw)
+      res = await txRelay.checkAddress.call(p.data, user1)
+      assert.isTrue(res, "Address is not first parameter")
 
+      try {
+        await  txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user2, {from: notSender})
+      } catch (e) {
+        assert.isFalse(errorThrown, "Sanity check")
+        assert.match(e.message, /invalid JUMP/, "Should have thrown, wrong relayer forwarded")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "Should have thrown, wrong relayer forwarded")
 
-  it('Should not approve bad data', (done) => {
-    //This function needs some serious thought + testing
-    let types = ['address', 'address', 'address', 'uint256', 'bytes']
-    let params = [user1, proxy.address, testReg.address, 0, []]
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), 0, 'Registry updated, should not have')
+    })
 
-    let emptyData = '0x' + lightwallet.txutils._encodeFunctionTxData('', [], [])
-    //What happens with a send? Are the first 4 bytes empty? Yes, so this is a worry. Should assume they can't send eth through a meta-tx
-    let shortData = '0x' + lightwallet.txutils._encodeFunctionTxData('forwardTo', types, params).substring(0, 16)
-    let longData = '0x' + lightwallet.txutils._encodeFunctionTxData('forwardTo', types, params)
-    let wrongAddressData =  '0x' + lightwallet.txutils._encodeFunctionTxData('forwardTo', types, [user2, proxy.address, testReg.address, 0, []]).substring(0, 16)
-    let firstHalfAddressData = '0x' + lightwallet.txutils._encodeFunctionTxData('forwardTo', types, params).substring(0, 26) + zero
+    it('Should not forward meta tx with Ether', async function () {
+      //Setup data and sign
+      data = enc('register', ['uint256'], [LOG_NUMBER_1])
+      types = ['address', 'address', 'address', 'uint256', 'bytes']
+      params = [user1, proxy.address, testReg.address, 0, data]
+      p = await signPayload(txRelay, user1, sender, metaIdentityManager.address,
+                                          'forwardTo', types, params, lw, keyFromPw)
 
+      res = await txRelay.checkAddress.call(p.data, user1)
+      assert.isTrue(res, "Address is not first parameter")
 
-    txRelay.checkAddress.call(emptyData, user1).then(res => {
-      assert.isFalse(res, "Empty data should not return true")
-      return txRelay.checkAddress.call(shortData, user1)
-    }).then(res => {
-      assert.isFalse(res, "Data that is to short should return false")
-      return txRelay.checkAddress.call(longData, user1)
-    }).then(res => {
-      assert.isTrue(res, 'Correctly encoded address should return true')
-      return txRelay.checkAddress.call(wrongAddressData, user1)
-    }).then(res => {
-      assert.isFalse(res, "Other address should not be allowed")
-      return txRelay.checkAddress.call(firstHalfAddressData, user1)
-    }).then(res => {
-      assert.isFalse(res, "Full address is not included")
-      done()
+      try {
+        await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, {from: sender, value: 10000})
+      } catch(e) {
+        assert.isFalse(errorThrown, "Sanity check")
+        assert.match(e.message, /invalid JUMP/, "Should have thrown an error, included Ether")
+        errorThrown = true;
+      }
+      assert.isTrue(errorThrown, "Should have thrown an error, included Ether")
+      regData = await testReg.registry.call(proxy.address)
+      assert.equal(regData.toNumber(), 0, 'Registry updated, should not have')
+    })
+
+    it('Should forward meta tx multiple times', async function() {
+      for (let i = 0; i < 100; i++) {
+        let randNum = getRandomNumber()
+        data = enc('register', ['uint256'], [randNum])
+        types = ['address', 'address', 'address', 'uint256', 'bytes']
+        params = [user1, proxy.address, testReg.address, 0, data]
+        p = await signPayload(txRelay, user1, sender, metaIdentityManager.address,
+                                    'forwardTo', types, params, lw, keyFromPw)
+        assert.equal(p.nonce, i.toString(), "Nonce should have updated")
+        await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, {from: sender})
+        regData = await testReg.registry.call(proxy.address)
+        assert.equal(regData.toNumber(), randNum, 'Registry did not update properly')
+      }
     })
   })
+
+  //Not working properly
+  it('Should not have massive overhead :~)', async function() {
+    //Setup data and sign
+    data = enc('register', ['uint256'], [LOG_NUMBER_1])
+    types = ['address', 'address', 'address', 'uint256', 'bytes']
+    params = [user1, proxy.address, testReg.address, 0, data]
+
+    //FIRST: Test throw, to increment the nonce for better reporting
+    throwData = enc('doThrow', [], [])
+    throwParams = [user1, proxy.address, testReg.address, 0, throwData]
+    pThrow = await signPayload(txRelay, user1, sender, metaIdentityManager.address,
+                                        'forwardTo', types, params, lw, keyFromPw)
+
+    await txRelay.relayMetaTx(pThrow.v, pThrow.r, pThrow.s, metaIdentityManager.address,
+                              pThrow.data, user1, {from: sender})
+
+    p = await signPayload(txRelay, user1, sender, metaIdentityManager.address,
+                                        'forwardTo', types, params, lw, keyFromPw)
+
+    assert.equal(p.nonce.toString(), "1", "Nonce should have been incremented")
+
+    res = await txRelay.checkAddress.call(p.data, user1)
+    assert.isTrue(res, "Address is not first parameter")
+
+    let tx = await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, {from: sender})
+    //console.log("Meta-tx, set from zeros: ", tx.receipt.gasUsed)
+    regData = await testReg.registry.call(proxy.address)
+    assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update properly')
+
+    //Try with a non-meta tx
+    let idenManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate)
+    tx = await idenManager.CreateIdentity(regularUser, recoveryKey, {from: sender})
+    const log = tx.logs[0]
+    assert.equal(log.event, 'IdentityCreated', 'wrong event')
+    let newProxy = Proxy.at(log.args.identity)
+
+    tx = await idenManager.forwardTo(newProxy.address, testReg.address, 0, data, {from: regularUser})
+    //console.log("IdenManager (no meta) tx, set from zeros: ", tx.receipt.gasUsed)
+
+    tx = await testReg.register(LOG_NUMBER_1)
+    //console.log("regular transaction, set from zeros: ", tx.receipt.gasUsed)
+
+    //Try again.
+    data = enc('register', ['uint256'], [LOG_NUMBER_2])
+    types = ['address', 'address', 'address', 'uint256', 'bytes']
+    params = [user1, proxy.address, testReg.address, 0, data]
+    p = await signPayload(txRelay, user1, sender, metaIdentityManager.address,
+                                        'forwardTo', types, params, lw, keyFromPw)
+
+    assert.equal(p.nonce.toString(), "2", "Nonce should have been incremented twice")
+
+    tx = await txRelay.relayMetaTx(p.v, p.r, p.s, metaIdentityManager.address, p.data, user1, {from: sender})
+    //console.log("Meta-tx, set from non-zeros: ", tx.receipt.gasUsed)
+    regData = await testReg.registry.call(proxy.address)
+    assert.equal(regData.toNumber(), LOG_NUMBER_2, 'Registry did not update properly')
+
+    tx = await idenManager.forwardTo(newProxy.address, testReg.address, 0, data, {from: regularUser})
+    //console.log("IdenManager (no meta) tx, set from non-zeros: ", tx.receipt.gasUsed)
+
+    tx = await testReg.register(LOG_NUMBER_1)
+    //console.log("regular transaction, set from non-zeros: ", tx.receipt.gasUsed)
+  })
+
+  it('Should not approve bad data', async function () {
+    //This function needs some serious thought + testing
+    let t = ['address', 'address', 'address', 'uint256', 'bytes'] //types
+    let p = [user1, proxy.address, testReg.address, 0, []] //params
+    let n = "forwardTo" //name of function
+
+    //encoded correctly
+    data = enc(n, t, p)
+    res = await txRelay.checkAddress.call(data, user1)
+    assert.isTrue(res, "Address is not first parameter")
+    //off by a nibble
+    data = enc(n, t, p).slice(1)
+    res = await txRelay.checkAddress.call(data, user1)
+    assert.isFalse(res, "Address is first parameter, should be shifted off")
+    //short
+    data = enc(n, t, p).substring(0, 16)
+    res = await txRelay.checkAddress.call(data, user1)
+    assert.isFalse(res, "Address is first parameter, should be too short")
+    //wrong address
+    let badParam = [user2, proxy.address, testReg.address, 0, []]
+    data = enc(n, t, badParam)
+    res = await txRelay.checkAddress.call(data, user1)
+    assert.isFalse(res, "Address is first parameter, should be someone else")
+    //first half of address
+    data = enc(n, t, p).substring(0, 26) + zero
+    res = await txRelay.checkAddress.call(data, user1)
+    assert.isFalse(res, "Address is first parameter, should be too short")
+
+    //Test with a bunch of randomly generated data
+    for (let i = 0; i < 10; i++) {
+      data = getRandomHexString(36); //minimal length to possibly pass
+      res = await txRelay.checkAddress(data, user1) //probabilistically, should never be true.
+      assert.isFalse(res, "Address is first parameter, probabilistically should not be")
+    }
+    })
 })
