@@ -11,19 +11,6 @@ contract TxRelay {
   mapping(address => uint) nonce;
 
   /*
-   * @dev Relays normal transactions
-   * @param destination The address to relay data to
-   * @param data The bytes necessary to call the function in the destination contract.
-                 Note, the first encoded argument in data must be msg.sender's address
-   */
-  function relayTx(address destination, bytes data) {
-    if (!checkAddress(data, msg.sender)) throw;
-
-    //As no state is updated before, can just throw in the case of a failed call.
-    if (!destination.call(data)) throw;
-  }
-
-  /*
    * @dev Relays meta transactions
    * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
    * @param data The bytes necessary to call the function in the destination contract.
