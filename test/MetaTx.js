@@ -90,7 +90,7 @@ function signPayload(relayContract, signingAddr, sendingAddress, destination,
     })
 }
 
-contract('IdentityManagerMetaTx', (accounts) => {
+contract('TxRelay', (accounts) => {
   let proxy
   let deployedProxy
   let testReg
