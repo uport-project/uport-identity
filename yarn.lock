@@ -828,7 +828,11 @@ better-assert@~1.0.0:
   dependencies:
     callsite "1.0.0"
 
-bignumber.js@debris/bignumber.js#94d7146671b9719e00a09c29b01a691bc85048c2, "bignumber.js@github:debris/bignumber.js#94d7146671b9719e00a09c29b01a691bc85048c2":
+bignumber.js@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-4.0.2.tgz#2d1dc37ee5968867ecea90b6da4d16e68608d21d"
+
+bignumber.js@debris/bignumber.js#94d7146671b9719e00a09c29b01a691bc85048c2:
   version "2.0.7"
   resolved "https://codeload.github.com/debris/bignumber.js/tar.gz/94d7146671b9719e00a09c29b01a691bc85048c2"
 
@@ -1720,11 +1724,10 @@ etag@~1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.0.tgz#6f631aef336d6c46362b51764044ce216be3c051"
 
-eth-lightwallet@^2.5.4:
-  version "2.5.4"
-  resolved "https://registry.yarnpkg.com/eth-lightwallet/-/eth-lightwallet-2.5.4.tgz#a2eddaffed9d45b78175afedaac01e167730bb53"
+eth-lightwallet@^2.5.6:
+  version "2.5.6"
+  resolved "https://registry.yarnpkg.com/eth-lightwallet/-/eth-lightwallet-2.5.6.tgz#6f10f134ca97531e4f03a194008d314322500c13"
   dependencies:
-    bignumber.js debris/bignumber.js#94d7146671b9719e00a09c29b01a691bc85048c2
     bitcore-lib "^0.14.0"
     bitcore-mnemonic "^1.2.2"
     buffer "^4.9.0"
@@ -1735,7 +1738,7 @@ eth-lightwallet@^2.5.4:
     rlp "^2.0.0"
     scrypt-async "^1.2.0"
     tweetnacl "0.13.2"
-    web3 "^0.15.3"
+    web3 "^0.19.1"
 
 eth-signer@^0.2.2:
   version "0.2.2"
@@ -5976,6 +5979,16 @@ web3@^0.18.0, web3@^0.18.2:
   resolved "https://registry.yarnpkg.com/web3/-/web3-0.18.4.tgz#81ec1784145491f2eaa8955b31c06049e07c5e7d"
   dependencies:
     bignumber.js "git+https://github.com/debris/bignumber.js.git#94d7146671b9719e00a09c29b01a691bc85048c2"
+    crypto-js "^3.1.4"
+    utf8 "^2.1.1"
+    xhr2 "*"
+    xmlhttprequest "*"
+
+web3@^0.19.1:
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/web3/-/web3-0.19.1.tgz#e763d5b1107c4bc24abd4f8cbee1ba3659e6eb31"
+  dependencies:
+    bignumber.js "^4.0.2"
     crypto-js "^3.1.4"
     utf8 "^2.1.1"
     xhr2 "*"
