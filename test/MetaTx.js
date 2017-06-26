@@ -403,6 +403,7 @@ contract('TxRelay', (accounts) => {
     assert.isFalse(res, "Address is first parameter, should be too short")
 
     //Test with a bunch of randomly generated data
+    //This might be useless :~)
     for (let i = 0; i < 10; i++) {
       data = getRandomHexString(36); //minimal length to possibly pass
       res = await txRelay.checkAddress(data, user1) //probabilistically, should never be true.
