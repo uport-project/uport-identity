@@ -42,6 +42,6 @@
     "truffle-hdwallet-provider": "0.0.3"
   },
   "dependencies": {
-    "eth-lightwallet": "^2.5.4"
+    "eth-lightwallet": "^2.5.6"
   }
 }
