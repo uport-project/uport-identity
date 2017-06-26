@@ -49,8 +49,8 @@ contract MetaIdentityManager {
   mapping(address => uint) migrationInitiated;
   mapping(address => address) migrationNewAddress;
 
-  modifier onlyRelay() {
-    if (msg.sender == relay) _;
+  modifier onlyAuthorized() {
+    if (msg.sender == relay || checkMessageData(msg.sender)) _;
     else throw;
   }
 
@@ -108,45 +108,45 @@ contract MetaIdentityManager {
   }
 
   // Primary forward function
-  function forwardTo(address sender, Proxy identity, address destination, uint value, bytes data) onlyRelay onlyOwner(identity, sender)  {
+  function forwardTo(address sender, Proxy identity, address destination, uint value, bytes data) onlyAuthorized onlyOwner(identity, sender)  {
     identity.forward(destination, value, data);
   }
 
   // an owner can add a new device instantly
-  function addOwner(address sender, Proxy identity, address newOwner) onlyRelay onlyOlderOwner(identity, sender) rateLimited(identity, sender) {
+  function addOwner(address sender, Proxy identity, address newOwner) onlyAuthorized onlyOlderOwner(identity, sender) rateLimited(identity, sender) {
     owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, sender);
   }
 
   // a recovery key owner can add a new device with 1 days wait time
-  function addOwnerForRecovery(address sender, Proxy identity, address newOwner) onlyRelay onlyRecovery(identity, sender) rateLimited(identity, sender) {
+  function addOwnerFromRecovery(address sender, Proxy identity, address newOwner) onlyAuthorized onlyRecovery(identity, sender) rateLimited(identity, sender) {
     if (owners[identity][newOwner] > 0) throw;
     owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, sender);
   }
 
   // an owner can remove another owner instantly
-  function removeOwner(address sender, Proxy identity, address owner) onlyRelay onlyOlderOwner(identity, sender) rateLimited(identity, sender) {
+  function removeOwner(address sender, Proxy identity, address owner) onlyAuthorized onlyOlderOwner(identity, sender) rateLimited(identity, sender) {
     owners[identity][owner] = 0;
     OwnerRemoved(identity, owner, sender);
   }
 
   // an owner can add change the recoverykey whenever they want to
-  function changeRecovery(address sender, Proxy identity, address recoveryKey) onlyRelay onlyOlderOwner(identity, sender) rateLimited(identity, sender) {
+  function changeRecovery(address sender, Proxy identity, address recoveryKey) onlyAuthorized onlyOlderOwner(identity, sender) rateLimited(identity, sender) {
     if (recoveryKey == address(0)) throw;
     recoveryKeys[identity] = recoveryKey;
     RecoveryChanged(identity, recoveryKey, sender);
   }
 
   // an owner can migrate away to a new IdentityManager
-  function initiateMigration(address sender, Proxy identity, address newIdManager) onlyRelay onlyOlderOwner(identity, sender) {
+  function initiateMigration(address sender, Proxy identity, address newIdManager) onlyAuthorized onlyOlderOwner(identity, sender) {
     migrationInitiated[identity] = now;
     migrationNewAddress[identity] = newIdManager;
     MigrationInitiated(identity, newIdManager, sender);
   }
 
   // any owner can cancel a migration
-  function cancelMigration(address sender, Proxy identity) onlyRelay onlyOwner(identity, sender) {
+  function cancelMigration(address sender, Proxy identity) onlyAuthorized onlyOwner(identity, sender) {
     address canceledManager = migrationNewAddress[identity];
     migrationInitiated[identity] = 0;
     migrationNewAddress[identity] = 0;
@@ -156,13 +156,23 @@ contract MetaIdentityManager {
   // owner needs to finalize migration once adminTimeLock time has passed
   // WARNING: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
   // Not doing so risks the proxy becoming stuck.
-  function finalizeMigration(address sender, Proxy identity) onlyRelay onlyOlderOwner(identity, sender) {
+  function finalizeMigration(address sender, Proxy identity) onlyAuthorized onlyOlderOwner(identity, sender) {
     if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
       address newIdManager = migrationNewAddress[identity];
       migrationInitiated[identity] = 0;
       migrationNewAddress[identity] = 0;
       identity.transfer(newIdManager);
       MigrationFinalized(identity, newIdManager, sender);
+    }
+  }
+
+  //Checks that address a is the first input in msg.data.
+  //Has very minimal gas overhead. Apparently, negative lol
+  function checkMessageData(address a) constant internal returns (bool t) {
+    if (msg.data.length < 36) return false;
+    assembly {
+        let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        t := eq(and(mask, a), and(mask, calldataload(4)))
     }
   }
 }
