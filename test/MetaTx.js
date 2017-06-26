@@ -2,7 +2,6 @@ const lightwallet = require('eth-lightwallet')
 const evm_increaseTime = require('./evmIncreaseTime.js')
 const MetaTxRelay = artifacts.require('TxRelay')
 const MetaIdentityManager = artifacts.require('MetaIdentityManager')
-const IdentityManager = artifacts.require('IdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const Promise = require('bluebird')
@@ -426,13 +425,12 @@ contract('IdentityManagerMetaTx', (accounts) => {
     assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update properly')
 
     //Try with a non-meta tx
-    let idenManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate)
-    tx = await idenManager.CreateIdentity(regularUser, recoveryKey, {from: sender})
+    tx = await metaIdentityManager.CreateIdentity(regularUser, recoveryKey, {from: sender})
     const log = tx.logs[0]
     assert.equal(log.event, 'IdentityCreated', 'wrong event')
     let newProxy = Proxy.at(log.args.identity)
 
-    tx = await idenManager.forwardTo(newProxy.address, testReg.address, 0, data, {from: regularUser})
+    tx = await metaIdentityManager.forwardTo(regularUser, newProxy.address, testReg.address, 0, data, {from: regularUser})
     //console.log("IdenManager (no meta) tx, set from zeros: ", tx.receipt.gasUsed)
 
     tx = await testReg.register(LOG_NUMBER_1)
@@ -452,7 +450,7 @@ contract('IdentityManagerMetaTx', (accounts) => {
     regData = await testReg.registry.call(proxy.address)
     assert.equal(regData.toNumber(), LOG_NUMBER_2, 'Registry did not update properly')
 
-    tx = await idenManager.forwardTo(newProxy.address, testReg.address, 0, data, {from: regularUser})
+    tx = await metaIdentityManager.forwardTo(regularUser, newProxy.address, testReg.address, 0, data, {from: regularUser})
     //console.log("IdenManager (no meta) tx, set from non-zeros: ", tx.receipt.gasUsed)
 
     tx = await testReg.register(LOG_NUMBER_1)
