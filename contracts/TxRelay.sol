@@ -21,7 +21,7 @@ contract TxRelay {
                        address destination, bytes data,
                        address claimedSender) {
 
-    // relay :: nonce :: destination :: data :: relayer :: blockTimeout
+    // relay :: nonce :: destination :: data :: relayer
     bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
     address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
@@ -31,8 +31,7 @@ contract TxRelay {
     if (!checkAddress(data, addressFromSig)) throw;
 
     if (!destination.call(data)) {
-      //Output an event?
-      //Do not throw; want nonce to still update
+      //In the future, add event here. Has semi-complex gas considerations. See EIP 150
     }
   }
 
@@ -40,7 +39,7 @@ contract TxRelay {
    * @dev Compares the first arg of a function call to an address
    * @param b The byte array that may have an address on the end
    * @param address Address to check on the end of the array
-    (Special thanks to tjade273 for optimization)
+     (Special thanks to tjade273 for optimization)
    */
   function checkAddress(bytes b, address a) constant returns (bool t) {
     if (b.length < 36) return false;
