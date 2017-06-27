@@ -181,7 +181,7 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows an owner to cancel the process of transfering proxy to new IdentityManager
-  function cancelMigration(address sender, Proxy identity)  onlyOwner(identity, sender) {
+  function cancelMigration(address sender, Proxy identity) onlyAuthorized onlyOwner(identity, sender) {
     address canceledManager = migrations[identity].newAddress;
     delete migrations[identity];
     MigrationCanceled(identity, canceledManager, sender);
