@@ -19,14 +19,15 @@ function getRandomNumber() {
   return Math.floor(Math.random() * (1000000 - 1)) + 1;
 }
 
-async function testForwardTo(testReg, metaIdentityManager, proxyAddress, fromAccount, shouldEqual) {
+//From is who is actually signing. claimedFrom is the address that they claim to be (first input to most functions)
+async function testForwardTo(testReg, metaIdentityManager, proxyAddress, fromAccount, claimedFrom, shouldEqual) {
   let errorThrown = false
   let testNum = getRandomNumber()
   // Encode the transaction to send to the proxy contract
   let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
   // Send forward request from the owner
   try {
-    await metaIdentityManager.forwardTo(fromAccount, proxyAddress, testReg.address, 0, '0x' + data, {from: fromAccount})
+    await metaIdentityManager.forwardTo(claimedFrom, proxyAddress, testReg.address, 0, '0x' + data, {from: fromAccount})
   } catch (error) {
     errorThrown = error.message
   }
@@ -40,14 +41,14 @@ async function testForwardTo(testReg, metaIdentityManager, proxyAddress, fromAcc
   }
 }
 
-async function testForwardToFromRelay(testReg, metaIdentityManager, proxyAddress, fromAccount, txRelay, shouldEqual) {
+async function testForwardToFromRelay(testReg, metaIdentityManager, proxyAddress, fromAccount, txRelayAddress, shouldEqual) {
   let errorThrown = false
   let testNum = getRandomNumber()
   // Encode the transaction to send to the proxy contract
   let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
   // Send forward request from the owner
   try {
-    await metaIdentityManager.forwardTo(fromAccount, proxyAddress, testReg.address, 0, '0x' + data, {from: txRelay.address})
+    await metaIdentityManager.forwardTo(fromAccount, proxyAddress, testReg.address, 0, '0x' + data, {from: txRelayAddress})
   } catch (error) {
     errorThrown = error.message
   }
@@ -94,15 +95,7 @@ contract('MetaIdentityManager', (accounts) => {
     metaIdentityManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, relay)
     deployedProxy = await Proxy.new({from: user1})
     testReg = await TestRegistry.deployed()
-    //   return snapshots.snapshot()
-    // }).then(id => {
-    //   snapshotId = id
   })
-
-  // afterEach(done => {
-  //   snapshots.revert(snapshotId)
-  //   done()
-  // })
 
   it('Correctly creates Identity', async function() {
     let tx = await metaIdentityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
@@ -128,15 +121,31 @@ contract('MetaIdentityManager', (accounts) => {
     })
 
     it('allow transactions initiated by owner', async function() {
-      await testForwardTo(testReg, metaIdentityManager, proxy.address, user1, true)
+      await testForwardTo(testReg, metaIdentityManager, proxy.address, user1, user1, true)
     })
 
     it('don\'t allow transactions initiated by non owner', async function() {
-      await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, false)
+      await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, false)
     })
 
     it('don\'t allow transactions initiated by recoveryKey', async function() {
-      await testForwardTo(testReg, metaIdentityManager, proxy.address, recoveryKey, false)
+      await testForwardTo(testReg, metaIdentityManager, proxy.address, recoveryKey, recoveryKey, false)
+    })
+
+    it('onlyAuthorized modifier allows in correct users/relay', async function () {
+      //Allow a user claimed to be themselves
+      await testForwardTo(testReg, metaIdentityManager, proxy.address, user1, user1, true)
+      //Do not allow a user claiming to be someone else.
+      let errorThrown = false
+      try {
+        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user1, true)
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "Should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown an error")
+      //Allow the transaction relay.
+      await testForwardToFromRelay(testReg, metaIdentityManager, proxy.address, user1, relay, true)
     })
 
     it('owner can add other owner', async function() {
@@ -154,6 +163,83 @@ contract('MetaIdentityManager', (accounts) => {
                   'Instigator key is set in event')
     })
 
+    it('owner is rateLimited on some functions', async function() {
+      //User1 adds user5
+      let tx = await metaIdentityManager.addOwner(user1, proxy.address, user5, {from: user1})
+      let log = tx.logs[0]
+      assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
+      //User1 try to add another owner, should fail.
+      let errorThrown = false
+      try {
+        await metaIdentityManager.addOwner(user1, proxy.address, user4, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //User1 try to remove a user. Should still be rate limited and fail.
+      errorThrown = false
+      try {
+        await metaIdentityManager.removeOwner(user1, proxy.address, user5, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //user1 tries to change recovery, but is still rate limited
+      errorThrown = false
+      try {
+        await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //No longer rateLimited
+      await evm_increaseTime(adminTimeLock + 1)
+      //User1 tries to add another owner. Should be able to
+      tx = await metaIdentityManager.addOwner(user1, proxy.address, user4, {from: user1})
+      log = tx.logs[0]
+      assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
+      //User1 try to remove a user. Should be rate limited and fail.
+      errorThrown = false
+      try {
+        await metaIdentityManager.removeOwner(user1, proxy.address, user5, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //user1 tries to change recovery, but is still rate limited
+      errorThrown = false
+      try {
+        await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //no longer rateLimited
+      await evm_increaseTime(adminTimeLock + 1)
+      tx = await metaIdentityManager.removeOwner(user1, proxy.address, user5, {from: user1})
+      log = tx.logs[0]
+      assert.equal(log.event, 'OwnerRemoved', 'should trigger correct event')
+      //user1 tries to change recovery, but is rate limited
+      errorThrown = false
+      try {
+        await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //no longer rateLimited
+      await evm_increaseTime(adminTimeLock + 1)
+      tx = await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+      log = tx.logs[0]
+      assert.equal(log.event, 'RecoveryChanged', 'should trigger correct event')
+    })
+
     it('non-owner can not add other owner', async function() {
       try {
         await metaIdentityManager.addOwner(user3, proxy.address, user4, {from: user3})
@@ -169,14 +255,14 @@ contract('MetaIdentityManager', (accounts) => {
       })
 
       it('within userTimeLock is not allowed transactions', async function() {
-        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, false)
+        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, false)
       })
 
       describe('after userTimeLock', () => {
         beforeEach(() => evm_increaseTime(userTimeLock))
 
         it('Allow transactions', async function() {
-          await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, true)
+          await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, true)
         })
 
         it('can not add other owner yet', async function() {
@@ -256,15 +342,31 @@ contract('MetaIdentityManager', (accounts) => {
         await metaIdentityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user2, {from: recoveryKey})
       })
 
+      it('recoveryKey is rate limited in added new owners', async function () {
+        //should be rate limited when trying again
+        let errorThrown = false
+        try {
+          await metaIdentityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
+        } catch (e) {
+          assert.match(e.message, /invalid JUMP/, "should have thrown")
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, "should have thrown")
+        //should no longer be rateLimited
+        await evm_increaseTime(adminTimeLock + 1)
+        tx = await metaIdentityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
+        assert.equal(tx.logs[0].event, 'OwnerAdded', 'should trigger correct event')
+      })
+
       it('within userTimeLock is not allowed transactions', async function() {
-        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, false)
+        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, false)
       })
 
       describe('after userTimeLock', () => {
         beforeEach(() => evm_increaseTime(userTimeLock))
 
         it('Allow transactions', async function() {
-          await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, true)
+          await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, true)
         })
       })
 

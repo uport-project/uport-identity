@@ -9,7 +9,6 @@ const Promise = require('bluebird')
 const compareCode = require('./compareCode')
 const solsha3 = require('solidity-sha3').default
 const leftPad = require('left-pad')
-web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
@@ -62,7 +61,7 @@ function signPayload(signingAddr, sendingAddr, txRelay, destinationAddress, func
             let hash
             let sig
             let retVal = {}
-            data = '0x' + lightwallet.txutils._encodeFunctionTxData(functionName, functionTypes, functionParams)
+            data = enc(functionName, functionTypes, functionParams)
 
             txRelay.getNonce.call(signingAddr).then(currNonce => {
               nonce = currNonce
@@ -387,6 +386,95 @@ contract('TxRelay', (accounts) => {
         await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
       })
 
+      it("owner is rateLimited in adding/removing owners and recoveryKey", async function () {
+        //First, user1 adds user2 as a new owner
+        types = ['address', 'address', 'address']
+        params = [user1, proxy.address, user2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'addOwner', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+
+        await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
+        //Then, user1 tries to add user3 as a new owner
+        params = [user1, proxy.address, user3]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'addOwner', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
+
+        //Tries to change the recoveryKey
+        params = [user1, proxy.address, recoveryKey2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'changeRecovery', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
+
+        //Then have user1 try to remove user2 - still is rateLimited
+        params = [user1, proxy.address, user2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'removeOwner', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
+
+        //Make them no longer rateLimited
+        await evm_increaseTime(adminRate + 1)
+        //Have them add user3, sucessfull this time
+        params = [user1, proxy.address, user3]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'addOwner', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        await checkLogs(tx, "OwnerAdded", proxy.address, user3, user1)
+
+        //Try to remove owner two again, should fail
+        params = [user1, proxy.address, user2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'removeOwner', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
+
+        //Tries to change the recoveryKey
+        params = [user1, proxy.address, recoveryKey2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'changeRecovery', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
+
+        //Unrate limit them again
+        await evm_increaseTime(adminRate + 1)
+
+        params = [user1, proxy.address, user2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'removeOwner', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        await checkLogs(tx, "OwnerRemoved", proxy.address, user2, user1)
+
+        //Tries to change the recoveryKey
+        params = [user1, proxy.address, recoveryKey2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'changeRecovery', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
+
+        //Unrate limit them again
+        await evm_increaseTime(adminRate + 1)
+        //Tries to change the recoveryKey
+        params = [user1, proxy.address, recoveryKey2]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'changeRecovery', types, params, lw, keyFromPw)
+
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        await checkLogs(tx, "RecoveryChanged", proxy.address, recoveryKey2, user1)
+      })
+
       it("non-owner can not add other owner", async function () {
         types = ['address', 'address', 'address']
         params = [user3, proxy.address, user4]
@@ -516,6 +604,16 @@ contract('TxRelay', (accounts) => {
           tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, recoveryKey, {from: sender})
 
           await checkLogs(tx, "OwnerAdded", proxy.address, user4, recoveryKey)
+        })
+
+        it('recovery key is rateLimited', async function () {
+          types = ['address', 'address', 'address']
+          params = [recoveryKey, proxy.address, user4] //new owner
+          p = await signPayload(recoveryKey, sender, txRelay, metaIdentityManager.address,
+                                'addOwnerFromRecovery', types, params, lw, keyFromPw)
+
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, recoveryKey, {from: sender, gas: 4500000})
+          assert.isAbove(tx.receipt.gasUsed, 4000000, "Sub call should have thrown")
         })
 
         it("within userTimeLock is not allowed transactions", async function () {
