@@ -18,9 +18,9 @@ contract TxRelay {
    * @param claimedSender Address of the user who is having tx forwarded
    */
   function relayMetaTx(uint8 sigV, bytes32 sigR, bytes32 sigS,
-                       address destination, bytes data,
-                       address claimedSender) {
+                       address destination, bytes data) {
 
+    address claimedSender = getAddress(data);
     // relay :: nonce :: destination :: data :: relayer
     bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
     address addressFromSig = ecrecover(h, sigV, sigR, sigS);
@@ -28,7 +28,6 @@ contract TxRelay {
     nonce[claimedSender]++;
 
     if (claimedSender != addressFromSig) throw;
-    if (!checkAddress(data, addressFromSig)) throw;
 
     if (!destination.call(data)) {
       //In the future, add event here. Has semi-complex gas considerations. See EIP 150
@@ -36,16 +35,16 @@ contract TxRelay {
   }
 
   /*
-   * @dev Compares the first arg of a function call to an address
-   * @param b The byte array that may have an address on the end
-   * @param address Address to check on the end of the array
-     (Special thanks to tjade273 for optimization)
+   * @dev Gets an address encoded as the first argument in transaction data
+   * @param b The byte array that should have an address as first argument
+   * @returns a The address retrieved from the array
+     (Optimization based on work by tjade273)
    */
-  function checkAddress(bytes b, address a) constant returns (bool t) {
-    if (b.length < 36) return false;
+  function getAddress(bytes b) constant returns (address a) {
+    if (b.length < 36) return address(0);
     assembly {
         let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        t := eq(and(mask, a), and(mask, mload(add(b,36))))
+        a := and(mask, mload(add(b,36)))
     }
   }
 

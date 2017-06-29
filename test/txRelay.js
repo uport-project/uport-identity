@@ -100,7 +100,7 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, metaIdenti
   let firstNonce = p.nonce
   // Send forward request from the owner
   try {
-    await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, signingAddr, {from: sendingAddr})
+    await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sendingAddr})
   } catch (error) {
     errorThrown = true
     assert.match(errorThrown, /invalid JUMP/, "An error should have been thrown")
@@ -221,8 +221,7 @@ contract('TxRelay', (accounts) => {
       p = await signPayload(user1, sender, txRelay, mTestReg.address, 'register',
                             types, params, lw, keyFromPw)
 
-      await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
-                                user1, {from: sender})
+      await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
       regData = await mTestReg.registry.call(user1)
       assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update')
@@ -235,7 +234,7 @@ contract('TxRelay', (accounts) => {
       p = await signPayload(user1, sender, txRelay, mTestReg.address, 'testThrow',
                             types, params, lw, keyFromPw)
 
-      tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1,
+      tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
                                     {from: sender, gas: 4500000})
       //Best way I have found to test for throw in a sub-call. Suggestions welcome :)
       assert.isAbove(tx.receipt.gasUsed, 4000000, "Did not throw, as it should have consumed gas")
@@ -253,13 +252,12 @@ contract('TxRelay', (accounts) => {
       p = await signPayload(user1, sender, txRelay, mTestReg.address, 'register',
                             types, params, lw, keyFromPw)
 
-      res = await txRelay.checkAddress.call(p.data, user2)
-      assert.isTrue(res, "Address is not first parameter")
+      res = await txRelay.getAddress.call(p.data)
+      assert.equal(res, user2, "Address is not first parameter")
 
       try {
         //claim to be a different person again
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
-                                  user2, {from: sender})
+        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "Should have thrown")
         errorThrown = true;
@@ -281,8 +279,7 @@ contract('TxRelay', (accounts) => {
 
       try {
         //Wrong sender tries to send transaction
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
-                                  user1, {from: notSender})
+        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: notSender})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "Should have thrown")
         errorThrown = true;
@@ -299,12 +296,12 @@ contract('TxRelay', (accounts) => {
       p = await signPayload(user1, sender, txRelay, mTestReg.address, 'register',
                             types, params, lw, keyFromPw)
 
-      res = await txRelay.checkAddress.call(p.data, user1)
-      assert.isTrue(res, "Address is not first parameter")
+      res = await txRelay.getAddress.call(p.data)
+      assert.equal(res, user1, "Address is not first parameter")
 
       try {
         //Send the transaction with 1 Wei
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1,
+        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
                                   {from: sender, value: 1})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "Should have thrown")
@@ -322,19 +319,17 @@ contract('TxRelay', (accounts) => {
       p = await signPayload(user1, sender, txRelay, mTestReg.address, 'register',
                             types, params, lw, keyFromPw)
 
-      res = await txRelay.checkAddress.call(p.data, user1)
-      assert.isTrue(res, "Address is not first parameter")
+      res = await txRelay.getAddress.call(p.data)
+      assert.equal(res, user1, "Address is not first parameter")
 
-      await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
-                                user1, {from: sender})
+      await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
       regData = await mTestReg.registry.call(user1)
       assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update')
 
       try {
         //Relayer tries to relay the same transaction twice
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
-                                  user1, {from: sender})
+        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "should have thrown")
         errorThrown = true
@@ -355,7 +350,7 @@ contract('TxRelay', (accounts) => {
                               types, params, lw, keyFromPw)
 
         assert.equal(p.nonce, i.toString(), "Nonce should have updated")
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         regData = await mTestReg.registry.call(user1)
         assert.equal(regData.toNumber(), randNum, 'Registry did not update properly')
@@ -381,7 +376,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
       })
@@ -393,7 +388,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
         //Then, user1 tries to add user3 as a new owner
@@ -401,7 +396,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
         assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
 
         //Tries to change the recoveryKey
@@ -409,7 +404,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
         assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
 
         //Then have user1 try to remove user2 - still is rateLimited
@@ -417,7 +412,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
 
         //Make them no longer rateLimited
@@ -427,7 +422,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
         await checkLogs(tx, "OwnerAdded", proxy.address, user3, user1)
 
         //Try to remove owner two again, should fail
@@ -435,7 +430,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
         assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
 
         //Tries to change the recoveryKey
@@ -443,7 +438,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
         assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
 
         //Unrate limit them again
@@ -453,7 +448,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         await checkLogs(tx, "OwnerRemoved", proxy.address, user2, user1)
 
         //Tries to change the recoveryKey
@@ -461,7 +456,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender, gas: 4500000})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
         assert.isAbove(tx.receipt.gasUsed, 4000000, "Should have thrown in a sub call")
 
         //Unrate limit them again
@@ -471,7 +466,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         await checkLogs(tx, "RecoveryChanged", proxy.address, recoveryKey2, user1)
       })
 
@@ -481,10 +476,10 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
-        res = await txRelay.checkAddress.call(p.data, user3)
-        assert.isTrue(res, "Address is not first parameter")
+        res = await txRelay.getAddress.call(p.data)
+        assert.equal(res, user3, "Address is not first parameter")
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user3, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Generated logs, thus owner was added")
       })
 
@@ -495,7 +490,7 @@ contract('TxRelay', (accounts) => {
           p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                                 'addOwner', types, params, lw, keyFromPw)
 
-          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
           await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
         })
@@ -521,10 +516,10 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
-            res = await txRelay.checkAddress.call(p.data, user2)
-            assert.isTrue(res, "Address is not first parameter")
+            res = await txRelay.getAddress.call(p.data)
+            assert.equal(res, user2, "Address is not first parameter")
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
             assert.isUndefined(tx.receipt.logs[0], "Generated logs, thus owner was added")
           })
 
@@ -534,10 +529,10 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
-            res = await txRelay.checkAddress.call(p.data, user2)
-            assert.isTrue(res, "Address is not first parameter")
+            res = await txRelay.getAddress.call(p.data)
+            assert.equal(res, user2, "Address is not first parameter")
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
             assert.isUndefined(tx.receipt.logs[0], "Generated logs, thus owner was removed")
           })
 
@@ -547,10 +542,10 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                                   'changeRecovery', types, params, lw, keyFromPw)
 
-            res = await txRelay.checkAddress.call(p.data, user2)
-            assert.isTrue(res, "Address is not first parameter")
+            res = await txRelay.getAddress.call(p.data)
+            assert.equal(res, user2, "Address is not first parameter")
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
             assert.isUndefined(tx.receipt.logs[0], "Generated logs, thus recovery was changed")
           })
         })
@@ -566,7 +561,7 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
             await checkLogs(tx, "OwnerAdded", proxy.address, user3, user2)
           })
@@ -577,7 +572,7 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                                   'removeOwner', types, params, lw, keyFromPw)
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
             await checkLogs(tx, "OwnerRemoved", proxy.address, user3, user2)
           })
@@ -588,7 +583,7 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                                   'changeRecovery', types, params, lw, keyFromPw)
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
             await checkLogs(tx, "RecoveryChanged", proxy.address, recoveryKey2, user2)
           })
@@ -601,7 +596,7 @@ contract('TxRelay', (accounts) => {
           p = await signPayload(recoveryKey, sender, txRelay, metaIdentityManager.address,
                                 'addOwnerFromRecovery', types, params, lw, keyFromPw)
 
-          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, recoveryKey, {from: sender})
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
           await checkLogs(tx, "OwnerAdded", proxy.address, user4, recoveryKey)
         })
@@ -612,7 +607,7 @@ contract('TxRelay', (accounts) => {
           p = await signPayload(recoveryKey, sender, txRelay, metaIdentityManager.address,
                                 'addOwnerFromRecovery', types, params, lw, keyFromPw)
 
-          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, recoveryKey, {from: sender, gas: 4500000})
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
           assert.isAbove(tx.receipt.gasUsed, 4000000, "Sub call should have thrown")
         })
 
@@ -640,7 +635,7 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user4, sender, txRelay, metaIdentityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user4, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
             await checkLogs(tx, "OwnerAdded", proxy.address, user3, user4)
           })
@@ -651,7 +646,7 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user4, sender, txRelay, metaIdentityManager.address,
                                   'removeOwner', types, params, lw, keyFromPw)
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user4, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
             await checkLogs(tx, "OwnerRemoved", proxy.address, user3, user4)
           })
@@ -662,7 +657,7 @@ contract('TxRelay', (accounts) => {
             p = await signPayload(user4, sender, txRelay, metaIdentityManager.address,
                                   'changeRecovery', types, params, lw, keyFromPw)
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user4, {from: sender})
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
             await checkLogs(tx, "RecoveryChanged", proxy.address, recoveryKey2, user4)
           })
@@ -679,10 +674,10 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
-        res = await txRelay.checkAddress.call(p.data, user1)
-        assert.isTrue(res, "Address is not first parameter")
+        res = await txRelay.getAddress.call(p.data)
+        assert.equal(res, user1, "Address is not first parameter")
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
       })
@@ -692,7 +687,7 @@ contract('TxRelay', (accounts) => {
         params = [user1, proxy.address, newMetaIdenManager.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
       })
@@ -703,7 +698,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
       })
 
@@ -713,7 +708,7 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user3, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
       })
 
@@ -723,7 +718,7 @@ contract('TxRelay', (accounts) => {
         params = [user1, proxy.address, newMetaIdenManager.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
 
@@ -732,14 +727,14 @@ contract('TxRelay', (accounts) => {
         params = [user3, proxy.address]
         p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user3, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
 
         //Young owner tries to cancel
         params = [user2, proxy.address]
         p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
 
         await evm_increaseTime(adminTimeLock + 1)
@@ -748,7 +743,7 @@ contract('TxRelay', (accounts) => {
         params = [user1, proxy.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "MigrationCanceled", proxy.address, newMetaIdenManager.address, user1)
       })
@@ -759,7 +754,7 @@ contract('TxRelay', (accounts) => {
         params = [user1, proxy.address, newMetaIdenManager.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
 
@@ -768,14 +763,14 @@ contract('TxRelay', (accounts) => {
         params = [user3, proxy.address]
         p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user3, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
 
         //Young owner tries to finalize
         params = [user2, proxy.address]
         p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user2, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
 
         await evm_increaseTime(adminTimeLock + 1)
@@ -784,7 +779,7 @@ contract('TxRelay', (accounts) => {
         params = [user1, proxy.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "MigrationFinalized", proxy.address, newMetaIdenManager.address, user1)
       })
@@ -795,7 +790,7 @@ contract('TxRelay', (accounts) => {
         params = [user1, proxy.address, newMetaIdenManager.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
 
@@ -806,9 +801,9 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'forwardTo', types, params, lw, keyFromPw)
 
-        res = await txRelay.checkAddress.call(p.data, user1)
-        assert.isTrue(res, "Address is not first parameter")
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        res = await txRelay.getAddress.call(p.data)
+        assert.equal(res, user1, "Address is not first parameter")
+        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         //Allow for transfer to finalize
         await evm_increaseTime(adminTimeLock + 1)
@@ -817,7 +812,7 @@ contract('TxRelay', (accounts) => {
         params = [user1, proxy.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "MigrationFinalized", proxy.address, newMetaIdenManager.address, user1)
 
@@ -828,10 +823,10 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, newMetaIdenManager.address,
                               'forwardTo', types, params, lw, keyFromPw)
 
-        res = await txRelay.checkAddress.call(p.data, user1)
-        assert.isTrue(res, "Address is not first parameter")
+        res = await txRelay.getAddress.call(p.data)
+        assert.equal(res, user1, "Address is not first parameter")
 
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, user1, {from: sender})
+        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         regData = await testReg.registry.call(proxy.address)
         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update properly')
       })
@@ -846,24 +841,24 @@ contract('TxRelay', (accounts) => {
 
     //encoded correctly
     data = enc(n, t, p)
-    res = await txRelay.checkAddress.call(data, user1)
-    assert.isTrue(res, "Address is not first parameter")
+    res = await txRelay.getAddress.call(data)
+    assert.equal(res, user1, "Address is not first parameter")
     //off by a nibble
     data = enc(n, t, p).slice(1)
-    res = await txRelay.checkAddress.call(data, user1)
-    assert.isFalse(res, "Address is first parameter, should be shifted off")
+    res = await txRelay.getAddress.call(data)
+    assert.notEqual(res, user1, "Address is first parameter, should be shifted off")
     //short
     data = enc(n, t, p).substring(0, 16)
-    res = await txRelay.checkAddress.call(data, user1)
-    assert.isFalse(res, "Address is first parameter, should be too short")
+    res = await txRelay.getAddress.call(data)
+    assert.notEqual(res, user1, "Address is first parameter, should be too short")
     //wrong address
     let badParam = [user2, proxy.address, testReg.address, 0, []]
     data = enc(n, t, badParam)
-    res = await txRelay.checkAddress.call(data, user1)
-    assert.isFalse(res, "Address is first parameter, should be someone else")
+    res = await txRelay.getAddress.call(data)
+    assert.notEqual(res, user1, "Address is first parameter, should be someone else")
     //first half of address
     data = enc(n, t, p).substring(0, 26) + zero
-    res = await txRelay.checkAddress.call(data, user1)
-    assert.isFalse(res, "Address is first parameter, should be too short")
+    res = await txRelay.getAddress.call(data)
+    assert.notEqual(res, user1, "Address is first parameter, should be too short")
     })
 })
