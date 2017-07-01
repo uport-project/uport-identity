@@ -254,8 +254,8 @@ contract('MetaIdentityManager', (accounts) => {
         errorThrown = false
       })
 
-      it('within userTimeLock is not allowed transactions', async function() {
-        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, false)
+      it('within userTimeLock is allowed transactions', async function() {
+        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, true)
       })
 
       describe('after userTimeLock', () => {

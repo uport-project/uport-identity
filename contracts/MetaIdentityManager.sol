@@ -134,7 +134,7 @@ contract MetaIdentityManager {
     onlyOlderOwner(identity, sender)
     rateLimited(identity, sender)
   {
-    owners[identity][newOwner] = now;
+    owners[identity][newOwner] = now - userTimeLock;
     OwnerAdded(identity, newOwner, sender);
   }
 
@@ -170,7 +170,7 @@ contract MetaIdentityManager {
     RecoveryChanged(identity, recoveryKey, sender);
   }
 
-  /// @dev Allows an owner to being process of transfering proxy to new IdentityManager
+  /// @dev Allows an owner to begin process of transfering proxy to new IdentityManager
   function initiateMigration(address sender, Proxy identity, address newIdManager)
     onlyAuthorized
     onlyOlderOwner(identity, sender)
@@ -204,7 +204,7 @@ contract MetaIdentityManager {
     if (msg.data.length < 36) return false;
     assembly {
         let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        t := eq(and(mask, a), and(mask, calldataload(4)))
+        t := eq(a, and(mask, calldataload(4)))
     }
   }
 }

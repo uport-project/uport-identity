@@ -44,7 +44,9 @@ contract TxRelay {
     if (b.length < 36) return address(0);
     assembly {
         let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        a := and(mask, mload(add(b,36)))
+        a := and(mask, mload(add(b, 36)))
+        //36 is the offset of the first param of the data, if encoded properly.
+        //4 bytes for the function signature, and 32 for the addess. 
     }
   }
 

@@ -495,9 +495,9 @@ contract('TxRelay', (accounts) => {
           await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
         })
 
-        it("within userTimeLock is not allowed transactions", async function () {
+        it("within userTimeLock is allowed transactions", async function () {
           await testMetaTxForwardTo(user2, sender, txRelay, metaIdentityManager.address, proxy.address,
-                                    testReg, false, true, lw, keyFromPw)
+                                    testReg, false, false, lw, keyFromPw)
         })
 
         describe("after userTimeLock", () => {
@@ -719,7 +719,6 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-
         await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
 
         //Non-owner tries to cancel
@@ -735,16 +734,23 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
+        await checkLogs(tx, "MigrationCanceled", proxy.address, newMetaIdenManager.address, user2)
 
         await evm_increaseTime(adminTimeLock + 1)
+        //Start migration again
+        types = ['address', 'address', 'address']
+        params = [user1, proxy.address, newMetaIdenManager.address]
+        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+                              'initiateMigration', types, params, lw, keyFromPw)
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
 
         //Older owner tries to cancel.
+        types = ['address', 'address']
         params = [user1, proxy.address]
         p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-
         await checkLogs(tx, "MigrationCanceled", proxy.address, newMetaIdenManager.address, user1)
       })
 
