@@ -12,7 +12,7 @@ contract IdentityFactory {
     mapping(address => address) public senderToProxy;
 
     //cost ~2.4M gas
-    function createProxyWithControllerAndRecovery(address userKey, address[] delegates, uint longTimeLock, uint shortTimeLock) {
+    function CreateProxyWithControllerAndRecovery(address userKey, address[] delegates, uint longTimeLock, uint shortTimeLock) {
         Proxy proxy = new Proxy();
         RecoverableController controller = new RecoverableController(proxy, userKey, longTimeLock, shortTimeLock);
         proxy.transfer(controller);
