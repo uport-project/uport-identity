@@ -1,6 +1,7 @@
 pragma solidity 0.4.8;
 import "./RecoveryQuorum.sol";
 
+
 contract IdentityFactory {
     event IdentityCreated(
         address indexed userKey,

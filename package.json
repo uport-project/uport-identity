@@ -17,6 +17,7 @@
     "deploy-local": "npm run _deploy local",
     "generate-readme": "./scripts/generate-readme.js",
     "test": "./node_modules/.bin/truffle test --network in_memory",
+    "lint": "./node_modules/.bin/solium -d contracts",
     "diagrams": "bash scripts/make-diagrams.bash"
   },
   "license": "Apache-2",
@@ -37,6 +38,7 @@
     "ethereumjs-testrpc": "^3.0.3",
     "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
+    "solium": "^0.5.3",
     "truffle": "3.1.2",
     "truffle-contract": "^1.1.10",
     "truffle-hdwallet-provider": "0.0.3"
