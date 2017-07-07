@@ -1,7 +1,7 @@
 const lightwallet = require('eth-signer')
 const evm_increaseTime = require('./evmIncreaseTime.js')
 const snapshots = require('./evmSnapshots.js')
-const MetaIdentityManager = artifacts.require('MetaIdentityManager')
+const IdentityManager = artifacts.require('IdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const Promise = require('bluebird')
@@ -20,14 +20,14 @@ function getRandomNumber() {
 }
 
 //From is who is actually signing. claimedFrom is the address that they claim to be (first input to most functions)
-async function testForwardTo(testReg, metaIdentityManager, proxyAddress, fromAccount, claimedFrom, shouldEqual) {
+async function testForwardTo(testReg, identityManager, proxyAddress, fromAccount, claimedFrom, shouldEqual) {
   let errorThrown = false
   let testNum = getRandomNumber()
   // Encode the transaction to send to the proxy contract
   let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
   // Send forward request from the owner
   try {
-    await metaIdentityManager.forwardTo(claimedFrom, proxyAddress, testReg.address, 0, '0x' + data, {from: fromAccount})
+    await identityManager.forwardTo(claimedFrom, proxyAddress, testReg.address, 0, '0x' + data, {from: fromAccount})
   } catch (error) {
     errorThrown = error.message
   }
@@ -41,14 +41,14 @@ async function testForwardTo(testReg, metaIdentityManager, proxyAddress, fromAcc
   }
 }
 
-async function testForwardToFromRelay(testReg, metaIdentityManager, proxyAddress, fromAccount, txRelayAddress, shouldEqual) {
+async function testForwardToFromRelay(testReg, identityManager, proxyAddress, fromAccount, txRelayAddress, shouldEqual) {
   let errorThrown = false
   let testNum = getRandomNumber()
   // Encode the transaction to send to the proxy contract
   let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
   // Send forward request from the owner
   try {
-    await metaIdentityManager.forwardTo(fromAccount, proxyAddress, testReg.address, 0, '0x' + data, {from: txRelayAddress})
+    await identityManager.forwardTo(fromAccount, proxyAddress, testReg.address, 0, '0x' + data, {from: txRelayAddress})
   } catch (error) {
     errorThrown = error.message
   }
@@ -63,7 +63,7 @@ async function testForwardToFromRelay(testReg, metaIdentityManager, proxyAddress
 }
 
 
-contract('MetaIdentityManager', (accounts) => {
+contract('IdentityManager', (accounts) => {
   let proxy
   let deployedProxy
   let testReg
@@ -92,13 +92,13 @@ contract('MetaIdentityManager', (accounts) => {
     relay = accounts[6]
     recoveryKey = accounts[8]
     recoveryKey2 = accounts[9]
-    metaIdentityManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, relay)
+    identityManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate, relay)
     deployedProxy = await Proxy.new({from: user1})
     testReg = await TestRegistry.deployed()
   })
 
   it('Correctly creates Identity', async function() {
-    let tx = await metaIdentityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+    let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
     let log = tx.logs[0]
 
     assert.equal(log.event, 'IdentityCreated', 'wrong event')
@@ -108,48 +108,48 @@ contract('MetaIdentityManager', (accounts) => {
 
     await compareCode(log.args.identity, deployedProxy.address)
     let proxyOwner = await Proxy.at(log.args.identity).owner.call()
-    assert.equal(proxyOwner, metaIdentityManager.address, 'Proxy owner should be the identity manager')
+    assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
   })
 
   describe('existing identity', () => {
 
     beforeEach(async function() {
-      let tx = await metaIdentityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+      let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
       let log = tx.logs[0]
       assert.equal(log.event, 'IdentityCreated', 'wrong event')
       proxy = Proxy.at(log.args.identity)
     })
 
     it('allow transactions initiated by owner', async function() {
-      await testForwardTo(testReg, metaIdentityManager, proxy.address, user1, user1, true)
+      await testForwardTo(testReg, identityManager, proxy.address, user1, user1, true)
     })
 
     it('don\'t allow transactions initiated by non owner', async function() {
-      await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, false)
+      await testForwardTo(testReg, identityManager, proxy.address, user2, user2, false)
     })
 
     it('don\'t allow transactions initiated by recoveryKey', async function() {
-      await testForwardTo(testReg, metaIdentityManager, proxy.address, recoveryKey, recoveryKey, false)
+      await testForwardTo(testReg, identityManager, proxy.address, recoveryKey, recoveryKey, false)
     })
 
     it('onlyAuthorized modifier allows in correct users/relay', async function () {
       //Allow a user claimed to be themselves
-      await testForwardTo(testReg, metaIdentityManager, proxy.address, user1, user1, true)
+      await testForwardTo(testReg, identityManager, proxy.address, user1, user1, true)
       //Do not allow a user claiming to be someone else.
       let errorThrown = false
       try {
-        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user1, true)
+        await testForwardTo(testReg, identityManager, proxy.address, user2, user1, true)
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "Should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown an error")
       //Allow the transaction relay.
-      await testForwardToFromRelay(testReg, metaIdentityManager, proxy.address, user1, relay, true)
+      await testForwardToFromRelay(testReg, identityManager, proxy.address, user1, relay, true)
     })
 
     it('owner can add other owner', async function() {
-      let tx = await metaIdentityManager.addOwner(user1, proxy.address, user5, {from: user1})
+      let tx = await identityManager.addOwner(user1, proxy.address, user5, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'OwnerAdded', 'should trigger correct event')
       assert.equal(log.args.identity,
@@ -165,13 +165,13 @@ contract('MetaIdentityManager', (accounts) => {
 
     it('owner is rateLimited on some functions', async function() {
       //User1 adds user5
-      let tx = await metaIdentityManager.addOwner(user1, proxy.address, user5, {from: user1})
+      let tx = await identityManager.addOwner(user1, proxy.address, user5, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
       //User1 try to add another owner, should fail.
       let errorThrown = false
       try {
-        await metaIdentityManager.addOwner(user1, proxy.address, user4, {from: user1})
+        await identityManager.addOwner(user1, proxy.address, user4, {from: user1})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "should have thrown")
         errorThrown = true
@@ -180,7 +180,7 @@ contract('MetaIdentityManager', (accounts) => {
       //User1 try to remove a user. Should still be rate limited and fail.
       errorThrown = false
       try {
-        await metaIdentityManager.removeOwner(user1, proxy.address, user5, {from: user1})
+        await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "should have thrown")
         errorThrown = true
@@ -189,7 +189,7 @@ contract('MetaIdentityManager', (accounts) => {
       //user1 tries to change recovery, but is still rate limited
       errorThrown = false
       try {
-        await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+        await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "should have thrown")
         errorThrown = true
@@ -198,13 +198,13 @@ contract('MetaIdentityManager', (accounts) => {
       //No longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
       //User1 tries to add another owner. Should be able to
-      tx = await metaIdentityManager.addOwner(user1, proxy.address, user4, {from: user1})
+      tx = await identityManager.addOwner(user1, proxy.address, user4, {from: user1})
       log = tx.logs[0]
       assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
       //User1 try to remove a user. Should be rate limited and fail.
       errorThrown = false
       try {
-        await metaIdentityManager.removeOwner(user1, proxy.address, user5, {from: user1})
+        await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "should have thrown")
         errorThrown = true
@@ -213,7 +213,7 @@ contract('MetaIdentityManager', (accounts) => {
       //user1 tries to change recovery, but is still rate limited
       errorThrown = false
       try {
-        await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+        await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "should have thrown")
         errorThrown = true
@@ -221,13 +221,13 @@ contract('MetaIdentityManager', (accounts) => {
       assert.isTrue(errorThrown, "should have thrown")
       //no longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
-      tx = await metaIdentityManager.removeOwner(user1, proxy.address, user5, {from: user1})
+      tx = await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       log = tx.logs[0]
       assert.equal(log.event, 'OwnerRemoved', 'should trigger correct event')
       //user1 tries to change recovery, but is rate limited
       errorThrown = false
       try {
-        await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+        await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
         assert.match(e.message, /invalid JUMP/, "should have thrown")
         errorThrown = true
@@ -235,14 +235,14 @@ contract('MetaIdentityManager', (accounts) => {
       assert.isTrue(errorThrown, "should have thrown")
       //no longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
-      tx = await metaIdentityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
+      tx = await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       log = tx.logs[0]
       assert.equal(log.event, 'RecoveryChanged', 'should trigger correct event')
     })
 
     it('non-owner can not add other owner', async function() {
       try {
-        await metaIdentityManager.addOwner(user3, proxy.address, user4, {from: user3})
+        await identityManager.addOwner(user3, proxy.address, user4, {from: user3})
       } catch(error) {
         assert.match(error, /invalid JUMP/, 'throws an error')
       }
@@ -250,25 +250,25 @@ contract('MetaIdentityManager', (accounts) => {
 
     describe('new owner added by owner', () => {
       beforeEach(async function() {
-        await metaIdentityManager.addOwner(user1, proxy.address, user2, {from: user1})
+        await identityManager.addOwner(user1, proxy.address, user2, {from: user1})
         errorThrown = false
       })
 
       it('within userTimeLock is allowed transactions', async function() {
-        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, true)
+        await testForwardTo(testReg, identityManager, proxy.address, user2, user2, true)
       })
 
       describe('after userTimeLock', () => {
         beforeEach(() => evm_increaseTime(userTimeLock))
 
         it('Allow transactions', async function() {
-          await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, true)
+          await testForwardTo(testReg, identityManager, proxy.address, user2, user2, true)
         })
 
         it('can not add other owner yet', async function() {
           let errorThrown = false
           try {
-            await metaIdentityManager.addOwner(user2, proxy.address, user4, {from: user2})
+            await identityManager.addOwner(user2, proxy.address, user4, {from: user2})
           } catch(error) {
             assert.match(error, /invalid JUMP/, 'throws an error')
             errorThrown = true
@@ -279,7 +279,7 @@ contract('MetaIdentityManager', (accounts) => {
         it('can not remove other owner yet', async function() {
           let errorThrown = false
           try {
-            await metaIdentityManager.removeOwner(user2, proxy.address, user1, {from: user2})
+            await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
           } catch(error) {
             assert.match(error, /invalid JUMP/, 'throws an error')
             errorThrown = true
@@ -290,7 +290,7 @@ contract('MetaIdentityManager', (accounts) => {
         it('can not change recoveryKey yet', async function() {
           let errorThrown = false
           try {
-            await metaIdentityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
+            await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
           } catch(error) {
             assert.match(error, /invalid JUMP/, 'throws an error')
             errorThrown = true
@@ -303,7 +303,7 @@ contract('MetaIdentityManager', (accounts) => {
         beforeEach(() => evm_increaseTime(adminTimeLock))
 
         it('can add new owner', async function() {
-          let tx = await metaIdentityManager.addOwner(user2, proxy.address, user3, {from: user2})
+          let tx = await identityManager.addOwner(user2, proxy.address, user3, {from: user2})
           const log = tx.logs[0]
           assert.equal(log.args.owner,
                       user3,
@@ -314,7 +314,7 @@ contract('MetaIdentityManager', (accounts) => {
         })
 
         it('can remove other owner', async function() {
-          let tx = await metaIdentityManager.removeOwner(user2, proxy.address, user1, {from: user2})
+          let tx = await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
           const log = tx.logs[0]
           assert.equal(log.args.owner,
                       user1,
@@ -325,7 +325,7 @@ contract('MetaIdentityManager', (accounts) => {
         })
 
         it('can change recoveryKey', async function() {
-          let tx = await metaIdentityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
+          let tx = await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
           const log = tx.logs[0]
           assert.equal(log.args.recoveryKey,
                       recoveryKey2,
@@ -339,14 +339,14 @@ contract('MetaIdentityManager', (accounts) => {
 
     describe('new owner added by recoveryKey', () => {
       beforeEach(async function() {
-        await metaIdentityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user2, {from: recoveryKey})
+        await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user2, {from: recoveryKey})
       })
 
       it('recoveryKey is rate limited in added new owners', async function () {
         //should be rate limited when trying again
         let errorThrown = false
         try {
-          await metaIdentityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
+          await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
         } catch (e) {
           assert.match(e.message, /invalid JUMP/, "should have thrown")
           errorThrown = true
@@ -354,19 +354,19 @@ contract('MetaIdentityManager', (accounts) => {
         assert.isTrue(errorThrown, "should have thrown")
         //should no longer be rateLimited
         await evm_increaseTime(adminTimeLock + 1)
-        tx = await metaIdentityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
+        tx = await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
         assert.equal(tx.logs[0].event, 'OwnerAdded', 'should trigger correct event')
       })
 
       it('within userTimeLock is not allowed transactions', async function() {
-        await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, false)
+        await testForwardTo(testReg, identityManager, proxy.address, user2, user2, false)
       })
 
       describe('after userTimeLock', () => {
         beforeEach(() => evm_increaseTime(userTimeLock))
 
         it('Allow transactions', async function() {
-          await testForwardTo(testReg, metaIdentityManager, proxy.address, user2, user2, true)
+          await testForwardTo(testReg, identityManager, proxy.address, user2, user2, true)
         })
       })
 
@@ -374,7 +374,7 @@ contract('MetaIdentityManager', (accounts) => {
         beforeEach(() => evm_increaseTime(adminTimeLock))
 
         it('can add new owner', async function() {
-          let tx = await metaIdentityManager.addOwner(user2, proxy.address, user3, {from: user2})
+          let tx = await identityManager.addOwner(user2, proxy.address, user3, {from: user2})
           const log = tx.logs[0]
           assert.equal(log.args.owner,
                       user3,
@@ -385,7 +385,7 @@ contract('MetaIdentityManager', (accounts) => {
         })
 
         it('can remove other owner', async function() {
-          let tx = await metaIdentityManager.removeOwner(user2, proxy.address, user1, {from: user2})
+          let tx = await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
           const log = tx.logs[0]
           assert.equal(log.args.owner,
                       user1,
@@ -396,7 +396,7 @@ contract('MetaIdentityManager', (accounts) => {
         })
 
         it('can change recoveryKey', async function() {
-          let tx = await metaIdentityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
+          let tx = await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
           const log = tx.logs[0]
           assert.equal(log.args.recoveryKey,
                       recoveryKey2,
@@ -412,13 +412,13 @@ contract('MetaIdentityManager', (accounts) => {
   describe('migration', () => {
     let newIdenManager
     beforeEach(async function() {
-      let tx = await metaIdentityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+      let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
       let log = tx.logs[0]
       assert.equal(log.event, 'IdentityCreated', 'wrong event')
       proxy = Proxy.at(log.args.identity)
-      newIdenManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, relay)
+      newIdenManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate, relay)
       //user2 is now a younger owner, while user1 is an olderowner
-      tx = await metaIdentityManager.addOwner(user1, proxy.address, user2, {from: user1})
+      tx = await identityManager.addOwner(user1, proxy.address, user2, {from: user1})
       log = tx.logs[0]
       assert.equal(log.event, 'OwnerAdded', 'wrong event')
       assert.equal(log.args.identity, proxy.address, 'wrong proxy')
@@ -427,7 +427,7 @@ contract('MetaIdentityManager', (accounts) => {
     })
 
     it('older owner can start transfer', async function() {
-      let tx = await metaIdentityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+      let tx = await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'MigrationInitiated', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'migrating wrong proxy')
@@ -438,7 +438,7 @@ contract('MetaIdentityManager', (accounts) => {
     it('young owner should not be able to start transfer', async function() {
       let threwError = false
       try {
-        await metaIdentityManager.initiateMigration(user2, proxy.address, newIdenManager.address, {from: user2})
+        await identityManager.initiateMigration(user2, proxy.address, newIdenManager.address, {from: user2})
       } catch(error) {
         assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
@@ -449,7 +449,7 @@ contract('MetaIdentityManager', (accounts) => {
     it('non-owner should not be able to start transfer' , async function() {
       let threwError = false
       try {
-        await metaIdentityManager.initiateMigration(nobody, proxy.address, newIdenManager.address, {from: nobody})
+        await identityManager.initiateMigration(nobody, proxy.address, newIdenManager.address, {from: nobody})
       } catch(error) {
         assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
@@ -458,14 +458,14 @@ contract('MetaIdentityManager', (accounts) => {
     })
 
     it('correct keys can cancel migration', async function() {
-      let tx = await metaIdentityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+      let tx = await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'MigrationInitiated', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'migrating to wrong location')
       assert.equal(log.args.instigator, user1, 'started migrating from wrong user')
 
-      tx = await metaIdentityManager.cancelMigration(user1, proxy.address, {from: user1})
+      tx = await identityManager.cancelMigration(user1, proxy.address, {from: user1})
       log = tx.logs[0]
       assert.equal(log.event, 'MigrationCanceled', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'canceled migrating wrong proxy')
@@ -473,7 +473,7 @@ contract('MetaIdentityManager', (accounts) => {
       assert.equal(log.args.instigator, user1, 'canceled migrating from wrong user')
 
       //set up migration again
-      tx = await metaIdentityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+      tx = await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       //Second migration attempt, should allow
       log = tx.logs[0]
       assert.equal(log.event, 'MigrationInitiated', 'wrong event initiated')
@@ -482,7 +482,7 @@ contract('MetaIdentityManager', (accounts) => {
       assert.equal(log.args.instigator, user1, 'started migrating from wrong person')
 
       await evm_increaseTime(userTimeLock)
-      tx = await metaIdentityManager.cancelMigration(user2, proxy.address, {from: user2})
+      tx = await identityManager.cancelMigration(user2, proxy.address, {from: user2})
       //young owner should also be able to cancel migration
       log = tx.logs[0]
       assert.equal(log.event, 'MigrationCanceled', 'wrong event initiated')
@@ -490,11 +490,11 @@ contract('MetaIdentityManager', (accounts) => {
       assert.equal(log.args.newIdManager, newIdenManager.address, 'canceled migration to wrong location')
       assert.equal(log.args.instigator, user2, 'canceled migrating from wrong person')
 
-      await metaIdentityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+      await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       //Don't need to check setup again
       let threwError = false
       try {
-        await metaIdentityManager.cancelMigration(nobody, proxy.address, {from: nobody})
+        await identityManager.cancelMigration(nobody, proxy.address, {from: nobody})
       } catch(error) {
         assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
@@ -503,10 +503,10 @@ contract('MetaIdentityManager', (accounts) => {
     })
 
     it('correct keys should finilize transfer', async function() {
-      await metaIdentityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+      await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let threwError = false
       try {
-          await metaIdentityManager.finalizeMigration(nobody, proxy.address, {from: nobody})
+          await identityManager.finalizeMigration(nobody, proxy.address, {from: nobody})
       } catch(error) {
         assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
@@ -514,7 +514,7 @@ contract('MetaIdentityManager', (accounts) => {
       assert.isTrue(threwError, 'non-owner should not be able to finalize')
       threwError = false
       try {
-          await metaIdentityManager.finalizeMigration(user2, proxy.address, {from: user2})
+          await identityManager.finalizeMigration(user2, proxy.address, {from: user2})
       } catch(error) {
         assert.match(error, /invalid JUMP/, 'throws an error')
         threwError = true
@@ -522,7 +522,7 @@ contract('MetaIdentityManager', (accounts) => {
       assert.isTrue(threwError, 'young owner should not be able to finalize')
 
       await evm_increaseTime(2 * adminTimeLock)
-      let tx = await metaIdentityManager.finalizeMigration(user1, proxy.address, {from: user1})
+      let tx = await identityManager.finalizeMigration(user1, proxy.address, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'MigrationFinalized', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')
@@ -530,13 +530,13 @@ contract('MetaIdentityManager', (accounts) => {
       assert.equal(log.args.instigator, user1, 'finalized migrating from wrong person')
     })
 
-    it('should be owner of new metaIdentityManager after successful transfer', async function() {
-      await metaIdentityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+    it('should be owner of new identityManager after successful transfer', async function() {
+      await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let data = '0x' + lightwallet.txutils._encodeFunctionTxData('registerIdentity', ['address', 'address'], [user1, recoveryKey])
-      await metaIdentityManager.forwardTo(user1, proxy.address, newIdenManager.address, 0, data, {from: user1})
+      await identityManager.forwardTo(user1, proxy.address, newIdenManager.address, 0, data, {from: user1})
       //increase time until migration can be finialized
       await evm_increaseTime(2 * adminTimeLock)
-      let tx = await metaIdentityManager.finalizeMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+      let tx = await identityManager.finalizeMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'MigrationFinalized', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')

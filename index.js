@@ -6,5 +6,5 @@ module.exports = {
   Proxy:                          require('./build/contracts/Proxy.json'),
   RecoveryQuorum:                 require('./build/contracts/RecoveryQuorum.json'),
   TxRelay:                        require('./build/contracts/TxRelay.json'),
-  MetaIdentityManager:            require('./build/contracts/MetaIdentityManager.json'),
+  IdentityManager:                require('./build/contracts/IdentityManager.json'),
 }

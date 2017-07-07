@@ -1,7 +1,7 @@
 pragma solidity 0.4.8;
 import "./Proxy.sol";
 
-contract MetaIdentityManager {
+contract IdentityManager {
 
   event IdentityCreated(
     address indexed identity,
@@ -91,7 +91,7 @@ contract MetaIdentityManager {
   /// @param _adminTimeLock Time before new owner can add/remove owners
   /// @param _adminRate Time period used for rate limiting a given key for admin functionality
   /// @param _relayAddress Address of meta transaction relay contract
-  function MetaIdentityManager(uint _userTimeLock, uint _adminTimeLock, uint _adminRate, address _relayAddress) {
+  function IdentityManager(uint _userTimeLock, uint _adminTimeLock, uint _adminRate, address _relayAddress) {
     adminTimeLock = _adminTimeLock;
     userTimeLock = _userTimeLock;
     adminRate = _adminRate;
@@ -102,7 +102,7 @@ contract MetaIdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Gas cost of ~300,000
-  function CreateIdentity(address owner, address recoveryKey) validRecovery(recoveryKey) {
+  function createIdentity(address owner, address recoveryKey) validRecovery(recoveryKey) {
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;

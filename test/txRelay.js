@@ -1,7 +1,7 @@
 const lightwallet = require('eth-lightwallet')
 const evm_increaseTime = require('./evmIncreaseTime.js')
 const MetaTxRelay = artifacts.require('TxRelay')
-const MetaIdentityManager = artifacts.require('MetaIdentityManager')
+const IdentityManager = artifacts.require('IdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const MetaTestRegistry = artifacts.require('MetaTestRegistry')
@@ -85,7 +85,7 @@ function signPayload(signingAddr, sendingAddr, txRelay, destinationAddress, func
 
 //shouldThrow is if the relayer should throw
 //shouldUpdate is if the subcall should throw
-async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, metaIdentityManagerAddress, proxyAddress,
+async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, identityManagerAddress, proxyAddress,
                                    testReg, relayShouldFail, subCallShouldFail, lw, keyFromPw) {
   //Relayer must be a truffle account, while fromAccount must be lightwallet account
   let errorThrown = false
@@ -95,7 +95,7 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, metaIdenti
   let types = ['address', 'address', 'address', 'uint256', 'bytes']
   let params = [signingAddr, proxyAddress, testReg.address, 0, data]
   // Setup payload for meta-tx
-  let p = await signPayload(signingAddr, sendingAddr, txRelay, metaIdentityManagerAddress,
+  let p = await signPayload(signingAddr, sendingAddr, txRelay, identityManagerAddress,
                         'forwardTo', types, params, lw, keyFromPw)
   let firstNonce = p.nonce
   // Send forward request from the owner
@@ -114,7 +114,7 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, metaIdenti
     } else {
       assert.equal(regData.toNumber(), testNum)
     }
-    p = await signPayload(signingAddr, sendingAddr, txRelay, metaIdentityManagerAddress,
+    p = await signPayload(signingAddr, sendingAddr, txRelay, identityManagerAddress,
                           'forwardTo', types, params, lw, keyFromPw)
     assert.equal(p.nonce.toNumber(), firstNonce.toNumber() + 1, "Nonce should have updated")
   }
@@ -134,7 +134,7 @@ contract('TxRelay', (accounts) => {
   let deployedProxy
   let testReg
   let mTestReg //metaTestRegistry
-  let metaIdentityManager
+  let identityManager
   let txRelay
   let user1
   let user2
@@ -191,16 +191,16 @@ contract('TxRelay', (accounts) => {
 
         MetaTxRelay.new().then(instance => {
           txRelay = instance
-          return MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, txRelay.address)
+          return IdentityManager.new(userTimeLock, adminTimeLock, adminRate, txRelay.address)
         }).then(instance => {
-          metaIdentityManager = instance
+          identityManager = instance
           return Proxy.new({from: sender})
         }).then(instance => {
           deployedProxy = instance
           return TestRegistry.new()
         }).then((instance) => {
           testReg = instance
-          return metaIdentityManager.CreateIdentity(user1, recoveryKey, {from: sender})
+          return identityManager.createIdentity(user1, recoveryKey, {from: sender})
         }).then(tx => {
           const log = tx.logs[0]
           assert.equal(log.event, 'IdentityCreated', 'wrong event')
@@ -358,22 +358,22 @@ contract('TxRelay', (accounts) => {
     })
   })
 
-  describe("Meta-tx with MetaIdentityManager", () => {
+  describe("Meta-tx with IdentityManager", () => {
     describe("existing identity", () => {
       it("allow transactions initiated by owner", async function () {
-        await testMetaTxForwardTo(user1, sender, txRelay, metaIdentityManager.address,
+        await testMetaTxForwardTo(user1, sender, txRelay, identityManager.address,
                             proxy.address, testReg, false, false, lw, keyFromPw)
       })
 
       it("don't allow transactions initiated by non owner", async function () {
-        await testMetaTxForwardTo(user2, sender, txRelay, metaIdentityManager.address, proxy.address,
+        await testMetaTxForwardTo(user2, sender, txRelay, identityManager.address, proxy.address,
                                   testReg, false, true, lw, keyFromPw)
       })
 
       it("owner can add other owner", async function () {
         types = ['address', 'address', 'address']
         params = [user1, proxy.address, user2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -385,7 +385,7 @@ contract('TxRelay', (accounts) => {
         //First, user1 adds user2 as a new owner
         types = ['address', 'address', 'address']
         params = [user1, proxy.address, user2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -393,7 +393,7 @@ contract('TxRelay', (accounts) => {
         await checkLogs(tx, "OwnerAdded", proxy.address, user2, user1)
         //Then, user1 tries to add user3 as a new owner
         params = [user1, proxy.address, user3]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
@@ -401,7 +401,7 @@ contract('TxRelay', (accounts) => {
 
         //Tries to change the recoveryKey
         params = [user1, proxy.address, recoveryKey2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
@@ -409,7 +409,7 @@ contract('TxRelay', (accounts) => {
 
         //Then have user1 try to remove user2 - still is rateLimited
         params = [user1, proxy.address, user2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -419,7 +419,7 @@ contract('TxRelay', (accounts) => {
         await evm_increaseTime(adminRate + 1)
         //Have them add user3, sucessfull this time
         params = [user1, proxy.address, user3]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
@@ -427,7 +427,7 @@ contract('TxRelay', (accounts) => {
 
         //Try to remove owner two again, should fail
         params = [user1, proxy.address, user2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
@@ -435,7 +435,7 @@ contract('TxRelay', (accounts) => {
 
         //Tries to change the recoveryKey
         params = [user1, proxy.address, recoveryKey2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
@@ -445,7 +445,7 @@ contract('TxRelay', (accounts) => {
         await evm_increaseTime(adminRate + 1)
 
         params = [user1, proxy.address, user2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -453,7 +453,7 @@ contract('TxRelay', (accounts) => {
 
         //Tries to change the recoveryKey
         params = [user1, proxy.address, recoveryKey2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
@@ -463,7 +463,7 @@ contract('TxRelay', (accounts) => {
         await evm_increaseTime(adminRate + 1)
         //Tries to change the recoveryKey
         params = [user1, proxy.address, recoveryKey2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -473,7 +473,7 @@ contract('TxRelay', (accounts) => {
       it("non-owner can not add other owner", async function () {
         types = ['address', 'address', 'address']
         params = [user3, proxy.address, user4]
-        p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user3, sender, txRelay, identityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
         res = await txRelay.getAddress.call(p.data)
@@ -487,7 +487,7 @@ contract('TxRelay', (accounts) => {
         beforeEach(async function () {
           types = ['address', 'address', 'address']
           params = [user1, proxy.address, user2]
-          p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+          p = await signPayload(user1, sender, txRelay, identityManager.address,
                                 'addOwner', types, params, lw, keyFromPw)
 
           tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -496,7 +496,7 @@ contract('TxRelay', (accounts) => {
         })
 
         it("within userTimeLock is allowed transactions", async function () {
-          await testMetaTxForwardTo(user2, sender, txRelay, metaIdentityManager.address, proxy.address,
+          await testMetaTxForwardTo(user2, sender, txRelay, identityManager.address, proxy.address,
                                     testReg, false, false, lw, keyFromPw)
         })
 
@@ -506,14 +506,14 @@ contract('TxRelay', (accounts) => {
           })
 
           it("Allow transactions", async function () {
-            await testMetaTxForwardTo(user2, sender, txRelay, metaIdentityManager.address, proxy.address,
+            await testMetaTxForwardTo(user2, sender, txRelay, identityManager.address, proxy.address,
                                       testReg, false, false, lw, keyFromPw)
           })
 
           it("can not add other owner yet", async function () {
             types = ['address', 'address', 'address']
             params = [user2, proxy.address, user3]
-            p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user2, sender, txRelay, identityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
             res = await txRelay.getAddress.call(p.data)
@@ -526,7 +526,7 @@ contract('TxRelay', (accounts) => {
           it("can not remove other owner yet", async function () {
             types = ['address', 'address', 'address']
             params = [user2, proxy.address, user1]
-            p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user2, sender, txRelay, identityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
             res = await txRelay.getAddress.call(p.data)
@@ -539,7 +539,7 @@ contract('TxRelay', (accounts) => {
           it("can not change recoveryKey yet", async function () {
             types = ['address', 'address', 'address']
             params = [user2, proxy.address, recoveryKey2]
-            p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user2, sender, txRelay, identityManager.address,
                                   'changeRecovery', types, params, lw, keyFromPw)
 
             res = await txRelay.getAddress.call(p.data)
@@ -558,7 +558,7 @@ contract('TxRelay', (accounts) => {
           it("can add new owner", async function () {
             types = ['address', 'address', 'address']
             params = [user2, proxy.address, user3]
-            p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user2, sender, txRelay, identityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
             tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -569,7 +569,7 @@ contract('TxRelay', (accounts) => {
           it("can remove other owner", async function () {
             types = ['address', 'address', 'address']
             params = [user2, proxy.address, user3]
-            p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user2, sender, txRelay, identityManager.address,
                                   'removeOwner', types, params, lw, keyFromPw)
 
             tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -580,7 +580,7 @@ contract('TxRelay', (accounts) => {
           it("can change recoveryKey", async function () {
             types = ['address', 'address', 'address']
             params = [user2, proxy.address, recoveryKey2]
-            p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user2, sender, txRelay, identityManager.address,
                                   'changeRecovery', types, params, lw, keyFromPw)
 
             tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -593,7 +593,7 @@ contract('TxRelay', (accounts) => {
         beforeEach(async function () {
           types = ['address', 'address', 'address']
           params = [recoveryKey, proxy.address, user4] //new owner
-          p = await signPayload(recoveryKey, sender, txRelay, metaIdentityManager.address,
+          p = await signPayload(recoveryKey, sender, txRelay, identityManager.address,
                                 'addOwnerFromRecovery', types, params, lw, keyFromPw)
 
           tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -604,7 +604,7 @@ contract('TxRelay', (accounts) => {
         it('recovery key is rateLimited', async function () {
           types = ['address', 'address', 'address']
           params = [recoveryKey, proxy.address, user4] //new owner
-          p = await signPayload(recoveryKey, sender, txRelay, metaIdentityManager.address,
+          p = await signPayload(recoveryKey, sender, txRelay, identityManager.address,
                                 'addOwnerFromRecovery', types, params, lw, keyFromPw)
 
           tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
@@ -612,14 +612,14 @@ contract('TxRelay', (accounts) => {
         })
 
         it("within userTimeLock is not allowed transactions", async function () {
-          await testMetaTxForwardTo(user4, sender, txRelay, metaIdentityManager.address, proxy.address,
+          await testMetaTxForwardTo(user4, sender, txRelay, identityManager.address, proxy.address,
                                     testReg, false, true, lw, keyFromPw)
         })
 
         describe("after userTimeLock", () => {
           it("Allow transactions", async function () {
             await evm_increaseTime(userTimeLock + 1)
-            await testMetaTxForwardTo(user4, sender, txRelay, metaIdentityManager.address, proxy.address,
+            await testMetaTxForwardTo(user4, sender, txRelay, identityManager.address, proxy.address,
                                       testReg, false, false, lw, keyFromPw)
           })
         })
@@ -632,7 +632,7 @@ contract('TxRelay', (accounts) => {
           it("can add new owner", async function () {
             types = ['address', 'address', 'address']
             params = [user4, proxy.address, user3]
-            p = await signPayload(user4, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user4, sender, txRelay, identityManager.address,
                                   'addOwner', types, params, lw, keyFromPw)
 
             tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -643,7 +643,7 @@ contract('TxRelay', (accounts) => {
           it("can remove other owner", async function () {
             types = ['address', 'address', 'address']
             params = [user4, proxy.address, user3]
-            p = await signPayload(user4, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user4, sender, txRelay, identityManager.address,
                                   'removeOwner', types, params, lw, keyFromPw)
 
             tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -654,7 +654,7 @@ contract('TxRelay', (accounts) => {
           it("can change recoveryKey", async function () {
             types = ['address', 'address', 'address']
             params = [user4, proxy.address, recoveryKey2]
-            p = await signPayload(user4, sender, txRelay, metaIdentityManager.address,
+            p = await signPayload(user4, sender, txRelay, identityManager.address,
                                   'changeRecovery', types, params, lw, keyFromPw)
 
             tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -665,13 +665,13 @@ contract('TxRelay', (accounts) => {
       })
     })
     describe("migration", () => {
-      let newMetaIdenManager
+      let newIdenManager
       beforeEach(async function () {
-        newMetaIdenManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, txRelay.address)
+        newIdenManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate, txRelay.address)
         //Make user2 a young owner.
         types = ['address', 'address', 'address']
         params = [user1, proxy.address, user2]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
         res = await txRelay.getAddress.call(p.data)
@@ -684,18 +684,18 @@ contract('TxRelay', (accounts) => {
 
       it("older owner can start transfer", async function () {
         types = ['address', 'address', 'address']
-        params = [user1, proxy.address, newMetaIdenManager.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        params = [user1, proxy.address, newIdenManager.address]
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
-        await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationInitiated", proxy.address, newIdenManager.address, user1)
       })
 
       it("young owner should not be able to start transfer", async function () {
         types = ['address', 'address', 'address']
-        params = [user2, proxy.address, newMetaIdenManager.address]
-        p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+        params = [user2, proxy.address, newIdenManager.address]
+        p = await signPayload(user2, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -704,8 +704,8 @@ contract('TxRelay', (accounts) => {
 
       it("non-owner should not be able to start transfer", async function () {
         types = ['address', 'address', 'address']
-        params = [user3, proxy.address, newMetaIdenManager.address]
-        p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
+        params = [user3, proxy.address, newIdenManager.address]
+        p = await signPayload(user3, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
@@ -715,66 +715,66 @@ contract('TxRelay', (accounts) => {
       it("correct keys can cancel migration ", async function () {
         //Start migration
         types = ['address', 'address', 'address']
-        params = [user1, proxy.address, newMetaIdenManager.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        params = [user1, proxy.address, newIdenManager.address]
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationInitiated", proxy.address, newIdenManager.address, user1)
 
         //Non-owner tries to cancel
         types = ['address', 'address']
         params = [user3, proxy.address]
-        p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user3, sender, txRelay, identityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
 
         //Young owner tries to cancel
         params = [user2, proxy.address]
-        p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user2, sender, txRelay, identityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        await checkLogs(tx, "MigrationCanceled", proxy.address, newMetaIdenManager.address, user2)
+        await checkLogs(tx, "MigrationCanceled", proxy.address, newIdenManager.address, user2)
 
         await evm_increaseTime(adminTimeLock + 1)
         //Start migration again
         types = ['address', 'address', 'address']
-        params = [user1, proxy.address, newMetaIdenManager.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        params = [user1, proxy.address, newIdenManager.address]
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationInitiated", proxy.address, newIdenManager.address, user1)
 
         //Older owner tries to cancel.
         types = ['address', 'address']
         params = [user1, proxy.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        await checkLogs(tx, "MigrationCanceled", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationCanceled", proxy.address, newIdenManager.address, user1)
       })
 
       it("correct keys should finilize transfer", async function () {
         //Start migration
         types = ['address', 'address', 'address']
-        params = [user1, proxy.address, newMetaIdenManager.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        params = [user1, proxy.address, newIdenManager.address]
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
-        await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationInitiated", proxy.address, newIdenManager.address, user1)
 
         //Non-owner tries to finalize
         types = ['address', 'address']
         params = [user3, proxy.address]
-        p = await signPayload(user3, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user3, sender, txRelay, identityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
 
         //Young owner tries to finalize
         params = [user2, proxy.address]
-        p = await signPayload(user2, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user2, sender, txRelay, identityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         assert.isUndefined(tx.receipt.logs[0], "Log generated, so therefore transfer started")
@@ -783,28 +783,28 @@ contract('TxRelay', (accounts) => {
 
         //Older owner tries to finalize, and succedes.
         params = [user1, proxy.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
-        await checkLogs(tx, "MigrationFinalized", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationFinalized", proxy.address, newIdenManager.address, user1)
       })
 
-      it("should be owner of new metaIdentityManager after successful transfer", async function () {
+      it("should be owner of new identityManager after successful transfer", async function () {
         //Start migration
         types = ['address', 'address', 'address']
-        params = [user1, proxy.address, newMetaIdenManager.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        params = [user1, proxy.address, newIdenManager.address]
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
-        await checkLogs(tx, "MigrationInitiated", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationInitiated", proxy.address, newIdenManager.address, user1)
 
-        //setup new metaIdentitymanage to receive
+        //setup new identitymanage to receive
         data = enc('registerIdentity', ['address', 'address'], [user1, recoveryKey])
         types = ['address', 'address', 'address', 'uint256', 'bytes']
-        params = [user1, proxy.address, newMetaIdenManager.address, 0, data]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        params = [user1, proxy.address, newIdenManager.address, 0, data]
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'forwardTo', types, params, lw, keyFromPw)
 
         res = await txRelay.getAddress.call(p.data)
@@ -816,17 +816,17 @@ contract('TxRelay', (accounts) => {
 
         types = ['address', 'address']
         params = [user1, proxy.address]
-        p = await signPayload(user1, sender, txRelay, metaIdentityManager.address,
+        p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
-        await checkLogs(tx, "MigrationFinalized", proxy.address, newMetaIdenManager.address, user1)
+        await checkLogs(tx, "MigrationFinalized", proxy.address, newIdenManager.address, user1)
 
         //Setup data and sign
         data = enc('register', ['uint256'], [LOG_NUMBER_1])
         types = ['address', 'address', 'address', 'uint256', 'bytes']
         params = [user1, proxy.address, testReg.address, 0, data]
-        p = await signPayload(user1, sender, txRelay, newMetaIdenManager.address,
+        p = await signPayload(user1, sender, txRelay, newIdenManager.address,
                               'forwardTo', types, params, lw, keyFromPw)
 
         res = await txRelay.getAddress.call(p.data)
