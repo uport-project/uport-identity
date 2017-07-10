@@ -1,6 +1,7 @@
 pragma solidity 0.4.11;
 import "./RecoverableController.sol";
 
+
 contract IdentityFactoryWithRecoveryKey {
     event IdentityCreated(
         address indexed userKey,
