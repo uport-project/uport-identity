@@ -28,15 +28,15 @@ async function testForwardTo(testReg, identityManager, proxyAddress, fromAccount
   // Send forward request from the owner
   try {
     await identityManager.forwardTo(claimedFrom, proxyAddress, testReg.address, 0, '0x' + data, {from: fromAccount})
-  } catch (error) {
-    errorThrown = error.message
+  } catch (e) {
+    errorThrown = e.message
   }
   let regData = await testReg.registry.call(proxyAddress)
   if (shouldEqual) {
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    assert.match(errorThrown, /invalid JUMP/, 'throws an error')
+    assert.match(errorThrown, /invalid opcode/, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -49,15 +49,15 @@ async function testForwardToFromRelay(testReg, identityManager, proxyAddress, fr
   // Send forward request from the owner
   try {
     await identityManager.forwardTo(fromAccount, proxyAddress, testReg.address, 0, '0x' + data, {from: txRelayAddress})
-  } catch (error) {
-    errorThrown = error.message
+  } catch (e) {
+    errorThrown = e.message
   }
   let regData = await testReg.registry.call(proxyAddress)
   if (shouldEqual) {
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    assert.match(errorThrown, /invalid JUMP/, 'throws an error')
+    assert.match(errorThrown, /invalid opcode/, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -140,7 +140,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await testForwardTo(testReg, identityManager, proxy.address, user2, user1, true)
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "Should have thrown")
+        assert.match(e.message, /invalid opcode/, "Should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown an error")
@@ -173,7 +173,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.addOwner(user1, proxy.address, user4, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown")
@@ -182,7 +182,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown")
@@ -191,7 +191,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown")
@@ -206,7 +206,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown")
@@ -215,7 +215,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown")
@@ -229,7 +229,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown")
@@ -241,11 +241,14 @@ contract('IdentityManager', (accounts) => {
     })
 
     it('non-owner can not add other owner', async function() {
+      errorThrown = false
       try {
         await identityManager.addOwner(user3, proxy.address, user4, {from: user3})
-      } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
+        errorThrown = true
       }
+      assert.isTrue(errorThrown, "should have thrown")
     })
 
     describe('new owner added by owner', () => {
@@ -269,8 +272,8 @@ contract('IdentityManager', (accounts) => {
           let errorThrown = false
           try {
             await identityManager.addOwner(user2, proxy.address, user4, {from: user2})
-          } catch(error) {
-            assert.match(error, /invalid JUMP/, 'throws an error')
+          } catch(e) {
+            assert.match(e.message, /invalid opcode/, 'throws an error')
             errorThrown = true
           }
           assert.isTrue(errorThrown, 'Should have thrown')
@@ -280,8 +283,8 @@ contract('IdentityManager', (accounts) => {
           let errorThrown = false
           try {
             await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
-          } catch(error) {
-            assert.match(error, /invalid JUMP/, 'throws an error')
+          } catch(e) {
+            assert.match(e.message, /invalid opcode/, 'throws an error')
             errorThrown = true
           }
           assert.isTrue(errorThrown, 'Should have thrown')
@@ -291,8 +294,8 @@ contract('IdentityManager', (accounts) => {
           let errorThrown = false
           try {
             await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
-          } catch(error) {
-            assert.match(error, /invalid JUMP/, 'throws an error')
+          } catch(e) {
+            assert.match(e.message, /invalid opcode/, 'throws an error')
             errorThrown = true
           }
           assert.isTrue(errorThrown, 'Should have thrown')
@@ -348,7 +351,7 @@ contract('IdentityManager', (accounts) => {
         try {
           await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
         } catch (e) {
-          assert.match(e.message, /invalid JUMP/, "should have thrown")
+          assert.match(e.message, /invalid opcode/, "should have thrown")
           errorThrown = true
         }
         assert.isTrue(errorThrown, "should have thrown")
@@ -439,8 +442,8 @@ contract('IdentityManager', (accounts) => {
       let threwError = false
       try {
         await identityManager.initiateMigration(user2, proxy.address, newIdenManager.address, {from: user2})
-      } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown an error here')
@@ -450,8 +453,8 @@ contract('IdentityManager', (accounts) => {
       let threwError = false
       try {
         await identityManager.initiateMigration(nobody, proxy.address, newIdenManager.address, {from: nobody})
-      } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown an error here')
@@ -495,8 +498,8 @@ contract('IdentityManager', (accounts) => {
       let threwError = false
       try {
         await identityManager.cancelMigration(nobody, proxy.address, {from: nobody})
-      } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown error')
@@ -507,16 +510,16 @@ contract('IdentityManager', (accounts) => {
       let threwError = false
       try {
           await identityManager.finalizeMigration(nobody, proxy.address, {from: nobody})
-      } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'non-owner should not be able to finalize')
       threwError = false
       try {
           await identityManager.finalizeMigration(user2, proxy.address, {from: user2})
-      } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'young owner should not be able to finalize')

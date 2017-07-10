@@ -103,7 +103,7 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, identityMa
     await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sendingAddr})
   } catch (error) {
     errorThrown = true
-    assert.match(errorThrown, /invalid JUMP/, "An error should have been thrown")
+    assert.match(errorThrown, /invalid opcode/, "An error should have been thrown")
   }
   if (relayShouldFail) {
     assert.true(errorThrown, "Transaction should not have gotten through relay")
@@ -259,7 +259,7 @@ contract('TxRelay', (accounts) => {
         //claim to be a different person again
         await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "Should have thrown")
+        assert.match(e.message, /invalid opcode/, "Should have thrown")
         errorThrown = true;
       }
       assert.isTrue(errorThrown, "Has thrown an error")
@@ -281,7 +281,7 @@ contract('TxRelay', (accounts) => {
         //Wrong sender tries to send transaction
         await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: notSender})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "Should have thrown")
+        assert.match(e.message, /invalid opcode/, "Should have thrown")
         errorThrown = true;
       }
       assert.isTrue(errorThrown, "Has thrown an error")
@@ -304,7 +304,7 @@ contract('TxRelay', (accounts) => {
         await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
                                   {from: sender, value: 1})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "Should have thrown")
+        assert.match(e.message, /Cannot send value to non-payable function/, "Should have thrown")
         errorThrown = true;
       }
       assert.isTrue(errorThrown, "Should have thrown an error")
@@ -331,7 +331,7 @@ contract('TxRelay', (accounts) => {
         //Relayer tries to relay the same transaction twice
         await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
       } catch (e) {
-        assert.match(e.message, /invalid JUMP/, "should have thrown")
+        assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
       assert.isTrue(errorThrown, "Should have thrown")

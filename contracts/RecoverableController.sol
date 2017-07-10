@@ -1,4 +1,4 @@
-pragma solidity 0.4.8;
+pragma solidity 0.4.11;
 import "./Proxy.sol";
 
 contract RecoverableController {
@@ -36,7 +36,7 @@ contract RecoverableController {
   function forward(address destination, uint value, bytes data) onlyUserKey {
     proxy.forward(destination, value, data);
   }
-  //pass 0x0 to cancel 
+  //pass 0x0 to cancel
   function signRecoveryChange(address _proposedRecoveryKey) onlyUserKey{
     proposedRecoveryKeyPendingUntil = now + longTimeLock;
     proposedRecoveryKey = _proposedRecoveryKey;
@@ -48,7 +48,7 @@ contract RecoverableController {
       delete proposedRecoveryKey;
     }
   }
-  //pass 0x0 to cancel 
+  //pass 0x0 to cancel
   function signControllerChange(address _proposedController) onlyUserKey{
     proposedControllerPendingUntil = now + longTimeLock;
     proposedController = _proposedController;
@@ -60,7 +60,7 @@ contract RecoverableController {
       suicide(proposedController);
     }
   }
-  //pass 0x0 to cancel 
+  //pass 0x0 to cancel
   function signUserKeyChange(address _proposedUserKey) onlyUserKey{
     proposedUserKeyPendingUntil = now + shortTimeLock;
     proposedUserKey = _proposedUserKey;
@@ -80,4 +80,3 @@ contract RecoverableController {
     userKey = _userKey;
   }
 }
-

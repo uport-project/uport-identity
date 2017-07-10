@@ -1,4 +1,4 @@
-pragma solidity 0.4.8;
+pragma solidity 0.4.11;
 
 //This contract is meant as a "singleton" forwarding contract.
 //Eventually, it will be able to forward any transaction to
@@ -46,7 +46,7 @@ contract TxRelay {
         let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         a := and(mask, mload(add(b, 36)))
         //36 is the offset of the first param of the data, if encoded properly.
-        //4 bytes for the function signature, and 32 for the addess. 
+        //4 bytes for the function signature, and 32 for the addess.
     }
   }
 

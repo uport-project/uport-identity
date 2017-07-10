@@ -1,4 +1,4 @@
-pragma solidity 0.4.8;
+pragma solidity 0.4.11;
 
 library ArrayLib {
   function findAddress(address a, address[] storage arry) returns (int){
