@@ -1,6 +1,7 @@
 pragma solidity 0.4.11;
 import "./Proxy.sol";
 
+
 contract IdentityManager {
 
   event IdentityCreated(
