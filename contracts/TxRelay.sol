@@ -13,9 +13,9 @@ contract TxRelay {
   /*
    * @dev Relays meta transactions
    * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
+   * @param destination Location the meta-tx should be forwarded to
    * @param data The bytes necessary to call the function in the destination contract.
                  Note, the first encoded argument in data must be address of the signer
-   * @param claimedSender Address of the user who is having tx forwarded
    */
   function relayMetaTx(uint8 sigV, bytes32 sigR, bytes32 sigS,
                        address destination, bytes data) {
