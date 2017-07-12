@@ -1,4 +1,8 @@
 # uPort Identity Contracts
+[![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/uport-identity)
+![CircleCI](https://img.shields.io/circleci/project/github/uport-project/uport-identity.svg)
+[![solidity-coverage](https://img.shields.io/badge/coverage-91.96%25-green.svg)](https://uport-project.github.io/uport-identity/coverage)
+
 Please read our [Whitepaper](http://whitepaper.uport.me) for information on what uPort is, and what is currently possible as far as integration.
 
 ## Contract Deployments
@@ -50,11 +54,12 @@ const uportIdentity = require('uport-identity')
 const Contract = require('truffle-contract')
 
 let IdentityFactory = Contract(uportIdentity.IdentityFactory)
+IdentityFactory.setProvider(web3.currentProvider)
 let identityFactory = IdentityFactory.deployed()
 ```
 You can also use web3.
 ```javascript
-let networkId = 1
+let networkId = 1 // Mainnet
 let IdentityFactory = web3.eth.contract(uportIdentity.IdentityFactory.abi)
 let identityFactory = IdentityFactory.at(uportIdentity.IdentityFactory.networks[networkId].address)
 ```
