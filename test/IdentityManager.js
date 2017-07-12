@@ -70,7 +70,7 @@ contract('IdentityManager', (accounts) => {
     recoveryKey2 = accounts[9]
     identityManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate)
     deployedProxy = await Proxy.new({from: user1})
-    testReg = await TestRegistry.deployed()
+    testReg = await TestRegistry.new({from: user1})
     //   return snapshots.snapshot()
     // }).then(id => {
     //   snapshotId = id

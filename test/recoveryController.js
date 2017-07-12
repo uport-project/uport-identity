@@ -34,7 +34,7 @@ contract('RecoverableController', (accounts) => {
     nobody = accounts[6]
     // Truffle deploys contracts with accounts[0]
     proxy = await Proxy.new({from: accounts[0]})
-    testReg = await TestRegistry.deployed()
+    testReg = await TestRegistry.new({from: user1})
   })
 
   it('Correctly deploys contract', async function() {

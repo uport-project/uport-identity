@@ -94,7 +94,7 @@ contract('MetaIdentityManager', (accounts) => {
     recoveryKey2 = accounts[9]
     identityManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, relay)
     deployedProxy = await Proxy.new({from: user1})
-    testReg = await TestRegistry.deployed()
+    testReg = await TestRegistry.new({from: user1})
   })
 
   it('Correctly creates Identity', async function() {
