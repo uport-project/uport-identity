@@ -74,13 +74,13 @@ This repository contains the contracts currently in use by uPort. This is also w
 ### Main contract interactions
 The most important interactions with the contracts are creation of identities and sending transactions. Here are visual representations of this being executed.
 
-#### Creating an identity with the IdentityManager:
+#### Creating an identity with the IdentityManager
 ![identity creation](./diagrams/create-identity.seq.png)
 
-#### Transfer an identity to IdentityManager:
+#### Transfer an identity to IdentityManager
 ![register identity](./diagrams/register-identity.seq.png)
 
-#### Send a meta-tx:
+#### Send a meta-tx
 ![meta-tx](./diagrams/send-tx.seq.png)
 
 ## Contributing
