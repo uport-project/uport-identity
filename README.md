@@ -67,9 +67,21 @@ let identityFactory = IdentityFactory.at(uportIdentity.IdentityFactory.networks[
 ## Contracts
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Mainnet and relevant test networks. Below you can find descriptions of each of the contracts and the rationale behind the design decisions.
 
-### [Proxy](./docs/proxy.md)
-### [TxRelay](./docs/txRelay.md)
-### [IdentityManager](./docs/identityManager.md)
+#### [Proxy](./docs/proxy.md)
+#### [TxRelay](./docs/txRelay.md)
+#### [IdentityManager](./docs/identityManager.md)
+
+### Main contract interactions
+The most important interactions with the contracts are creation of identities and sending transactions. Here are visual representations of this being executed.
+
+#### Creating an identity with the IdentityManager:
+![identity creation](./diagrams/create-identity.seq.png)
+
+#### Transfer an identity to IdentityManager:
+![register identity](./diagrams/register-identity.seq.png)
+
+#### Send a meta-tx:
+![meta-tx](./diagrams/send-tx.seq.png)
 
 ## Contributing
 Want to contribute to uport-contracts? Cool, please read our [contribution guidelines](./CONTRIBUTING.md) to get an understanding of the process we use for making changes to this repo.
