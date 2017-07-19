@@ -149,6 +149,8 @@ contract('IdentityManager', (accounts) => {
     })
 
     it('owner can add other owner', async function() {
+      let isOwner = await identityManager.isOwner(proxy.address, user5, {from: user1})
+      assert.isFalse(isOwner, 'user5 should not be owner yet')
       let tx = await identityManager.addOwner(user1, proxy.address, user5, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'OwnerAdded', 'should trigger correct event')
@@ -161,6 +163,8 @@ contract('IdentityManager', (accounts) => {
       assert.equal(log.args.instigator,
                   user1,
                   'Instigator key is set in event')
+      isOwner = await identityManager.isOwner(proxy.address, user5, {from: user1})
+      assert.isTrue(isOwner, 'user5 should be owner now')
     })
 
     it('owner is rateLimited on some functions', async function() {
@@ -328,6 +332,8 @@ contract('IdentityManager', (accounts) => {
         })
 
         it('can change recoveryKey', async function() {
+          let isRecovery = await identityManager.isRecovery(proxy.address, recoveryKey2, {from: user1})
+          assert.isFalse(isRecovery, 'recoveryKey2 should not be recovery yet')
           let tx = await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
           const log = tx.logs[0]
           assert.equal(log.args.recoveryKey,
@@ -336,6 +342,8 @@ contract('IdentityManager', (accounts) => {
           assert.equal(log.args.instigator,
                       user2,
                       'Instigator key is set in event')
+          isRecovery = await identityManager.isRecovery(proxy.address, recoveryKey2, {from: user1})
+          assert.isTrue(isRecovery, 'recoveryKey2 should be recovery now')
         })
       })
     })
