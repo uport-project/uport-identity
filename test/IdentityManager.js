@@ -82,7 +82,7 @@ contract('IdentityManager', (accounts) => {
   // })
 
   it('Correctly creates Identity', async function() {
-    let tx = await identityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+    let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
     let log = tx.logs[0]
     assert.equal(log.event, 'IdentityCreated', 'wrong event')
 
@@ -104,7 +104,7 @@ contract('IdentityManager', (accounts) => {
   describe('existing identity', () => {
 
     beforeEach(async function() {
-      let tx = await identityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+      let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
       let log = tx.logs[0]
       assert.equal(log.event, 'IdentityCreated', 'wrong event')
       proxy = Proxy.at(log.args.identity)
@@ -284,7 +284,7 @@ contract('IdentityManager', (accounts) => {
   describe('migration', () => {
     let newIdenManager
     beforeEach(async function() {
-      let tx = await identityManager.CreateIdentity(user1, recoveryKey, {from: nobody})
+      let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
       let log = tx.logs[0]
       assert.equal(log.event, 'IdentityCreated', 'wrong event')
       proxy = Proxy.at(log.args.identity)
