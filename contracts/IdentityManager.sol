@@ -70,6 +70,11 @@ contract IdentityManager {
     } else throw;
   }
 
+  modifier validAddress(address addr) { //protects against some weird attacks
+    if (addr != address(0)) _;
+    else throw;
+  }
+
   /// @dev Contract constructor sets initial timelock limits
   /// @param _userTimeLock Time before new owner can control proxy
   /// @param _adminTimeLock Time before new owner can add/remove owners
@@ -84,8 +89,7 @@ contract IdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Gas cost of 289,311
-  function createIdentity(address owner, address recoveryKey) {
-    if (recoveryKey == address(0)) throw;
+  function createIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
@@ -96,8 +100,7 @@ contract IdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Note: User must change owner of proxy to this contract after calling this
-  function registerIdentity(address owner, address recoveryKey) {
-    if (recoveryKey == address(0)) throw;
+  function registerIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
     if (owners[msg.sender][owner] > 0 || recoveryKeys[msg.sender] > 0 ) throw; // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
@@ -129,15 +132,20 @@ contract IdentityManager {
   }
 
   /// @dev Allows an owner to change the recoveryKey instantly
-  function changeRecovery(Proxy identity, address recoveryKey) onlyOlderOwner(identity) rateLimited(identity) {
-    if (recoveryKey == address(0)) throw;
+  function changeRecovery(Proxy identity, address recoveryKey)
+    onlyOlderOwner(identity)
+    rateLimited(identity)
+    validAddress(recoveryKey)
+  {
     recoveryKeys[identity] = recoveryKey;
     RecoveryChanged(identity, recoveryKey, msg.sender);
   }
 
   /// @dev Allows an owner to begin process of transfering proxy to new IdentityManager
-  function initiateMigration(Proxy identity, address newIdManager) onlyOlderOwner(identity) {
-    if (newIdManager == address(0)) throw;
+  function initiateMigration(Proxy identity, address newIdManager)
+    onlyOlderOwner(identity)
+    validAddress(newIdManager)
+  {
     migrationInitiated[identity] = now;
     migrationNewAddress[identity] = newIdManager;
     MigrationInitiated(identity, newIdManager, msg.sender);
