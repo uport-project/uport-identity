@@ -171,5 +171,13 @@ contract IdentityManager {
       MigrationFinalized(identity, newIdManager, msg.sender);
     }
   }
+
+  function isOwner(address identity, address owner) constant returns (bool) {
+    return owners[identity][owner] != 0;
+  }
+
+  function isRecovery(address identity, address recoveryKey) constant returns (bool) {
+    return recoveryKeys[identity] == recoveryKey;
+  }
 }
 
