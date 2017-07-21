@@ -101,7 +101,7 @@ contract IdentityManager {
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Note: User must change owner of proxy to this contract after calling this
   function registerIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
-    if (owners[msg.sender][owner] > 0 || recoveryKeys[msg.sender] > 0 ) throw; // Deny any funny business
+    if (recoveryKeys[msg.sender] > 0) throw; // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
     IdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
@@ -120,14 +120,14 @@ contract IdentityManager {
 
   /// @dev Allows a recoveryKey to add a new owner with userTimeLock waiting time
   function addOwnerFromRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited(identity) {
-    if (owners[identity][newOwner] > 0) throw;
+    if (isOwner(identity, newOwner)) throw;
     owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
   /// @dev Allows an owner to remove another owner instantly
   function removeOwner(Proxy identity, address owner) onlyOlderOwner(identity) rateLimited(identity) {
-    owners[identity][owner] = 0;
+    delete owners[identity][owner];
     OwnerRemoved(identity, owner, msg.sender);
   }
 
@@ -154,8 +154,8 @@ contract IdentityManager {
   /// @dev Allows an owner to cancel the process of transfering proxy to new IdentityManager
   function cancelMigration(Proxy identity) onlyOwner(identity) {
     address canceledManager = migrationNewAddress[identity];
-    migrationInitiated[identity] = 0;
-    migrationNewAddress[identity] = 0;
+    delete migrationInitiated[identity];
+    delete migrationNewAddress[identity];
     MigrationCanceled(identity, canceledManager, msg.sender);
   }
 
@@ -165,8 +165,8 @@ contract IdentityManager {
   function finalizeMigration(Proxy identity) onlyOlderOwner(identity) {
     if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
       address newIdManager = migrationNewAddress[identity];
-      migrationInitiated[identity] = 0;
-      migrationNewAddress[identity] = 0;
+      delete migrationInitiated[identity];
+      delete migrationNewAddress[identity];
       identity.transfer(newIdManager);
       MigrationFinalized(identity, newIdManager, msg.sender);
     }
