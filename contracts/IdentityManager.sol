@@ -133,6 +133,7 @@ contract IdentityManager {
 
   // an owner can migrate away to a new IdentityManager
   function initiateMigration(Proxy identity, address newIdManager) onlyOlderOwner(identity) {
+    if (newIdManager == address(0)) throw;
     migrationInitiated[identity] = now;
     migrationNewAddress[identity] = newIdManager;
     MigrationInitiated(identity, newIdManager, msg.sender);
