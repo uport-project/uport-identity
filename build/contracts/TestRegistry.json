@@ -1,0 +1,73 @@
+{
+  "contract_name": "TestRegistry",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "registry",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "with",
+          "type": "uint256"
+        },
+        {
+          "name": "many",
+          "type": "address"
+        },
+        {
+          "name": "strange",
+          "type": "string"
+        },
+        {
+          "name": "params",
+          "type": "uint256"
+        }
+      ],
+      "name": "reallyLongFunctionName",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "testThrow",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "x",
+          "type": "uint256"
+        }
+      ],
+      "name": "register",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b5b6101858061001c6000396000f300606060405263ffffffff60e060020a600035041663038defd781146100425780630da9a4241461007057806350bff6bf146100d7578063f207564e146100e9575bfe5b341561004a57fe5b61005e600160a060020a03600435166100fe565b60408051918252519081900360200190f35b341561007857fe5b604080516020600460443581810135601f81018490048402850184019095528484526100d59482359460248035600160a060020a031695606494929391909201918190840183828082843750949650509335935061011092505050565b005b34156100df57fe5b6100d5610132565b005b34156100f157fe5b6100d560043561013a565b005b60006020819052908152604090205481565b600160a060020a03831660009081526020819052604090208190555b50505050565b60006000fd5b565b600160a060020a03331660009081526020819052604090208190555b505600a165627a7a72305820b8aa772571a057935c76c8e11f222ac8bb8536e0d759d0f81cb5ec845a2a6c460029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1499785642009
+}
