@@ -151,16 +151,12 @@ contract('IdentityManager', (accounts) => {
         errorThrown = false
       })
 
-      it('within userTimeLock is not allowed transactions', async function() {
-        await testForwardTo(testReg, identityManager, proxy.address, user2, false)
+      it('can send transactions directly', async function() {
+        await testForwardTo(testReg, identityManager, proxy.address, user2, true)
       })
 
       describe('after userTimeLock', () => {
         beforeEach(() => evm_increaseTime(userTimeLock))
-
-        it('Allow transactions', async function() {
-          await testForwardTo(testReg, identityManager, proxy.address, user2, true)
-        })
 
         it('can not add other owner yet', async function() {
           try {
