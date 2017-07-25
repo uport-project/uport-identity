@@ -173,11 +173,10 @@ contract IdentityManager {
   }
 
   function isOwner(address identity, address owner) constant returns (bool) {
-    return owners[identity][owner] != 0;
+    return (owners[identity][owner] > 0 && (owners[identity][owner] + userTimeLock) <= now);
   }
 
   function isRecovery(address identity, address recoveryKey) constant returns (bool) {
     return recoveryKeys[identity] == recoveryKey;
   }
 }
-
