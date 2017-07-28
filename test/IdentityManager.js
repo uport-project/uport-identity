@@ -35,7 +35,7 @@ async function testForwardTo(testReg, identityManager, proxyAddress, fromAccount
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    assert.match(errorThrown, /invalid JUMP/, 'throws an error')
+    assert.match(errorThrown, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -145,7 +145,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.addOwner(proxy.address, user4, {from: user3})
       } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+        assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
       }
     })
 
@@ -166,7 +166,7 @@ contract('IdentityManager', (accounts) => {
           try {
             await identityManager.addOwner(proxy.address, user4, {from: user2})
           } catch(error) {
-            assert.match(error, /invalid JUMP/, 'throws an error')
+            assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
           }
         })
 
@@ -174,7 +174,7 @@ contract('IdentityManager', (accounts) => {
           try {
             await identityManager.removeOwner(proxy.address, user1, {from: user2})
           } catch(error) {
-            assert.match(error, /invalid JUMP/, 'throws an error')
+            assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
           }
         })
 
@@ -182,7 +182,7 @@ contract('IdentityManager', (accounts) => {
           try {
             await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user2})
           } catch(error) {
-            assert.match(error, /invalid JUMP/, 'throws an error')
+            assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
           }
         })
       })
@@ -316,7 +316,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: user2})
       } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+        assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown an error here')
@@ -327,7 +327,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: nobody})
       } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+        assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown an error here')
@@ -372,7 +372,7 @@ contract('IdentityManager', (accounts) => {
       try {
         await identityManager.cancelMigration(proxy.address, {from: nobody})
       } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+        assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'Should have thrown error')
@@ -384,7 +384,7 @@ contract('IdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(proxy.address, {from: nobody})
       } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+        assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'non-owner should not be able to finalize')
@@ -392,7 +392,7 @@ contract('IdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(proxy.address, {from: user2})
       } catch(error) {
-        assert.match(error, /invalid JUMP/, 'throws an error')
+        assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
       assert.isTrue(threwError, 'young owner should not be able to finalize')
