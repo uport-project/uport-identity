@@ -22,6 +22,8 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |ArrayLib|[0xb8a00506e12d39522cd1787389ae8f83db536e46](https://rinkeby.etherscan.io/address/0xb8a00506e12d39522cd1787389ae8f83db536e46)|
 |IdentityFactory|[0x6a841ba0ea1a88cfbc085220fc6b65973afca431](https://rinkeby.etherscan.io/address/0x6a841ba0ea1a88cfbc085220fc6b65973afca431)|
 |IdentityFactoryWithRecoveryKey|[0xd7dc3926bc6089a5be4815215ceaa6e707591023](https://rinkeby.etherscan.io/address/0xd7dc3926bc6089a5be4815215ceaa6e707591023)|
+|IdentityManager|[0x02147e6dc09eb90ed508d99274aaafa9c4ab0d72](https://rinkeby.etherscan.io/address/0x02147e6dc09eb90ed508d99274aaafa9c4ab0d72)|
+
 
 ### Kovan testnet (id: 42)
 |Contract|Address|
@@ -29,6 +31,7 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |ArrayLib|[0x6a841ba0ea1a88cfbc085220fc6b65973afca431](https://kovan.etherscan.io/address/0x6a841ba0ea1a88cfbc085220fc6b65973afca431)|
 |IdentityFactory|[0xd7dc3926bc6089a5be4815215ceaa6e707591023](https://kovan.etherscan.io/address/0xd7dc3926bc6089a5be4815215ceaa6e707591023)|
 |IdentityFactoryWithRecoveryKey|[0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d](https://kovan.etherscan.io/address/0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d)|
+|IdentityManager|[0xfccae2f34600e3d34155815ed21818feb69a31c7](https://rinkeby.etherscan.io/address/0xfccae2f34600e3d34155815ed21818feb69a31c7)|
 
 
 ## Using the contracts
