@@ -17,7 +17,7 @@ const userTimeLock = 100;
 const adminTimeLock = 1000;
 const adminRate = 200;
 
-//NOTE: All references to identityManager in this contract are to a metaIdentityManager 
+//NOTE: All references to identityManager in this contract are to a metaIdentityManager
 
 const zero = "0000000000000000000000000000000000000000000000000000000000000000"
 
@@ -45,43 +45,38 @@ function pad(n) {
   }
 }
 
-function signPayload(signingAddr, sendingAddr, txRelay, destinationAddress, functionName,
-                     functionTypes, functionParams, lw, keyFromPw) {
-    return new Promise(
-        function (resolve, reject) {
-            if (functionTypes.length !== functionParams.length) {
-              reject(error("Types and params are uneven"))
-            }
-            if (typeof(functionName) !== 'string') {
-              reject(error("Function name should be a string"))
-            }
-            //Prolly should check inputs more thoroughly :@
-            let nonce
-            let blockTimeout
-            let data
-            let hashInput
-            let hash
-            let sig
-            let retVal = {}
-            data = enc(functionName, functionTypes, functionParams)
+async function signPayload(signingAddr, sendingAddr, txRelay, destinationAddress, functionName,
+                     functionTypes, functionParams, lw, keyFromPw)
+{
+   if (functionTypes.length !== functionParams.length) {
+     return //should throw error
+   }
+   if (typeof(functionName) !== 'string') {
+     return //should throw error
+   }
+   let nonce
+   let blockTimeout
+   let data
+   let hashInput
+   let hash
+   let sig
+   let retVal = {}
+   data = enc(functionName, functionTypes, functionParams)
 
-            txRelay.getNonce.call(signingAddr).then(currNonce => {
-              nonce = currNonce
-              //Tight packing, as Solidity sha3 does
-              hashInput = txRelay.address + pad(nonce.toString('16')).slice(2)
-                          + destinationAddress.slice(2) + data.slice(2) + sendingAddr.slice(2)
-              hash = solsha3(hashInput)
-              sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signingAddr)
-              retVal.r = '0x'+sig.r.toString('hex')
-              retVal.s = '0x'+sig.s.toString('hex')
-              retVal.v = sig.v //Q: Why is this not converted to hex?
-              retVal.data = data
-              retVal.hash = hash
-              retVal.nonce = nonce
-              retVal.dest = destinationAddress
-              resolve(retVal)
-            })
-    })
+   nonce = await txRelay.getNonce.call(signingAddr)
+   //Tight packing, as Solidity sha3 does
+   hashInput = txRelay.address + pad(nonce.toString('16')).slice(2)
+               + destinationAddress.slice(2) + data.slice(2) + sendingAddr.slice(2)
+   hash = solsha3(hashInput)
+   sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signingAddr)
+   retVal.r = '0x'+sig.r.toString('hex')
+   retVal.s = '0x'+sig.s.toString('hex')
+   retVal.v = sig.v //Q: Why is this not converted to hex?
+   retVal.data = data
+   retVal.hash = hash
+   retVal.nonce = nonce
+   retVal.dest = destinationAddress
+   return retVal
 }
 
 
@@ -171,7 +166,7 @@ contract('TxRelay', (accounts) => {
     function (err, keystore) {
 
       lw = keystore
-      lw.keyFromPassword("test", function(e,k) {
+      lw.keyFromPassword("test", async function(e,k) {
         keyFromPw = k
 
         lw.generateNewAddress(keyFromPw, 10)
@@ -191,27 +186,16 @@ contract('TxRelay', (accounts) => {
 
         errorThrown = false
 
-        MetaTxRelay.new().then(instance => {
-          txRelay = instance
-          return MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, txRelay.address)
-        }).then(instance => {
-          identityManager = instance
-          return Proxy.new({from: sender})
-        }).then(instance => {
-          deployedProxy = instance
-          return TestRegistry.new()
-        }).then((instance) => {
-          testReg = instance
-          return identityManager.createIdentity(user1, recoveryKey, {from: sender})
-        }).then(tx => {
-          const log = tx.logs[0]
-          assert.equal(log.event, 'IdentityCreated', 'wrong event')
-          proxy = Proxy.at(log.args.identity)
-          return MetaTestRegistry.new()
-        }).then(instance => {
-          mTestReg = instance
-          done()
-        })
+        txRelay = await MetaTxRelay.new()
+        identityManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, txRelay.address)
+        deployedProxy = await Proxy.new({from: sender})
+        testReg = await TestRegistry.new()
+        let tx = await identityManager.createIdentity(user1, recoveryKey, {from: sender})
+        const log = tx.logs[0]
+        assert.equal(log.event, 'IdentityCreated', 'wrong event')
+        proxy = Proxy.at(log.args.identity)
+        mTestReg = await MetaTestRegistry.new()
+        done()
       })
     })
   })
