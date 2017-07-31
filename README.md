@@ -8,6 +8,7 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |ArrayLib|[0x5bfa4582b0c48cb375b9e8322b57ac025965c148](https://etherscan.io/address/0x5bfa4582b0c48cb375b9e8322b57ac025965c148)|
 |IdentityFactory|[0x12e627125abcfa989de831572f198577780d7127](https://etherscan.io/address/0x12e627125abcfa989de831572f198577780d7127)|
 |IdentityFactoryWithRecoveryKey|(not deployed)|
+|IdentityManager|(not deployed)|
 
 ### Ropsten testnet (id: 3)
 |Contract|Address|
@@ -15,6 +16,7 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |ArrayLib|[0x957eb298a72167367fa210fc1aa3faba1d2b629c](https://ropsten.etherscan.io/address/0x957eb298a72167367fa210fc1aa3faba1d2b629c)|
 |IdentityFactory|[0x1c9d9e1962985c9b8101777cae25c46279fe2a9c](https://ropsten.etherscan.io/address/0x1c9d9e1962985c9b8101777cae25c46279fe2a9c)|
 |IdentityFactoryWithRecoveryKey|[0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7](https://ropsten.etherscan.io/address/0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7)|
+|IdentityManager|(not deployed)|
 
 ### Rinkeby testnet (id: 4)
 |Contract|Address|
@@ -24,14 +26,13 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |IdentityFactoryWithRecoveryKey|[0xd7dc3926bc6089a5be4815215ceaa6e707591023](https://rinkeby.etherscan.io/address/0xd7dc3926bc6089a5be4815215ceaa6e707591023)|
 |IdentityManager|[0x02147e6dc09eb90ed508d99274aaafa9c4ab0d72](https://rinkeby.etherscan.io/address/0x02147e6dc09eb90ed508d99274aaafa9c4ab0d72)|
 
-
 ### Kovan testnet (id: 42)
 |Contract|Address|
 | --|--|
 |ArrayLib|[0x6a841ba0ea1a88cfbc085220fc6b65973afca431](https://kovan.etherscan.io/address/0x6a841ba0ea1a88cfbc085220fc6b65973afca431)|
 |IdentityFactory|[0xd7dc3926bc6089a5be4815215ceaa6e707591023](https://kovan.etherscan.io/address/0xd7dc3926bc6089a5be4815215ceaa6e707591023)|
 |IdentityFactoryWithRecoveryKey|[0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d](https://kovan.etherscan.io/address/0xdc420f5d89ef5c729c63cf05b0ceda364d5a8b1d)|
-|IdentityManager|[0xfccae2f34600e3d34155815ed21818feb69a31c7](https://rinkeby.etherscan.io/address/0xfccae2f34600e3d34155815ed21818feb69a31c7)|
+|IdentityManager|[0xfccae2f34600e3d34155815ed21818feb69a31c7](https://kovan.etherscan.io/address/0xfccae2f34600e3d34155815ed21818feb69a31c7)|
 
 
 ## Using the contracts
