@@ -3,6 +3,10 @@ import "./Proxy.sol";
 
 
 contract MetaIdentityManager {
+  uint adminTimeLock;
+  uint userTimeLock;
+  uint adminRate;
+  address relay;
 
   event IdentityCreated(
     address indexed identity,
@@ -40,20 +44,11 @@ contract MetaIdentityManager {
     address indexed newIdManager,
     address instigator);
 
-  uint adminTimeLock;
-  uint userTimeLock;
-  uint adminRate;
-  address relay;
-
   mapping(address => mapping(address => uint)) owners;
   mapping(address => address) recoveryKeys;
   mapping(address => mapping(address => uint)) limiter;
-
-  struct Migration {
-    uint startTime;
-    address newAddress;
-  }
-  mapping(address => Migration) migrations;
+  mapping(address => uint) migrationInitiated;
+  mapping(address => address) migrationNewAddress;
 
   modifier onlyAuthorized() {
     if (msg.sender == relay || checkMessageData(msg.sender)) _;
@@ -61,12 +56,12 @@ contract MetaIdentityManager {
   }
 
   modifier onlyOwner(address identity, address sender) {
-    if (owners[identity][sender] > 0 && (owners[identity][sender] + userTimeLock) <= now ) _;
+    if (owners[identity][sender] > 0 && (owners[identity][sender] + userTimeLock) <= now ) _ ;
     else throw;
   }
 
   modifier onlyOlderOwner(address identity, address sender) {
-    if (owners[identity][sender] > 0 && (owners[identity][sender] + adminTimeLock) <= now) _;
+    if (owners[identity][sender] > 0 && (owners[identity][sender] + adminTimeLock) <= now) _ ;
     else throw;
   }
 
@@ -76,14 +71,14 @@ contract MetaIdentityManager {
   }
 
   modifier rateLimited(Proxy identity, address sender) {
-    if ((limiter[identity][sender] + adminRate) < now) {
+    if (limiter[identity][sender] < (now - adminRate)) {
       limiter[identity][sender] = now;
       _ ;
     } else throw;
   }
 
-  modifier validRecovery(address newKey) { //protects against some weird attacks
-    if (newKey != address(0)) _;
+  modifier validAddress(address addr) { //protects against some weird attacks
+    if (addr != address(0)) _;
     else throw;
   }
 
@@ -103,7 +98,7 @@ contract MetaIdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Gas cost of ~300,000
-  function createIdentity(address owner, address recoveryKey) validRecovery(recoveryKey) {
+  function createIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
@@ -114,7 +109,7 @@ contract MetaIdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Note: User must change owner of proxy to this contract after calling this
-  function registerIdentity(address owner, address recoveryKey) validRecovery(recoveryKey) {
+  function registerIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
     if (recoveryKeys[msg.sender] > 0 ) throw; // Invariant enforced w/ validRecovery modifier
     owners[msg.sender][owner] = now - adminTimeLock; // Owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
@@ -165,7 +160,7 @@ contract MetaIdentityManager {
     onlyAuthorized
     onlyOlderOwner(identity, sender)
     rateLimited(identity, sender)
-    validRecovery(recoveryKey)
+    validAddress(recoveryKey)
   {
     recoveryKeys[identity] = recoveryKey;
     RecoveryChanged(identity, recoveryKey, sender);
@@ -176,24 +171,27 @@ contract MetaIdentityManager {
     onlyAuthorized
     onlyOlderOwner(identity, sender)
   {
-    migrations[identity].startTime = now;
-    migrations[identity].newAddress = newIdManager;
+    migrationInitiated[identity] = now;
+    migrationNewAddress[identity] = newIdManager;
     MigrationInitiated(identity, newIdManager, sender);
   }
 
   /// @dev Allows an owner to cancel the process of transfering proxy to new IdentityManager
   function cancelMigration(address sender, Proxy identity) onlyAuthorized onlyOwner(identity, sender) {
-    MigrationCanceled(identity, migrations[identity].newAddress, sender);
-    delete migrations[identity];
+    address canceledManager = migrationNewAddress[identity];
+    delete migrationInitiated[identity];
+    delete migrationNewAddress[identity];
+    MigrationCanceled(identity, canceledManager, sender);
   }
 
   /// @dev Allows an owner to finalize and completly transfer proxy to new IdentityManager
   /// Note: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
   /// Not doing so risks the proxy becoming stuck.
   function finalizeMigration(address sender, Proxy identity) onlyAuthorized onlyOlderOwner(identity, sender) {
-    if (migrations[identity].startTime > 0 && migrations[identity].startTime + adminTimeLock < now) {
-      address newIdManager = migrations[identity].newAddress;
-      delete migrations[identity];
+    if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
+      address newIdManager = migrationNewAddress[identity];
+      delete migrationInitiated[identity];
+      delete migrationNewAddress[identity];
       identity.transfer(newIdManager);
       MigrationFinalized(identity, newIdManager, sender);
     }
@@ -210,7 +208,7 @@ contract MetaIdentityManager {
   }
 
   function isOwner(address identity, address owner) constant returns (bool) {
-    return owners[identity][owner] != 0;
+    return (owners[identity][owner] > 0 && (owners[identity][owner] + userTimeLock) <= now);
   }
 
   function isRecovery(address identity, address recoveryKey) constant returns (bool) {
