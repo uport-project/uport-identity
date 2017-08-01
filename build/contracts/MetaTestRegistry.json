@@ -1,0 +1,82 @@
+{
+  "contract_name": "MetaTestRegistry",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "registry",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "with",
+          "type": "uint256"
+        },
+        {
+          "name": "many",
+          "type": "address"
+        },
+        {
+          "name": "strange",
+          "type": "string"
+        },
+        {
+          "name": "params",
+          "type": "uint256"
+        }
+      ],
+      "name": "reallyLongFunctionName",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "testThrow",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "name": "x",
+          "type": "uint256"
+        }
+      ],
+      "name": "register",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b5b61019f8061001c6000396000f300606060405263ffffffff60e060020a600035041663038defd781146100425780630da9a424146100705780634a99e570146100d75780636d705ebb146100f5575bfe5b341561004a57fe5b61005e600160a060020a0360043516610116565b60408051918252519081900360200190f35b341561007857fe5b604080516020600460443581810135601f81018490048402850184019095528484526100d59482359460248035600160a060020a031695606494929391909201918190840183828082843750949650509335935061012892505050565b005b34156100df57fe5b6100d5600160a060020a036004351661014a565b005b34156100fd57fe5b6100d5600160a060020a0360043516602435610153565b005b60006020819052908152604090205481565b600160a060020a03831660009081526020819052604090208190555b50505050565b60006000fd5b50565b600160a060020a03821660009081526020819052604090208190555b50505600a165627a7a72305820972b8b9ac5450fc835da2ef21f99ffc3dead2e60c2fb35b4cc298432017e80800029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1501602616858
+}
