@@ -56,7 +56,7 @@ contract MetaIdentityManager {
   }
 
   modifier onlyOwner(address identity, address sender) {
-    if (owners[identity][sender] > 0 && (owners[identity][sender] + userTimeLock) <= now ) _ ;
+    if (isOwner(identity, sender)) _ ;
     else throw;
   }
 
