@@ -8,6 +8,7 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |ArrayLib|[0x5bfa4582b0c48cb375b9e8322b57ac025965c148](https://etherscan.io/address/0x5bfa4582b0c48cb375b9e8322b57ac025965c148)|
 |IdentityFactory|[0x12e627125abcfa989de831572f198577780d7127](https://etherscan.io/address/0x12e627125abcfa989de831572f198577780d7127)|
 |IdentityFactoryWithRecoveryKey|(not deployed)|
+|IdentityManager|(not deployed)|
 
 ### Ropsten testnet (id: 3)
 |Contract|Address|
@@ -15,6 +16,7 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |ArrayLib|[0x957eb298a72167367fa210fc1aa3faba1d2b629c](https://ropsten.etherscan.io/address/0x957eb298a72167367fa210fc1aa3faba1d2b629c)|
 |IdentityFactory|[0x1c9d9e1962985c9b8101777cae25c46279fe2a9c](https://ropsten.etherscan.io/address/0x1c9d9e1962985c9b8101777cae25c46279fe2a9c)|
 |IdentityFactoryWithRecoveryKey|[0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7](https://ropsten.etherscan.io/address/0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7)|
+|IdentityManager|(not deployed)|
 
 
 ### Rinkeby testnet (id: 4)
@@ -28,7 +30,6 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |MetaIdentityManager|[0x7281f645c89f5153cf7a1eea8f97678994506e17](https://rinkeby.etherscan.io/address/0x7281f645c89f5153cf7a1eea8f97678994506e17)|
 
 
-
 ### Kovan testnet (id: 42)
 |Contract|Address|
 | --|--|
@@ -38,6 +39,7 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 |IdentityManager|[0xfccae2f34600e3d34155815ed21818feb69a31c7](https://kovan.etherscan.io/address/0xfccae2f34600e3d34155815ed21818feb69a31c7)|
 |TxRelay|[0x899d47b36d94bc36050e9fdddb7d210a62c8656c](https://kovan.etherscan.io/address/0x899d47b36d94bc36050e9fdddb7d210a62c8656c)|
 |MetaIdentityManager|[0x3ca9a9aeccda9b2ed803cee7bc24d4962ea29f25](https://kovan.etherscan.io/address/0x3ca9a9aeccda9b2ed803cee7bc24d4962ea29f25)|
+
 
 
 ## Using the contracts

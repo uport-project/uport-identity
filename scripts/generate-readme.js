@@ -35,6 +35,7 @@ function writeContractInfo(id) {
   outStream.write(createContractString(artifacts.ArrayLib, id))
   outStream.write(createContractString(artifacts.IdentityFactory, id))
   outStream.write(createContractString(artifacts.IdentityFactoryWithRecoveryKey, id))
+  outStream.write(createContractString(artifacts.IdentityManager, id))
   outStream.write('\n')
 }
 
