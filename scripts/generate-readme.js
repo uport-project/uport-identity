@@ -18,12 +18,12 @@ lines.on('line', line => {
     outStream.write('## Contract Deployments\n')
     outStream.write('### Mainnet (id: 1)\n')
     writeContractInfo(1)
-    outStream.write('### Ropsten testnet (id: 3)\n')
-    writeContractInfo(3)
     outStream.write('### Rinkeby testnet (id: 4)\n')
     writeContractInfo(4)
     outStream.write('### Kovan testnet (id: 42)\n')
     writeContractInfo(42)
+    outStream.write('### Ropsten testnet (id: 3)\n')
+    writeContractInfo(3)
   } else {
     outStream.write(line + '\n')
   }
@@ -36,6 +36,8 @@ function writeContractInfo(id) {
   outStream.write(createContractString(artifacts.IdentityFactory, id))
   outStream.write(createContractString(artifacts.IdentityFactoryWithRecoveryKey, id))
   outStream.write(createContractString(artifacts.IdentityManager, id))
+  outStream.write(createContractString(artifacts.TxRelay, id))
+  outStream.write(createContractString(artifacts.MetaIdentityManager, id))
   outStream.write('\n')
 }
 

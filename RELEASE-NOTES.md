@@ -1,5 +1,8 @@
 # Release notes
 
+## v1.2.0
+New controller called MetaIdentityManager and a contract called TxRelay. The MetaIdentityManager is very similar to the IdentityManager but also supports meta transactions with the help of the TxRelay.
+
 ## v1.1.0
 New controller called IdentityManager. It is a controller that is shared by multiple users to reduce the overall gas cost in the uport system.
 
