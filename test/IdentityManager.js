@@ -160,7 +160,14 @@ contract('IdentityManager', (accounts) => {
       })
 
       describe('after userTimeLock', () => {
-        beforeEach(() => evm_increaseTime(userTimeLock))
+        beforeEach(async function () {await evm_increaseTime(userTimeLock)})
+
+        it('is an owner', async function () {
+          let isOwner = await identityManager.isOwner.call(proxy.address, user2)
+          assert.isTrue(isOwner, "should be an owner")
+          //let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
+          //assert.isFalse(isOlderOwner, "should not be an olderOwner")
+        })
 
         it('can not add other owner yet', async function() {
           try {
@@ -188,7 +195,17 @@ contract('IdentityManager', (accounts) => {
       })
 
       describe('after adminTimeLock', () => {
-        beforeEach(() => evm_increaseTime(adminTimeLock))
+        beforeEach(async function () {await evm_increaseTime(adminTimeLock)})
+
+        it('is olderOwner', async function() {
+          let temp = await identityManager.isOwner(proxy.address, user2)
+          console.log("Is owner: " + temp)
+
+          await evm_increaseTime(userTimeLock)
+          let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
+          console.log("Is olderOwner: " + isOlderOwner)
+          assert.isTrue(isOlderOwner, "should be an olderOwner")
+        })
 
         it('can add new owner', async function() {
           let tx = await identityManager.addOwner(proxy.address, user3, {from: user2})
@@ -239,7 +256,7 @@ contract('IdentityManager', (accounts) => {
       })
 
       describe('after userTimeLock', () => {
-        beforeEach(() => evm_increaseTime(userTimeLock))
+        beforeEach(async function () {await evm_increaseTime(userTimeLock)})
 
         it('Allow transactions', async function() {
           await testForwardTo(testReg, identityManager, proxy.address, user2, true)
@@ -247,7 +264,7 @@ contract('IdentityManager', (accounts) => {
       })
 
       describe('after adminTimeLock', () => {
-        beforeEach(() => evm_increaseTime(adminTimeLock))
+        beforeEach(async function () {await evm_increaseTime(adminTimeLock)})
 
         it('can add new owner', async function() {
           let tx = await identityManager.addOwner(proxy.address, user3, {from: user2})
@@ -378,6 +395,12 @@ contract('IdentityManager', (accounts) => {
       assert.isTrue(threwError, 'Should have thrown error')
     })
 
+    it('should return correct address for finalization', async function () {
+      await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: user1})
+      let newAdd = await identityManager.migrationNewAddress(proxy.address)
+      assert.equal(newAdd, newIdenManager.address, "should be migration to new identityManager")
+    })
+
     it('correct keys should finilize transfer', async function() {
       await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: user1})
       let threwError = false
@@ -396,6 +419,16 @@ contract('IdentityManager', (accounts) => {
         threwError = true
       }
       assert.isTrue(threwError, 'young owner should not be able to finalize')
+
+      //correct owner tries to finalize before they can
+      threwError = false
+      try {
+          await identityManager.finalizeMigration(proxy.address, {from: user1})
+      } catch(error) {
+        assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
+        threwError = true
+      }
+      assert.isTrue(threwError, 'older owner should not be able to finalize before time is up')
 
       await evm_increaseTime(2 * adminTimeLock)
       let tx = await identityManager.finalizeMigration(proxy.address, {from: user1})

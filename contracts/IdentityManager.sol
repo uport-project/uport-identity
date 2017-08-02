@@ -45,16 +45,16 @@ contract IdentityManager {
   mapping(address => mapping(address => uint)) owners;
   mapping(address => address) recoveryKeys;
   mapping(address => mapping(address => uint)) limiter;
-  mapping(address => uint) migrationInitiated;
-  mapping(address => address) migrationNewAddress;
+  mapping(address => uint) public migrationInitiated;
+  mapping(address => address) public migrationNewAddress;
 
   modifier onlyOwner(address identity) {
-    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + userTimeLock) <= now ) _ ;
+    if (isOwner(identity, msg.sender)) _ ;
     else throw;
   }
 
   modifier onlyOlderOwner(address identity) {
-    if (owners[identity][msg.sender] > 0 && (owners[identity][msg.sender] + adminTimeLock) <= now) _ ;
+    if (isOlderOwner(identity, msg.sender)) _ ;
     else throw;
   }
 
@@ -169,11 +169,17 @@ contract IdentityManager {
       delete migrationNewAddress[identity];
       identity.transfer(newIdManager);
       MigrationFinalized(identity, newIdManager, msg.sender);
+    } else {
+      throw; //so users know tx failed
     }
   }
 
   function isOwner(address identity, address owner) constant returns (bool) {
     return (owners[identity][owner] > 0 && (owners[identity][owner] + userTimeLock) <= now);
+  }
+
+  function isOlderOwner(address identity, address owner) constant returns (bool) {
+    return (owners[identity][owner] > 0 && (owners[identity][owner] + adminTimeLock) <= now);
   }
 
   function isRecovery(address identity, address recoveryKey) constant returns (bool) {
