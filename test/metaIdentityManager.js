@@ -10,6 +10,7 @@ web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 const userTimeLock = 100;
 const adminTimeLock = 1000;
@@ -132,7 +133,7 @@ contract('MetaIdentityManager', (accounts) => {
       await testForwardTo(testReg, identityManager, proxy.address, recoveryKey, recoveryKey, false)
     })
 
-    it('onlyAuthorized modifier allows in correct users/relay', async function () {
+    it('onlyAuthorized modifier allows in correct users/relay', async function() {
       //Allow a user claimed to be themselves
       await testForwardTo(testReg, identityManager, proxy.address, user1, user1, true)
       //Do not allow a user claiming to be someone else.
@@ -346,6 +347,17 @@ contract('MetaIdentityManager', (accounts) => {
           isRecovery = await identityManager.isRecovery(proxy.address, recoveryKey2, {from: user1})
           assert.isTrue(isRecovery, 'recoveryKey2 should be recovery now')
         })
+
+        it('should throw if recoveryKey is set to zero address', async function() {
+          let errorThrown = false
+          try {
+            await identityManager.changeRecovery(user2, proxy.address, ZERO_ADDRESS, {from: user2})
+          } catch (e) {
+            assert.match(e.message, /invalid opcode/, "should have thrown")
+            errorThrown = true
+          }
+          assert.isTrue(errorThrown, "should have thrown")
+        })
       })
     })
 
@@ -354,7 +366,7 @@ contract('MetaIdentityManager', (accounts) => {
         await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user2, {from: recoveryKey})
       })
 
-      it('recoveryKey is rate limited in added new owners', async function () {
+      it('recoveryKey is rate limited in added new owners', async function() {
         //should be rate limited when trying again
         let errorThrown = false
         try {
@@ -417,6 +429,29 @@ contract('MetaIdentityManager', (accounts) => {
                       user2,
                       'Instigator key is set in event')
         })
+      })
+
+      it('incorrect recoveryKey should throw', async function() {
+        let errorThrown = false
+        try {
+          await identityManager.addOwnerFromRecovery(nobody, proxy.address, user4, {from: nobody})
+        } catch (e) {
+          assert.match(e.message, /invalid opcode/, "should have thrown")
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, "should have thrown")
+      })
+
+      it('should throw if new owner is already an owner', async function() {
+        await evm_increaseTime(adminTimeLock + 1)
+        let errorThrown = false
+        try {
+          await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user2, {from: recoveryKey})
+        } catch (e) {
+          assert.match(e.message, /invalid opcode/, "should have thrown")
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, "should have thrown")
       })
     })
   })
@@ -559,6 +594,17 @@ contract('MetaIdentityManager', (accounts) => {
       // Verify that the proxy address is logged as the sender
       let regData = await testReg.registry.call(proxy.address)
         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction from new contract')
+    })
+
+    it('should throw if trying to register an existing proxy', async function() {
+      let data = '0x' + lightwallet.txutils._encodeFunctionTxData('registerIdentity', ['address', 'address'], [user1, recoveryKey])
+      try {
+        await identityManager.forwardTo(user1, proxy.address, identityManager.address, 0, data, {from: user1})
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
+        threwError = true
+      }
+      assert.isTrue(threwError, 'existing proxy should not be able to re-register')
     })
   })
 })

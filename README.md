@@ -1,7 +1,7 @@
 # uPort Identity Contracts
 [![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/uport-identity)
 ![CircleCI](https://img.shields.io/circleci/project/github/uport-project/uport-identity.svg)
-[![solidity-coverage](https://img.shields.io/badge/coverage-91.96%25-green.svg)](https://uport-project.github.io/uport-identity/coverage)
+[![solidity-coverage](https://img.shields.io/badge/coverage-97.42%25-green.svg)](https://uport-project.github.io/uport-identity/coverage)
 
 Please read our [Whitepaper](http://whitepaper.uport.me) for information on what uPort is, and what is currently possible as far as integration.
 

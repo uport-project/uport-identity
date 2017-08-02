@@ -10,6 +10,7 @@ web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 const userTimeLock = 100;
 const adminTimeLock = 1000;
@@ -141,6 +142,83 @@ contract('IdentityManager', (accounts) => {
       assert.isTrue(isOwner, 'user5 should be owner now')
     })
 
+    it('owner is rateLimited on some functions', async function() {
+      //User1 adds user5
+      let tx = await identityManager.addOwner(proxy.address, user5, {from: user1})
+      let log = tx.logs[0]
+      assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
+      //User1 try to add another owner, should fail.
+      let errorThrown = false
+      try {
+        await identityManager.addOwner(proxy.address, user4, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //User1 try to remove a user. Should still be rate limited and fail.
+      errorThrown = false
+      try {
+        await identityManager.removeOwner(proxy.address, user5, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //user1 tries to change recovery, but is still rate limited
+      errorThrown = false
+      try {
+        await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //No longer rateLimited
+      await evm_increaseTime(adminTimeLock + 1)
+      //User1 tries to add another owner. Should be able to
+      tx = await identityManager.addOwner(proxy.address, user4, {from: user1})
+      log = tx.logs[0]
+      assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
+      //User1 try to remove a user. Should be rate limited and fail.
+      errorThrown = false
+      try {
+        await identityManager.removeOwner(proxy.address, user5, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //user1 tries to change recovery, but is still rate limited
+      errorThrown = false
+      try {
+        await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //no longer rateLimited
+      await evm_increaseTime(adminTimeLock + 1)
+      tx = await identityManager.removeOwner(proxy.address, user5, {from: user1})
+      log = tx.logs[0]
+      assert.equal(log.event, 'OwnerRemoved', 'should trigger correct event')
+      //user1 tries to change recovery, but is rate limited
+      errorThrown = false
+      try {
+        await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown")
+      //no longer rateLimited
+      await evm_increaseTime(adminTimeLock + 1)
+      tx = await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user1})
+      log = tx.logs[0]
+      assert.equal(log.event, 'RecoveryChanged', 'should trigger correct event')
+    })
+
     it('non-owner can not add other owner', async function() {
       try {
         await identityManager.addOwner(proxy.address, user4, {from: user3})
@@ -226,6 +304,17 @@ contract('IdentityManager', (accounts) => {
           isRecovery = await identityManager.isRecovery(proxy.address, recoveryKey2, {from: user1})
           assert.isTrue(isRecovery, 'recoveryKey2 should be recovery now')
         })
+
+        it('should throw if recoveryKey is set to zero address', async function() {
+          let errorThrown = false
+          try {
+            await identityManager.changeRecovery(proxy.address, ZERO_ADDRESS, {from: user1})
+          } catch (e) {
+            assert.match(e.message, /invalid opcode/, "should have thrown")
+            errorThrown = true
+          }
+          assert.isTrue(errorThrown, "should have thrown")
+        })
       })
     })
 
@@ -281,6 +370,29 @@ contract('IdentityManager', (accounts) => {
                       user2,
                       'Instigator key is set in event')
         })
+      })
+
+      it('incorrect recoveryKey should throw', async function() {
+        let errorThrown = false
+        try {
+          await identityManager.addOwnerFromRecovery(proxy.address, user4, {from: nobody})
+        } catch (e) {
+          assert.match(e.message, /invalid opcode/, "should have thrown")
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, "should have thrown")
+      })
+
+      it('should throw if new owner is already an owner', async function() {
+        await evm_increaseTime(adminTimeLock + 1)
+        let errorThrown = false
+        try {
+          await identityManager.addOwnerFromRecovery(proxy.address, user2, {from: recoveryKey})
+        } catch (e) {
+          assert.match(e.message, /invalid opcode/, "should have thrown")
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, "should have thrown")
       })
     })
   })
@@ -423,6 +535,17 @@ contract('IdentityManager', (accounts) => {
       // Verify that the proxy address is logged as the sender
       let regData = await testReg.registry.call(proxy.address)
         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction from new contract')
+    })
+
+    it('should throw if trying to register an existing proxy', async function() {
+      let data = '0x' + lightwallet.txutils._encodeFunctionTxData('registerIdentity', ['address', 'address'], [user1, recoveryKey])
+      try {
+        await identityManager.forwardTo(proxy.address, identityManager.address, 0, data, {from: user1})
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
+        threwError = true
+      }
+      assert.isTrue(threwError, 'existing proxy should not be able to re-register')
     })
   })
 })
