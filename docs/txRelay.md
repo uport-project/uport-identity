@@ -23,12 +23,12 @@ Rationale:
 5. relayer_address: prevents a not-really-feasible-but-maybe attack, where someone could front run, but not send enough gas when they do for the meta-tx to be processed, and then try and trick the user to convince them the transaction just failed, other than the meta-tx. They can then relay the transaction later. Assuming an honest relayer, this is not an issue. 
 
 ### Using TxRelay in a contract
-If you want a contract to support meta-tx there some changes that needs to be made. Refer to the [IdentityManager](./identityManager.md) contract for an example.
+If you want a contract to support meta-tx there some changes that needs to be made. Refer to the [MetaIdentityManager](./metaIdentityManager.md) contract for an example.
 
 1. Add sender param sender to all functions and modifiers that include a reference to msg.sender
     a. This param should be the first param of the function call
 2. All references to msg.sender should be changed to sender
-3. Add a modifier onlyAuthorized to all functions changed in this manner
+3. Add a modifier `onlyAuthorized` to all functions changed in this manner
     a. Allows the relay contract to call these functions. Otherwise, anyone could claim to be whomever they wanted to be
     b. Also allows users to call these functions themselves without meta-tx with the use of checkMessageData function
 

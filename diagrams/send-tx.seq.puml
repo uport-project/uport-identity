@@ -1,6 +1,6 @@
 @startuml
 participant TxRelay as tr
-participant IdentityManager as im
+participant MetaIdentityManager as im
 participant Proxy as p
 
 ->tr:relayMetaTx(v, r, s, IdentityManager, data)
