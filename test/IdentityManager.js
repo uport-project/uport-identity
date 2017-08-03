@@ -155,55 +155,51 @@ contract('IdentityManager', (accounts) => {
         errorThrown = false
       })
 
-      it('can send transactions directly', async function() {
-        await testForwardTo(testReg, identityManager, proxy.address, user2, true)
+      it('is an owner', async function () {
+        let isOwner = await identityManager.isOwner.call(proxy.address, user2)
+        assert.isTrue(isOwner, "should be an owner")
+        //let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
+        //assert.isFalse(isOlderOwner, "should not be an olderOwner")
       })
 
-      describe('after userTimeLock', () => {
-        beforeEach(async function () {await evm_increaseTime(userTimeLock)})
+      it('can not add other owner yet', async function() {
+        try {
+          await identityManager.addOwner(proxy.address, user4, {from: user2})
+        } catch(error) {
+          assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
+        }
+      })
 
-        it('is an owner', async function () {
-          let isOwner = await identityManager.isOwner.call(proxy.address, user2)
-          assert.isTrue(isOwner, "should be an owner")
-          //let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
-          //assert.isFalse(isOlderOwner, "should not be an olderOwner")
-        })
+      it('can not remove other owner yet', async function() {
+        try {
+          await identityManager.removeOwner(proxy.address, user1, {from: user2})
+        } catch(error) {
+          assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
+        }
+      })
 
-        it('can not add other owner yet', async function() {
-          try {
-            await identityManager.addOwner(proxy.address, user4, {from: user2})
-          } catch(error) {
-            assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
-          }
-        })
-
-        it('can not remove other owner yet', async function() {
-          try {
-            await identityManager.removeOwner(proxy.address, user1, {from: user2})
-          } catch(error) {
-            assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
-          }
-        })
-
-        it('can not change recoveryKey yet', async function() {
-          try {
-            await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user2})
-          } catch(error) {
-            assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
-          }
-        })
+      it('can not change recoveryKey yet', async function() {
+        try {
+          await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user2})
+        } catch(error) {
+          assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
+        }
       })
 
       describe('after adminTimeLock', () => {
-        beforeEach(async function () {await evm_increaseTime(adminTimeLock)})
+        beforeEach(async function () {
+          await evm_increaseTime(adminTimeLock)
+          // a tx needs to be sent in order for the evm_increaseTime to have effect for eth_calls
+          await web3.eth.sendTransactionAsync({to: user1, from: user2, value: 1})
+        })
 
         it('is olderOwner', async function() {
-          let temp = await identityManager.isOwner(proxy.address, user2)
-          console.log("Is owner: " + temp)
+          //send a transaction before, just to make sure that the evm increases time properly
+          let tx = await identityManager.removeOwner(proxy.address, user1, {from: user2})
 
-          await evm_increaseTime(userTimeLock)
+          let isOwner = await identityManager.isOwner(proxy.address, user2)
+          assert.isTrue(isOwner, "should be an owner")
           let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
-          console.log("Is olderOwner: " + isOlderOwner)
           assert.isTrue(isOlderOwner, "should be an olderOwner")
         })
 
