@@ -188,14 +188,14 @@ contract MetaIdentityManager {
   /// Note: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
   /// Not doing so risks the proxy becoming stuck.
   function finalizeMigration(address sender, Proxy identity) onlyAuthorized onlyOlderOwner(identity, sender) {
-    if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
+    if (migrationInitiated[identity] == 0 || migrationInitiated[identity] + adminTimeLock >= now) {
+      throw;
+    } else {
       address newIdManager = migrationNewAddress[identity];
       delete migrationInitiated[identity];
       delete migrationNewAddress[identity];
       identity.transfer(newIdManager);
       MigrationFinalized(identity, newIdManager, sender);
-    } else {
-      throw; //so users know tx failed
     }
   }
 

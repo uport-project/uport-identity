@@ -314,14 +314,11 @@ contract('MetaIdentityManager', (accounts) => {
         })
 
         it('is olderOwner', async function() {
-<<<<<<< HEAD
           //send a transaction before, just to make sure that the evm increases time properly
           let tx = await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
 
           let isOwner = await identityManager.isOwner(proxy.address, user2)
           assert.isTrue(isOwner, "should be an owner")
-=======
->>>>>>> 8e8a01a... Fixed bug in isOlderOwner test
           let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
           assert.isTrue(isOlderOwner, "should be an olderOwner")
         })
