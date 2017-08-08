@@ -41,4 +41,4 @@ Replay attacks are a subset of censorship attacks. Here is a brief summary of bo
 Question: Why would anyone choose to replay as compared to censoring?
 Answer: The transaction will appear on the blockchain (just as a failed transaction), and thus, to someone not paying attention, it may look like the relayer has not been compromised.
 
-In our system we choose to trust the relayer since it is controlled by us. If a user don't want to trust the relayer they will still have the option of sending regular transactions.
+In our system we choose to trust the relayer since it is controlled by us. If a user don't want to trust the relayer they will still have the option of sending regular transactions, or use a different relayer.

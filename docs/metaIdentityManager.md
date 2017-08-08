@@ -9,3 +9,5 @@ The MetaIdentityManager should be able to perform the following actions:
 ## Design
 The interface of the MetaIdentityManager is the same as [IdentityManager](./identityManager.md) with some small changes to be able to use the [TxRelay](./txRelay.md). Namely adding sender as the first parameters of all authenticated methods, as well as a `onlyAuthorized` modifier. Also note that a user can both send meta-tx and regular tx to the MetaIdentityManager.
 
+## Attacks
+See [IdentityManager](./identityManager.md), should have the same possible attack scenarios.
