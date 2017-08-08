@@ -56,7 +56,7 @@ contract('Proxy', (accounts) => {
     // Truffle deploys contracts with accounts[0]
     proxy1 = await Proxy.new({from: ownerProxy1})
     proxy2 = await Proxy.new({from: ownerProxy2})
-    testReg = await TestRegistry.deployed()
+    testReg = await TestRegistry.new({from: ownerProxy1})
   })
 
   it('Owner can send transaction', async function() {

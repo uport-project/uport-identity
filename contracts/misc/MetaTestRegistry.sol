@@ -10,10 +10,6 @@ contract MetaTestRegistry {
     registry[sender] = x;
   }
 
-  function reallyLongFunctionName(uint with, address many, string strange, uint params) {
-    registry[many] = params;
-  }
-
   function testThrow(address sender) {
       throw;
   }
