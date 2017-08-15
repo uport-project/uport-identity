@@ -1,5 +1,9 @@
 # Release notes
 
+## v1.2.1
+* Small fixes to IdentityManager and MetaIdentityManager
+* Better documentation for contracts
+
 ## v1.2.0
 New controller called MetaIdentityManager and a contract called TxRelay. The MetaIdentityManager is very similar to the IdentityManager but also supports meta transactions with the help of the TxRelay.
 

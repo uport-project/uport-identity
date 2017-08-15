@@ -70,6 +70,7 @@ This repository contains the contracts currently in use by uPort. This is also w
 #### [Proxy](./docs/proxy.md)
 #### [TxRelay](./docs/txRelay.md)
 #### [IdentityManager](./docs/identityManager.md)
+#### [MetaIdentityManager](./docs/metaIdentityManager.md)
 
 ### Main contract interactions
 The most important interactions with the contracts are creation of identities and sending transactions. Here are visual representations of this being executed.
