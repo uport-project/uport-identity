@@ -47,8 +47,8 @@ contract MetaIdentityManager {
   mapping(address => mapping(address => uint)) owners;
   mapping(address => address) recoveryKeys;
   mapping(address => mapping(address => uint)) limiter;
-  mapping(address => uint) migrationInitiated;
-  mapping(address => address) migrationNewAddress;
+  mapping(address => uint) public migrationInitiated;
+  mapping(address => address) public migrationNewAddress;
 
   modifier onlyAuthorized() {
     if (msg.sender == relay || checkMessageData(msg.sender)) _;
@@ -61,7 +61,7 @@ contract MetaIdentityManager {
   }
 
   modifier onlyOlderOwner(address identity, address sender) {
-    if (owners[identity][sender] > 0 && (owners[identity][sender] + adminTimeLock) <= now) _ ;
+    if (isOlderOwner(identity, sender)) _ ;
     else throw;
   }
 
@@ -188,7 +188,9 @@ contract MetaIdentityManager {
   /// Note: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
   /// Not doing so risks the proxy becoming stuck.
   function finalizeMigration(address sender, Proxy identity) onlyAuthorized onlyOlderOwner(identity, sender) {
-    if (migrationInitiated[identity] > 0 && migrationInitiated[identity] + adminTimeLock < now) {
+    if (migrationInitiated[identity] == 0 || migrationInitiated[identity] + adminTimeLock >= now) {
+      throw;
+    } else {
       address newIdManager = migrationNewAddress[identity];
       delete migrationInitiated[identity];
       delete migrationNewAddress[identity];
@@ -209,6 +211,10 @@ contract MetaIdentityManager {
 
   function isOwner(address identity, address owner) constant returns (bool) {
     return (owners[identity][owner] > 0 && (owners[identity][owner] + userTimeLock) <= now);
+  }
+
+  function isOlderOwner(address identity, address owner) constant returns (bool) {
+    return (owners[identity][owner] > 0 && (owners[identity][owner] + adminTimeLock) <= now);
   }
 
   function isRecovery(address identity, address recoveryKey) constant returns (bool) {

@@ -262,58 +262,72 @@ contract('MetaIdentityManager', (accounts) => {
         errorThrown = false
       })
 
-      it('within userTimeLock is allowed transactions', async function() {
+      it('is an owner but not olderOwner', async function() {
+        let isOwner = await identityManager.isOwner.call(proxy.address, user2)
+        assert.isTrue(isOwner, "should be an owner")
+        let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
+        assert.isFalse(isOlderOwner, "should not be an olderOwner")
+      })
+
+      it('Allow transactions', async function() {
         await testForwardTo(testReg, identityManager, proxy.address, user2, user2, true)
       })
 
-      describe('after userTimeLock', () => {
-        beforeEach(() => evm_increaseTime(userTimeLock))
+      it('can not add other owner yet', async function() {
+        let errorThrown = false
+        try {
+          let temp = await identityManager.addOwner(user2, proxy.address, user4, {from: user2})
+          console.log(temp)
+        } catch(e) {
+          assert.match(e.message, /invalid opcode/, 'throws an error')
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, 'Should have thrown')
+      })
 
-        it('Allow transactions', async function() {
-          await testForwardTo(testReg, identityManager, proxy.address, user2, user2, true)
-        })
+      it('can not remove other owner yet', async function() {
+        let errorThrown = false
+        try {
+          await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
+        } catch(e) {
+          assert.match(e.message, /invalid opcode/, 'throws an error')
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, 'Should have thrown')
+      })
 
-        it('can not add other owner yet', async function() {
-          let errorThrown = false
-          try {
-            let temp = await identityManager.addOwner(user2, proxy.address, user4, {from: user2})
-            console.log(temp)
-          } catch(e) {
-            assert.match(e.message, /invalid opcode/, 'throws an error')
-            errorThrown = true
-          }
-          assert.isTrue(errorThrown, 'Should have thrown')
-        })
-
-        it('can not remove other owner yet', async function() {
-          let errorThrown = false
-          try {
-            await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
-          } catch(e) {
-            assert.match(e.message, /invalid opcode/, 'throws an error')
-            errorThrown = true
-          }
-          assert.isTrue(errorThrown, 'Should have thrown')
-        })
-
-        it('can not change recoveryKey yet', async function() {
-          let errorThrown = false
-          try {
-            await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
-          } catch(e) {
-            assert.match(e.message, /invalid opcode/, 'throws an error')
-            errorThrown = true
-          }
-          assert.isTrue(errorThrown, 'Should have thrown')
-        })
+      it('can not change recoveryKey yet', async function() {
+        let errorThrown = false
+        try {
+          await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
+        } catch(e) {
+          assert.match(e.message, /invalid opcode/, 'throws an error')
+          errorThrown = true
+        }
+        assert.isTrue(errorThrown, 'Should have thrown')
       })
 
       describe('after adminTimeLock', () => {
-        beforeEach(() => evm_increaseTime(adminTimeLock))
+        beforeEach(async function () {
+          await evm_increaseTime(adminTimeLock)
+          // a tx needs to be sent in order for the evm_increaseTime to have effect for eth_calls
+          await web3.eth.sendTransactionAsync({to: user1, from: user2, value: 1})
+        })
+
+        it('is olderOwner', async function() {
+          //send a transaction before, just to make sure that the evm increases time properly
+          let tx = await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
+
+          let isOwner = await identityManager.isOwner(proxy.address, user2)
+          assert.isTrue(isOwner, "should be an owner")
+          let isOlderOwner = await identityManager.isOlderOwner.call(proxy.address, user2)
+          assert.isTrue(isOlderOwner, "should be an olderOwner")
+        })
 
         it('can add new owner', async function() {
           let tx = await identityManager.addOwner(user2, proxy.address, user3, {from: user2})
           const log = tx.logs[0]
+
           assert.equal(log.args.owner,
                       user3,
                       'Owner key is set in event')
@@ -387,7 +401,7 @@ contract('MetaIdentityManager', (accounts) => {
       })
 
       describe('after userTimeLock', () => {
-        beforeEach(() => evm_increaseTime(userTimeLock))
+        beforeEach(async function () {await evm_increaseTime(userTimeLock)})
 
         it('Allow transactions', async function() {
           await testForwardTo(testReg, identityManager, proxy.address, user2, user2, true)
@@ -395,7 +409,7 @@ contract('MetaIdentityManager', (accounts) => {
       })
 
       describe('after adminTimeLock', () => {
-        beforeEach(() => evm_increaseTime(adminTimeLock))
+        beforeEach(async function () {await evm_increaseTime(adminTimeLock)})
 
         it('can add new owner', async function() {
           let tx = await identityManager.addOwner(user2, proxy.address, user3, {from: user2})
@@ -549,6 +563,12 @@ contract('MetaIdentityManager', (accounts) => {
       assert.isTrue(threwError, 'Should have thrown error')
     })
 
+    it('should return correct address for finalization', async function () {
+      await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
+      let newAdd = await identityManager.migrationNewAddress.call(proxy.address)
+      assert.equal(newAdd, newIdenManager.address, "should be migration to new identityManager")
+    })
+
     it('correct keys should finilize transfer', async function() {
       await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let threwError = false
@@ -567,6 +587,17 @@ contract('MetaIdentityManager', (accounts) => {
         threwError = true
       }
       assert.isTrue(threwError, 'young owner should not be able to finalize')
+
+      //correct owner should not be able to finalize before time is up
+      threwError = false
+      try {
+          await identityManager.finalizeMigration(user1, proxy.address, {from: user1})
+      } catch(e) {
+        assert.match(e.message, /invalid opcode/, 'throws an error')
+        threwError = true
+      }
+      assert.isTrue(threwError, 'young owner should not be able to finalize')
+
 
       await evm_increaseTime(2 * adminTimeLock)
       let tx = await identityManager.finalizeMigration(user1, proxy.address, {from: user1})
