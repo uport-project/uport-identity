@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 for i in diagrams/*.puml; do
 
   d=${i%.puml};

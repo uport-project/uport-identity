@@ -1,0 +1,12 @@
+@startuml
+participant Proxy as p
+participant IdentityManager as im
+
+p->im:registerIdentity(owner, recoveryKey)
+activate im
+im->im:owners[msg.sender][owner] = now - adminTimeLock;
+im->im:recoveryKeys[msg.sender] = recoveryKey;
+im-->o]: <<Event>> IdentityCreated(msg.sender, msg.sender, owner, recoveryKey)
+deactivate im
+
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+participant TxRelay as tr
+participant MetaIdentityManager as im
+participant Proxy as p
+
+->tr:relayMetaTx(v, r, s, IdentityManager, data)
+
+activate tr
+tr->tr:verifySignature
+
+tr->im: forwardTo(sender, proxy, destination, value, data)
+activate im
+im->p:forward(destination, value, data)
+activate p
+p-->o]: <<Event>> Forwarded(destination, value, data)
+p-->im
+deactivate p
+im-->tr
+deactivate im
+deactivate tr
+
+@enduml

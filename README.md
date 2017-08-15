@@ -65,25 +65,23 @@ let identityFactory = IdentityFactory.at(uportIdentity.IdentityFactory.networks[
 ```
 
 ## Contracts
-This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Ropsten and Mainnet.
+This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Mainnet and relevant test networks. Below you can find descriptions of each of the contracts and the rationale behind the design decisions.
 
-### IdentityFactory
-A factory that creates new identities with a Proxy, RecoverableController and RecoveryQuorum.
+#### [Proxy](./docs/proxy.md)
+#### [TxRelay](./docs/txRelay.md)
+#### [IdentityManager](./docs/identityManager.md)
 
-### IdentityFactoryWithRecoveryKey
-A factory that creates new identities with a Proxy and RecoverableController.
+### Main contract interactions
+The most important interactions with the contracts are creation of identities and sending transactions. Here are visual representations of this being executed.
 
-### Proxy
-This is the main identity contract. All your transactions are forwarded through this contract which acts as your persistent identifier.
+#### Creating an identity with the IdentityManager
+![identity creation](./diagrams/create-identity.seq.png)
 
-### RecoverableController
-This is a controller which plugs in to the proxy contract. It gives you the ability to have one key that can make transactions through the proxy, but can't change the owner of the proxy, and another key that acts as a recovery key that can change the owner of the proxy. This gives you the ability to store a recovery key in cold storage while you can use your main key for regular transactions. If your main key is lost you can change it using the recovery key from cold storage.
+#### Transfer an identity to IdentityManager
+![register identity](./diagrams/register-identity.seq.png)
 
-### RecoveryQuorum
-This contract plugs into the RecoverableController to provide recovery with a n-of-m setup. This allows for creating recovery networks consisting of your friends.
-
-### ArrayLib
-A library for finding and removing addresses in arrays.
+#### Send a meta-tx
+![meta-tx](./diagrams/send-tx.seq.png)
 
 ## Contributing
 Want to contribute to uport-contracts? Cool, please read our [contribution guidelines](./CONTRIBUTING.md) to get an understanding of the process we use for making changes to this repo.
