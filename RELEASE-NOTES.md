@@ -1,5 +1,8 @@
 # Release notes
 
+## v1.2.2
+Deployed updated versions of IdentityManager and MetaIdentityManager.
+
 ## v1.2.1
 * Small fixes to IdentityManager and MetaIdentityManager
 * Better documentation for contracts
