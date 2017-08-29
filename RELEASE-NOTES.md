@@ -1,5 +1,8 @@
 # Release notes
 
+## v1.2.3
+Small fix in order to play more nicely with react-native
+
 ## v1.2.2
 Deployed updated versions of IdentityManager and MetaIdentityManager.
 
