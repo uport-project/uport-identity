@@ -7,38 +7,38 @@ contract IdentityManager {
   uint userTimeLock;
   uint adminRate;
 
-  event IdentityCreated(
+  event LogIdentityCreated(
     address indexed identity,
     address indexed creator,
     address owner,
     address indexed recoveryKey);
 
-  event OwnerAdded(
+  event LogOwnerAdded(
     address indexed identity,
     address indexed owner,
     address instigator);
 
-  event OwnerRemoved(
+  event LogOwnerRemoved(
     address indexed identity,
     address indexed owner,
     address instigator);
 
-  event RecoveryChanged(
+  event LogRecoveryChanged(
     address indexed identity,
     address indexed recoveryKey,
     address instigator);
 
-  event MigrationInitiated(
+  event LogMigrationInitiated(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
 
-  event MigrationCanceled(
+  event LogMigrationCanceled(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
 
-  event MigrationFinalized(
+  event LogMigrationFinalized(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
@@ -93,7 +93,7 @@ contract IdentityManager {
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
-    IdentityCreated(identity, msg.sender, owner,  recoveryKey);
+    LogIdentityCreated(identity, msg.sender, owner,  recoveryKey);
   }
 
   /// @dev Allows a user to transfer control of existing proxy to this contract. Must come through proxy
@@ -104,7 +104,7 @@ contract IdentityManager {
     require(recoveryKeys[msg.sender] == 0); // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
-    IdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
+    LogIdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
   }
 
   /// @dev Allows a user to forward a call through their proxy.
@@ -115,20 +115,20 @@ contract IdentityManager {
   /// @dev Allows an olderOwner to add a new owner instantly
   function addOwner(Proxy identity, address newOwner) public onlyOlderOwner(identity) rateLimited(identity) {
     owners[identity][newOwner] = now - userTimeLock;
-    OwnerAdded(identity, newOwner, msg.sender);
+    LogOwnerAdded(identity, newOwner, msg.sender);
   }
 
   /// @dev Allows a recoveryKey to add a new owner with userTimeLock waiting time
   function addOwnerFromRecovery(Proxy identity, address newOwner) public onlyRecovery(identity) rateLimited(identity) {
     require(!isOwner(identity, newOwner));
     owners[identity][newOwner] = now;
-    OwnerAdded(identity, newOwner, msg.sender);
+    LogOwnerAdded(identity, newOwner, msg.sender);
   }
 
   /// @dev Allows an owner to remove another owner instantly
   function removeOwner(Proxy identity, address owner) public onlyOlderOwner(identity) rateLimited(identity) {
     delete owners[identity][owner];
-    OwnerRemoved(identity, owner, msg.sender);
+    LogOwnerRemoved(identity, owner, msg.sender);
   }
 
   /// @dev Allows an owner to change the recoveryKey instantly
@@ -138,7 +138,7 @@ contract IdentityManager {
     validAddress(recoveryKey)
   {
     recoveryKeys[identity] = recoveryKey;
-    RecoveryChanged(identity, recoveryKey, msg.sender);
+    LogRecoveryChanged(identity, recoveryKey, msg.sender);
   }
 
   /// @dev Allows an owner to begin process of transfering proxy to new IdentityManager
@@ -148,7 +148,7 @@ contract IdentityManager {
   {
     migrationInitiated[identity] = now;
     migrationNewAddress[identity] = newIdManager;
-    MigrationInitiated(identity, newIdManager, msg.sender);
+    LogMigrationInitiated(identity, newIdManager, msg.sender);
   }
 
   /// @dev Allows an owner to cancel the process of transfering proxy to new IdentityManager
@@ -156,7 +156,7 @@ contract IdentityManager {
     address canceledManager = migrationNewAddress[identity];
     delete migrationInitiated[identity];
     delete migrationNewAddress[identity];
-    MigrationCanceled(identity, canceledManager, msg.sender);
+    LogMigrationCanceled(identity, canceledManager, msg.sender);
   }
 
   /// @dev Allows an owner to finalize migration once adminTimeLock time has passed
@@ -168,7 +168,7 @@ contract IdentityManager {
     delete migrationInitiated[identity];
     delete migrationNewAddress[identity];
     identity.transfer(newIdManager);
-    MigrationFinalized(identity, newIdManager, msg.sender);
+    LogMigrationFinalized(identity, newIdManager, msg.sender);
   }
 
   function isOwner(address identity, address owner) public constant returns (bool) {

@@ -8,38 +8,38 @@ contract MetaIdentityManager {
   uint adminRate;
   address relay;
 
-  event IdentityCreated(
+  event LogIdentityCreated(
     address indexed identity,
     address indexed creator,
     address owner,
     address indexed recoveryKey);
 
-  event OwnerAdded(
+  event LogOwnerAdded(
     address indexed identity,
     address indexed owner,
     address instigator);
 
-  event OwnerRemoved(
+  event LogOwnerRemoved(
     address indexed identity,
     address indexed owner,
     address instigator);
 
-  event RecoveryChanged(
+  event LogRecoveryChanged(
     address indexed identity,
     address indexed recoveryKey,
     address instigator);
 
-  event MigrationInitiated(
+  event LogMigrationInitiated(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
 
-  event MigrationCanceled(
+  event LogMigrationCanceled(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
 
-  event MigrationFinalized(
+  event LogMigrationFinalized(
     address indexed identity,
     address indexed newIdManager,
     address instigator);
@@ -101,7 +101,7 @@ contract MetaIdentityManager {
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
-    IdentityCreated(identity, msg.sender, owner,  recoveryKey);
+    LogIdentityCreated(identity, msg.sender, owner,  recoveryKey);
   }
 
   /// @dev Allows a user to transfer control of existing proxy to this contract. Must come through proxy
@@ -112,7 +112,7 @@ contract MetaIdentityManager {
     require(recoveryKeys[msg.sender] == 0); // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // Owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
-    IdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
+    LogIdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
   }
 
   /// @dev Allows a user to forward a call through their proxy.
@@ -130,7 +130,7 @@ contract MetaIdentityManager {
     rateLimited(identity, sender)
   {
     owners[identity][newOwner] = now - userTimeLock;
-    OwnerAdded(identity, newOwner, sender);
+    LogOwnerAdded(identity, newOwner, sender);
   }
 
   /// @dev Allows a recoveryKey to add a new owner with userTimeLock waiting time
@@ -141,7 +141,7 @@ contract MetaIdentityManager {
   {
     require(!isOwner(identity, newOwner));
     owners[identity][newOwner] = now;
-    OwnerAdded(identity, newOwner, sender);
+    LogOwnerAdded(identity, newOwner, sender);
   }
 
   /// @dev Allows an owner to remove another owner instantly
@@ -151,7 +151,7 @@ contract MetaIdentityManager {
     rateLimited(identity, sender)
   {
     delete owners[identity][owner];
-    OwnerRemoved(identity, owner, sender);
+    LogOwnerRemoved(identity, owner, sender);
   }
 
   /// @dev Allows an owner to change the recoveryKey instantly
@@ -162,7 +162,7 @@ contract MetaIdentityManager {
     validAddress(recoveryKey)
   {
     recoveryKeys[identity] = recoveryKey;
-    RecoveryChanged(identity, recoveryKey, sender);
+    LogRecoveryChanged(identity, recoveryKey, sender);
   }
 
   /// @dev Allows an owner to begin process of transfering proxy to new IdentityManager
@@ -172,7 +172,7 @@ contract MetaIdentityManager {
   {
     migrationInitiated[identity] = now;
     migrationNewAddress[identity] = newIdManager;
-    MigrationInitiated(identity, newIdManager, sender);
+    LogMigrationInitiated(identity, newIdManager, sender);
   }
 
   /// @dev Allows an owner to cancel the process of transfering proxy to new IdentityManager
@@ -183,7 +183,7 @@ contract MetaIdentityManager {
     address canceledManager = migrationNewAddress[identity];
     delete migrationInitiated[identity];
     delete migrationNewAddress[identity];
-    MigrationCanceled(identity, canceledManager, sender);
+    LogMigrationCanceled(identity, canceledManager, sender);
   }
 
   /// @dev Allows an owner to finalize and completly transfer proxy to new IdentityManager
@@ -195,7 +195,7 @@ contract MetaIdentityManager {
     delete migrationInitiated[identity];
     delete migrationNewAddress[identity];
     identity.transfer(newIdManager);
-    MigrationFinalized(identity, newIdManager, sender);
+    LogMigrationFinalized(identity, newIdManager, sender);
   }
 
   //Checks that address a is the first input in msg.data.
