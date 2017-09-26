@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 const readline = require('readline')
-const artifacts = require('../index.js')
+const artifacts = require('../artifact-index.js')
 const exec = require('child_process').exec
 
 const TEMPLATE = 'readme-template.md'
@@ -41,9 +41,9 @@ exec('grep -m 1 -o ">.\\{1,5\\}%" ./docs/coverage/index.html', (error, stdout, s
 function writeContractInfo(id) {
   outStream.write('|Contract|Address|\n')
   outStream.write('| --|--|\n')
-  outStream.write(createContractString(artifacts.ArrayLib, id))
-  outStream.write(createContractString(artifacts.IdentityFactory, id))
-  outStream.write(createContractString(artifacts.IdentityFactoryWithRecoveryKey, id))
+  //outStream.write(createContractString(artifacts.ArrayLib, id))
+  //outStream.write(createContractString(artifacts.IdentityFactory, id))
+  //outStream.write(createContractString(artifacts.IdentityFactoryWithRecoveryKey, id))
   outStream.write(createContractString(artifacts.IdentityManager, id))
   outStream.write(createContractString(artifacts.TxRelay, id))
   outStream.write(createContractString(artifacts.MetaIdentityManager, id))
@@ -52,8 +52,10 @@ function writeContractInfo(id) {
 
 function createContractString(artifact, id) {
   let wrapAddr = '(not deployed)'
-  if (artifact.networks[id]) {
-    let address = artifact.networks[id].address
+  let version = artifact.latestVersion
+  let artifactObj = artifact[version]
+  if (artifactObj.networks[id]) {
+    let address = artifactObj.networks[id].address
     let netPrefix = ''
     if (id === 3) {
       netPrefix = 'ropsten.'
@@ -64,5 +66,5 @@ function createContractString(artifact, id) {
     }
     wrapAddr = '[' + address +'](https://' + netPrefix + 'etherscan.io/address/' + address + ')'
   }
-  return '|' + artifact.contract_name + '|' + wrapAddr + '|\n'
+  return '|' + artifactObj.contract_name + '|' + wrapAddr + '|\n'
 }
