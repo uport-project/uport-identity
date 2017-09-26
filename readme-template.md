@@ -7,23 +7,33 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 <contract-deployments>
 
 ## Using the contracts
-To use the contract we provide truffle artifacts. You can use `truffle-contract` to utilize these.
+To use the contract we provide truffle artifacts. Once you require the `uport-identity` module you will get an object containing a versioned index of the uport contracts. You can specify which version you want to user, or just use the latest one. Keep in mind that different versions will be deployed to different addresses.
 ```javascript
 const uportIdentity = require('uport-identity')
 const Contract = require('truffle-contract')
 
-let IdentityFactory = Contract(uportIdentity.IdentityFactory)
-IdentityFactory.setProvider(web3.currentProvider)
-let identityFactory = IdentityFactory.deployed()
+// use specific version
+const IdentityManagerArtifact = uportIdentity.IdentityManager.v1
+
+// or use latest version
+const version = uportIdentity.IdentityManager.latestVersion
+const IdentityManagerArtifact = uportIdentity.IdentityManager[version]
+```
+
+ You can use `truffle-contract` to utilize these artifacts.
+```javascript
+let IdentityManager = Contract(IdentityManagerArtifact)
+IdentityManager.setProvider(web3.currentProvider)
+let identityManager = IdentityManager.deployed()
 ```
 You can also use web3.
 ```javascript
 let networkId = 1 // Mainnet
-let IdentityFactory = web3.eth.contract(uportIdentity.IdentityFactory.abi)
-let identityFactory = IdentityFactory.at(uportIdentity.IdentityFactory.networks[networkId].address)
+let IdentityManager = web3.eth.contract(IdentityManagerArtifact)
+let identityManager = IdentityManager.at(IdentityManagerArtifact.networks[networkId].address)
 ```
 
-## Contracts
+## Contract documentation
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Mainnet and relevant test networks. Below you can find descriptions of each of the contracts and the rationale behind the design decisions.
 
 #### [Proxy](./docs/proxy.md)

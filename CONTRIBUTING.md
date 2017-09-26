@@ -48,6 +48,13 @@ where:
 
 All of the above uses infura to send the deployment transactions, with exeception of `local` which uses `localhost:8545`.
 
+After contracts have been deployed to all relevant networks, make sure to generate the artifact index by running the following two commands:
+```
+$ yarn build-artifact-index
+$ yarn generate-readme
+```
+These commands make sure that the artifacts a user gets are correct and that the readme has the latest addresses for contracts.
+
 ## Diagrams
 Diagrams are made with PlantUML.
 
@@ -61,7 +68,7 @@ The contracts in this repo are an essential part of the uport ecosystem. Therefo
 A pull request being merged into `develop` needs to be reviewed by at least two members of the uport team.
 
 ### Merging into master
-A pull request being merged into `master` needs to be reviewed by a security team that is external to the uport team. These pull request ideally only originate from the `develop` branch which has been reviewed by the uport team. All contracts that are being merged also needs to be deployed on the *relevant networks* with the addresses specified in the `build/contracts` folder.
+A pull request being merged into `master` needs to be reviewed by a security team that is external to the uport team. To prepare for this make a branch from `develop` called `release/<semver-number>` and make neccesary preparations. Then make a pull request to `master`. The `develop` branch has been reviewed by the uport team and should generally be in a good state. The external review team audits the newly created branch. If there are changes needed they are made in this branch. Once the external team are happy with the state of the contracts make sure that contracts are deployed on the *relevant networks*. The release branch can then be merged into `master`, and also `develop`.
 
 #### Relevant networks
 Right now the networks we want the contracts deployed on are `ropsten (testnet)` and ethereums `mainnet`.
