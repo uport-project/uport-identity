@@ -97,7 +97,7 @@ contract MetaIdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Gas cost of ~300,000
-  function createIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
+  function createIdentity(address owner, address recoveryKey) public validAddress(recoveryKey) {
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
@@ -108,7 +108,7 @@ contract MetaIdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Note: User must change owner of proxy to this contract after calling this
-  function registerIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
+  function registerIdentity(address owner, address recoveryKey) public validAddress(recoveryKey) {
     require(recoveryKeys[msg.sender] == 0); // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // Owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
@@ -116,7 +116,7 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows a user to forward a call through their proxy.
-  function forwardTo(address sender, Proxy identity, address destination, uint value, bytes data)
+  function forwardTo(address sender, Proxy identity, address destination, uint value, bytes data) public
     onlyAuthorized
     onlyOwner(identity, sender)
   {
@@ -124,7 +124,7 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows an olderOwner to add a new owner instantly
-  function addOwner(address sender, Proxy identity, address newOwner)
+  function addOwner(address sender, Proxy identity, address newOwner) public
     onlyAuthorized
     onlyOlderOwner(identity, sender)
     rateLimited(identity, sender)
@@ -134,7 +134,7 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows a recoveryKey to add a new owner with userTimeLock waiting time
-  function addOwnerFromRecovery(address sender, Proxy identity, address newOwner)
+  function addOwnerFromRecovery(address sender, Proxy identity, address newOwner) public
     onlyAuthorized
     onlyRecovery(identity, sender)
     rateLimited(identity, sender)
@@ -145,7 +145,7 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows an owner to remove another owner instantly
-  function removeOwner(address sender, Proxy identity, address owner)
+  function removeOwner(address sender, Proxy identity, address owner) public
     onlyAuthorized
     onlyOlderOwner(identity, sender)
     rateLimited(identity, sender)
@@ -155,7 +155,7 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows an owner to change the recoveryKey instantly
-  function changeRecovery(address sender, Proxy identity, address recoveryKey)
+  function changeRecovery(address sender, Proxy identity, address recoveryKey) public
     onlyAuthorized
     onlyOlderOwner(identity, sender)
     rateLimited(identity, sender)
@@ -166,7 +166,7 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows an owner to begin process of transfering proxy to new IdentityManager
-  function initiateMigration(address sender, Proxy identity, address newIdManager)
+  function initiateMigration(address sender, Proxy identity, address newIdManager) public
     onlyAuthorized
     onlyOlderOwner(identity, sender)
   {
@@ -176,7 +176,10 @@ contract MetaIdentityManager {
   }
 
   /// @dev Allows an owner to cancel the process of transfering proxy to new IdentityManager
-  function cancelMigration(address sender, Proxy identity) onlyAuthorized onlyOwner(identity, sender) {
+  function cancelMigration(address sender, Proxy identity) public
+    onlyAuthorized
+    onlyOwner(identity, sender)
+  {
     address canceledManager = migrationNewAddress[identity];
     delete migrationInitiated[identity];
     delete migrationNewAddress[identity];
@@ -197,7 +200,7 @@ contract MetaIdentityManager {
 
   //Checks that address a is the first input in msg.data.
   //Has very minimal gas overhead.
-  function checkMessageData(address a) constant internal returns (bool t) {
+  function checkMessageData(address a) internal constant returns (bool t) {
     if (msg.data.length < 36) return false;
     assembly {
         let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -205,15 +208,15 @@ contract MetaIdentityManager {
     }
   }
 
-  function isOwner(address identity, address owner) constant returns (bool) {
+  function isOwner(address identity, address owner) public constant returns (bool) {
     return (owners[identity][owner] > 0 && (owners[identity][owner] + userTimeLock) <= now);
   }
 
-  function isOlderOwner(address identity, address owner) constant returns (bool) {
+  function isOlderOwner(address identity, address owner) public constant returns (bool) {
     return (owners[identity][owner] > 0 && (owners[identity][owner] + adminTimeLock) <= now);
   }
 
-  function isRecovery(address identity, address recoveryKey) constant returns (bool) {
+  function isRecovery(address identity, address recoveryKey) public constant returns (bool) {
     return recoveryKeys[identity] == recoveryKey;
   }
 }

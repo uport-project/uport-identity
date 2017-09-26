@@ -89,7 +89,7 @@ contract IdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Gas cost of 289,311
-  function createIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
+  function createIdentity(address owner, address recoveryKey) public validAddress(recoveryKey) {
     Proxy identity = new Proxy();
     owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[identity] = recoveryKey;
@@ -100,7 +100,7 @@ contract IdentityManager {
   /// @param owner Key who can use this contract to control proxy. Given full power
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Note: User must change owner of proxy to this contract after calling this
-  function registerIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
+  function registerIdentity(address owner, address recoveryKey) public validAddress(recoveryKey) {
     require(recoveryKeys[msg.sender] == 0); // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
@@ -108,31 +108,31 @@ contract IdentityManager {
   }
 
   /// @dev Allows a user to forward a call through their proxy.
-  function forwardTo(Proxy identity, address destination, uint value, bytes data) onlyOwner(identity) {
+  function forwardTo(Proxy identity, address destination, uint value, bytes data) public onlyOwner(identity) {
     identity.forward(destination, value, data);
   }
 
   /// @dev Allows an olderOwner to add a new owner instantly
-  function addOwner(Proxy identity, address newOwner) onlyOlderOwner(identity) rateLimited(identity) {
+  function addOwner(Proxy identity, address newOwner) public onlyOlderOwner(identity) rateLimited(identity) {
     owners[identity][newOwner] = now - userTimeLock;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
   /// @dev Allows a recoveryKey to add a new owner with userTimeLock waiting time
-  function addOwnerFromRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited(identity) {
+  function addOwnerFromRecovery(Proxy identity, address newOwner) public onlyRecovery(identity) rateLimited(identity) {
     require(!isOwner(identity, newOwner));
     owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
   }
 
   /// @dev Allows an owner to remove another owner instantly
-  function removeOwner(Proxy identity, address owner) onlyOlderOwner(identity) rateLimited(identity) {
+  function removeOwner(Proxy identity, address owner) public onlyOlderOwner(identity) rateLimited(identity) {
     delete owners[identity][owner];
     OwnerRemoved(identity, owner, msg.sender);
   }
 
   /// @dev Allows an owner to change the recoveryKey instantly
-  function changeRecovery(Proxy identity, address recoveryKey)
+  function changeRecovery(Proxy identity, address recoveryKey) public
     onlyOlderOwner(identity)
     rateLimited(identity)
     validAddress(recoveryKey)
@@ -142,7 +142,7 @@ contract IdentityManager {
   }
 
   /// @dev Allows an owner to begin process of transfering proxy to new IdentityManager
-  function initiateMigration(Proxy identity, address newIdManager)
+  function initiateMigration(Proxy identity, address newIdManager) public
     onlyOlderOwner(identity)
     validAddress(newIdManager)
   {
@@ -152,7 +152,7 @@ contract IdentityManager {
   }
 
   /// @dev Allows an owner to cancel the process of transfering proxy to new IdentityManager
-  function cancelMigration(Proxy identity) onlyOwner(identity) {
+  function cancelMigration(Proxy identity) public onlyOwner(identity) {
     address canceledManager = migrationNewAddress[identity];
     delete migrationInitiated[identity];
     delete migrationNewAddress[identity];
@@ -162,7 +162,7 @@ contract IdentityManager {
   /// @dev Allows an owner to finalize migration once adminTimeLock time has passed
   /// WARNING: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
   /// Not doing so risks the proxy becoming stuck.
-  function finalizeMigration(Proxy identity) onlyOlderOwner(identity) {
+  function finalizeMigration(Proxy identity) public onlyOlderOwner(identity) {
     require(migrationInitiated[identity] != 0 && migrationInitiated[identity] + adminTimeLock < now);
     address newIdManager = migrationNewAddress[identity];
     delete migrationInitiated[identity];
@@ -171,15 +171,15 @@ contract IdentityManager {
     MigrationFinalized(identity, newIdManager, msg.sender);
   }
 
-  function isOwner(address identity, address owner) constant returns (bool) {
+  function isOwner(address identity, address owner) public constant returns (bool) {
     return (owners[identity][owner] > 0 && (owners[identity][owner] + userTimeLock) <= now);
   }
 
-  function isOlderOwner(address identity, address owner) constant returns (bool) {
+  function isOlderOwner(address identity, address owner) public constant returns (bool) {
     return (owners[identity][owner] > 0 && (owners[identity][owner] + adminTimeLock) <= now);
   }
 
-  function isRecovery(address identity, address recoveryKey) constant returns (bool) {
+  function isRecovery(address identity, address recoveryKey) public constant returns (bool) {
     return recoveryKeys[identity] == recoveryKey;
   }
 }

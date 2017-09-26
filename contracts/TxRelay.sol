@@ -18,7 +18,7 @@ contract TxRelay {
                  Note, the first encoded argument in data must be address of the signer
    */
   function relayMetaTx(uint8 sigV, bytes32 sigR, bytes32 sigS,
-                       address destination, bytes data) {
+                       address destination, bytes data) public {
 
     address claimedSender = getAddress(data);
     // relay :: nonce :: destination :: data :: relayer
@@ -40,7 +40,7 @@ contract TxRelay {
    * @returns a The address retrieved from the array
      (Optimization based on work by tjade273)
    */
-  function getAddress(bytes b) constant returns (address a) {
+  function getAddress(bytes b) public constant returns (address a) {
     if (b.length < 36) return address(0);
     assembly {
         let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -55,7 +55,7 @@ contract TxRelay {
  * @param add The address to return the nonce for.
  * @return The specific-to-this-contract nonce of the address provided
  */
-  function getNonce(address add) constant returns (uint) {
+  function getNonce(address add) public constant returns (uint) {
     return nonce[add];
   }
 }
