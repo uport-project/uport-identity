@@ -19,14 +19,11 @@ module.exports = {
     v1: require('./build/contracts/versions/v1/Owned.json'),
   },
   Proxy: {
-    latestVersion: 'v3',
+    latestVersion: 'v1',
     v1: require('./build/contracts/versions/v1/Proxy.json'),
-    v2: require('./build/contracts/versions/v2/Proxy.json'),
-    v3: require('./build/contracts/versions/v3/Proxy.json'),
   },
   TxRelay: {
-    latestVersion: 'v2',
+    latestVersion: 'v1',
     v1: require('./build/contracts/versions/v1/TxRelay.json'),
-    v2: require('./build/contracts/versions/v2/TxRelay.json'),
   }
 }
