@@ -51,35 +51,34 @@ contract MetaIdentityManager {
   mapping(address => address) public migrationNewAddress;
 
   modifier onlyAuthorized() {
-    if (msg.sender == relay || checkMessageData(msg.sender)) _;
-    else throw;
+    require(msg.sender == relay || checkMessageData(msg.sender));
+    _;
   }
 
   modifier onlyOwner(address identity, address sender) {
-    if (isOwner(identity, sender)) _ ;
-    else throw;
+    require(isOwner(identity, sender));
+    _;
   }
 
   modifier onlyOlderOwner(address identity, address sender) {
-    if (isOlderOwner(identity, sender)) _ ;
-    else throw;
+    require(isOlderOwner(identity, sender));
+    _;
   }
 
   modifier onlyRecovery(address identity, address sender) {
-    if (recoveryKeys[identity] == sender) _;
-    else throw;
+    require(recoveryKeys[identity] == sender);
+    _;
   }
 
   modifier rateLimited(Proxy identity, address sender) {
-    if (limiter[identity][sender] < (now - adminRate)) {
-      limiter[identity][sender] = now;
-      _ ;
-    } else throw;
+    require(limiter[identity][sender] < (now - adminRate));
+    limiter[identity][sender] = now;
+    _;
   }
 
   modifier validAddress(address addr) { //protects against some weird attacks
-    if (addr != address(0)) _;
-    else throw;
+    require(addr != address(0));
+    _;
   }
 
   /// @dev Contract constructor sets initial timelocks and meta-tx relay address
@@ -110,7 +109,7 @@ contract MetaIdentityManager {
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Note: User must change owner of proxy to this contract after calling this
   function registerIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
-    if (recoveryKeys[msg.sender] > 0 ) throw; // Invariant enforced w/ validRecovery modifier
+    require(recoveryKeys[msg.sender] == 0); // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // Owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
     IdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
@@ -140,7 +139,7 @@ contract MetaIdentityManager {
     onlyRecovery(identity, sender)
     rateLimited(identity, sender)
   {
-    if (owners[identity][newOwner] > 0) throw;
+    require(!isOwner(identity, newOwner));
     owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, sender);
   }
@@ -188,15 +187,12 @@ contract MetaIdentityManager {
   /// Note: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
   /// Not doing so risks the proxy becoming stuck.
   function finalizeMigration(address sender, Proxy identity) onlyAuthorized onlyOlderOwner(identity, sender) {
-    if (migrationInitiated[identity] == 0 || migrationInitiated[identity] + adminTimeLock >= now) {
-      throw;
-    } else {
-      address newIdManager = migrationNewAddress[identity];
-      delete migrationInitiated[identity];
-      delete migrationNewAddress[identity];
-      identity.transfer(newIdManager);
-      MigrationFinalized(identity, newIdManager, sender);
-    }
+    require(migrationInitiated[identity] != 0 && migrationInitiated[identity] + adminTimeLock < now);
+    address newIdManager = migrationNewAddress[identity];
+    delete migrationInitiated[identity];
+    delete migrationNewAddress[identity];
+    identity.transfer(newIdManager);
+    MigrationFinalized(identity, newIdManager, sender);
   }
 
   //Checks that address a is the first input in msg.data.

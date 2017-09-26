@@ -1,6 +1,7 @@
 pragma solidity 0.4.11;
 import "./Proxy.sol";
 
+
 contract IdentityManager {
   uint adminTimeLock;
   uint userTimeLock;
@@ -49,30 +50,29 @@ contract IdentityManager {
   mapping(address => address) public migrationNewAddress;
 
   modifier onlyOwner(address identity) {
-    if (isOwner(identity, msg.sender)) _ ;
-    else throw;
+    require(isOwner(identity, msg.sender));
+    _;
   }
 
   modifier onlyOlderOwner(address identity) {
-    if (isOlderOwner(identity, msg.sender)) _ ;
-    else throw;
+    require(isOlderOwner(identity, msg.sender));
+    _;
   }
 
   modifier onlyRecovery(address identity) {
-    if (recoveryKeys[identity] == msg.sender) _ ;
-    else throw;
+    require(recoveryKeys[identity] == msg.sender);
+    _;
   }
 
   modifier rateLimited(address identity) {
-    if (limiter[identity][msg.sender] < (now - adminRate)) {
-      limiter[identity][msg.sender] = now;
-      _ ;
-    } else throw;
+    require(limiter[identity][msg.sender] < (now - adminRate));
+    limiter[identity][msg.sender] = now;
+    _;
   }
 
   modifier validAddress(address addr) { //protects against some weird attacks
-    if (addr != address(0)) _;
-    else throw;
+    require(addr != address(0));
+    _;
   }
 
   /// @dev Contract constructor sets initial timelock limits
@@ -101,7 +101,7 @@ contract IdentityManager {
   /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
   /// Note: User must change owner of proxy to this contract after calling this
   function registerIdentity(address owner, address recoveryKey) validAddress(recoveryKey) {
-    if (recoveryKeys[msg.sender] > 0) throw; // Deny any funny business
+    require(recoveryKeys[msg.sender] == 0); // Deny any funny business
     owners[msg.sender][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
     recoveryKeys[msg.sender] = recoveryKey;
     IdentityCreated(msg.sender, msg.sender, owner, recoveryKey);
@@ -120,7 +120,7 @@ contract IdentityManager {
 
   /// @dev Allows a recoveryKey to add a new owner with userTimeLock waiting time
   function addOwnerFromRecovery(Proxy identity, address newOwner) onlyRecovery(identity) rateLimited(identity) {
-    if (isOwner(identity, newOwner)) throw;
+    require(!isOwner(identity, newOwner));
     owners[identity][newOwner] = now;
     OwnerAdded(identity, newOwner, msg.sender);
   }
@@ -163,15 +163,12 @@ contract IdentityManager {
   /// WARNING: before transfering to a new address, make sure this address is "ready to recieve" the proxy.
   /// Not doing so risks the proxy becoming stuck.
   function finalizeMigration(Proxy identity) onlyOlderOwner(identity) {
-    if (migrationInitiated[identity] == 0 || migrationInitiated[identity] + adminTimeLock >= now) {
-      throw;
-    } else {
-      address newIdManager = migrationNewAddress[identity];
-      delete migrationInitiated[identity];
-      delete migrationNewAddress[identity];
-      identity.transfer(newIdManager);
-      MigrationFinalized(identity, newIdManager, msg.sender);
-    }
+    require(migrationInitiated[identity] != 0 && migrationInitiated[identity] + adminTimeLock < now);
+    address newIdManager = migrationNewAddress[identity];
+    delete migrationInitiated[identity];
+    delete migrationNewAddress[identity];
+    identity.transfer(newIdManager);
+    MigrationFinalized(identity, newIdManager, msg.sender);
   }
 
   function isOwner(address identity, address owner) constant returns (bool) {

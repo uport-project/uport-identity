@@ -25,7 +25,7 @@ contract TxRelay {
     bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
     address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
-    if (claimedSender != addressFromSig) throw;
+    require(claimedSender == addressFromSig);
 
     nonce[claimedSender]++; //if we are going to do tx, update nonce
 

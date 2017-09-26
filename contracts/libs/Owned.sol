@@ -4,9 +4,7 @@ pragma solidity 0.4.11;
 contract Owned {
     address public owner;
     modifier onlyOwner() {
-        if (!isOwner(msg.sender)) {
-            throw;
-        }
+        require(isOwner(msg.sender));
         _;
     }
 
