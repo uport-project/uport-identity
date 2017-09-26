@@ -128,9 +128,9 @@ function writeArtifactIndex(index, filename) {
     outStream.write(`  ${name}: {\n`)
     for (const artifact in object) {
       if (artifact === 'latestVersion') {
-        outStream.write(`    ${artifact}: '${object[artifact]}')\n`)
+        outStream.write(`    ${artifact}: '${object[artifact]}',\n`)
       } else {
-        outStream.write(`    ${artifact}: require('./${object[artifact]}')\n`)
+        outStream.write(`    ${artifact}: require('./${object[artifact]}'),\n`)
       }
     }
     outStream.write(`  }${last?'':','}\n`)
