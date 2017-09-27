@@ -1,4 +1,4 @@
-pragma solidity 0.4.11;
+pragma solidity 0.4.15;
 
 
 // This contract is only used for testing purposes.
@@ -10,7 +10,7 @@ contract MetaTestRegistry {
         registry[sender] = x;
     }
 
-    function testThrow(address sender) {
-        throw;
+    function testThrow() {
+        revert();
     }
 }

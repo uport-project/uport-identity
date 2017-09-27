@@ -553,7 +553,7 @@ contract('IdentityManager', (accounts) => {
       await identityManager.forwardTo(proxy.address, newIdenManager.address, 0, data, {from: user1})
       //increase time until migration can be finialized
       await evm_increaseTime(2 * adminTimeLock)
-      let tx = await identityManager.finalizeMigration(proxy.address, newIdenManager.address, {from: user1})
+      let tx = await identityManager.finalizeMigration(proxy.address, {from: user1})
       let log = tx.logs[0]
       assert.equal(log.event, 'LogMigrationFinalized', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')
