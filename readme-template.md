@@ -33,7 +33,7 @@ let IdentityManager = web3.eth.contract(IdentityManagerArtifact)
 let identityManager = IdentityManager.at(IdentityManagerArtifact.networks[networkId].address)
 ```
 
-If you want to learn more about this structure, checkout the document about the [artifact index](./ARTIFACT-INDEX.md).
+If you want to learn more about this structure, checkout the document about the [artifact index](./docs/artifact-index.md).
 
 ## Contract documentation
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Mainnet and relevant test networks. Below you can find descriptions of each of the contracts and the rationale behind the design decisions.
