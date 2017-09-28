@@ -63,7 +63,7 @@ Diagrams are made with PlantUML.
 ## Making a pull request
 Once you have made changes that you want to get into, you need to create a pull request. We follow git flow, so make sure to name your branch in the format of `feature/description-of-your-feature` or `hotfix/description-of-your-fix`. Also make sure that your pull request is against the `develop` branch and **not** `master`.
 
-## Reviewing process
+## Review process
 The contracts in this repo are an essential part of the uport ecosystem. Therefore it is very important that they are properly reviewed to minimize the risk of potential bugs and exploits.
 
 ### Merging into develop
@@ -73,10 +73,5 @@ A pull request being merged into `develop` needs to be reviewed by at least two 
 A pull request being merged into `master` needs to be reviewed by a security team that is external to the uport team. To prepare for this make a branch from `develop` called `release/<semver-number>` and make neccesary preparations. Then make a pull request to `master`. The `develop` branch has been reviewed by the uport team and should generally be in a good state. The external review team audits the newly created branch. If there are changes needed they are made in this branch. Once the external team are happy with the state of the contracts make sure that contracts are deployed on the *relevant networks*. The release branch can then be merged into `master`, and also `develop`.
 
 #### Relevant networks
-Right now the networks we want the contracts deployed on are `ropsten (testnet)` and ethereums `mainnet`.
+Right now the networks we want the contracts deployed on are `rinkeby (testnet)` and ethereums `mainnet`.
 
-## Checklist for external review
-Here is a checklist of things to be checked by an external review. Note that this is not an extensive list.
-
-* Review solidity code
-* Verify compiled bytecode against deployed bytecode

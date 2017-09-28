@@ -80,6 +80,28 @@ Returns true if `owner` is an owner of `identity` and is older than `adminTimeLo
 
 Returns true if `recoveryKey` is the recoveryKey of `identity`.
 
+## Values of constants
+There are three constants that needs to be set when creating this contract. All of these constants are specified in seconds.
+```
+_userTimeLock - Time before new owner added by recovery can control proxy
+_adminTimeLock - Time before new owner can add/remove owners
+_adminRate - Time period used for rate limiting a given key for admin functionality
+```
+
+We set these values to the following:
+
+|Constant|Value|
+| --|--|
+|_userTimeLock|3600 (1 hour)|
+|_adminTimeLock|129600 (1.5 days)|
+|_adminRate|1200 (20 minutes)|
+
+These values gives an OlderOwner the ability to recover from a stolen recoveryKey. If a stolen recoveryKey is used to add a user, that user will be able to transact from the proxy after 1 h, but won't be able to remove other users etc until 1.5 days have passed.
+
+The negative implications on these values on UX is the following:
+* after recovery you won't be able to make transactions for 1h
+* after you have created your identity you'd have to wait 1.5 days to add a new device (user)
+
 ## Attacks
 A user should not lose access to their proxy contract. Thus, the IdentityManager should be robust during the following scenarios.
 
