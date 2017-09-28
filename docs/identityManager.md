@@ -129,3 +129,8 @@ Assume that Alice has at least two keys that she controls on two different devic
             * New evil owner will be able to transact from identity after `userTimeLock` unless Alice acts
             * New evil owner will be able to remove other owners from identity after `adminTimeLock` unless Alice acts
             * Note: In the case where Malory performs this action, an OwnerAdded event will be triggered, and thus Alice should be notified that this is occurring. As long as she realizes before `adminTimeLock`, she can delete both the new evil owner and the evil recovery.
+
+## Measures in case of bugs
+If a critical bug is discovered in the IdentityManager we basically have one option. Since this contract needs to be trustless there should not be any way for us to upgrading it without users knowing about it. Instead we rely on the `Migration` functionality to move user to a new contract where the bug is fixed. This can be done with a simple confirmation from the user in the uPort client app. If a bug is discovered in the `Migration` functionality itself, the user will have no way of migrating away from the IdentityManager.
+
+If you have found a critical bug in this or any other of our contracts please report it to team@uport.me
