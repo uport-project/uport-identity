@@ -3433,6 +3433,13 @@ sha.js@^2.3.6, sha.js@^2.4.8:
   dependencies:
     inherits "^2.0.1"
 
+sha.js@^2.4.8:
+  version "2.4.9"
+  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.9.tgz#98f64880474b74f4a38b8da9d3c0f2d104633e7d"
+  dependencies:
+    inherits "^2.0.1"
+    safe-buffer "^5.0.1"
+
 sha3@^1.1.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/sha3/-/sha3-1.2.0.tgz#6989f1b70a498705876a373e2c62ace96aa9399a"
@@ -3546,9 +3553,9 @@ solidity-sha3@^0.4.1:
     left-pad "^1.1.1"
     web3 "^0.16.0"
 
-solium@^0.5.3:
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/solium/-/solium-0.5.4.tgz#3ef9031b6043e944512e048848067c58beb36e62"
+solium@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/solium/-/solium-0.5.5.tgz#420ae5c0709d00c19430158418bb8264bdac66aa"
   dependencies:
     chokidar "^1.6.0"
     colors "^1.1.2"
@@ -3556,11 +3563,11 @@ solium@^0.5.3:
     lodash "^4.14.2"
     sol-digger "0.0.2"
     sol-explore "^1.6.1"
-    solparse "^1.2.1"
+    solparse "^1.2.2"
 
-solparse@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/solparse/-/solparse-1.2.1.tgz#d04fe840cbbeb83f7cf81e280bbba160f921239a"
+solparse@^1.2.2:
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/solparse/-/solparse-1.2.7.tgz#94c053bf2af6903a8c01bb29648179ff373367f6"
   dependencies:
     mocha "^2.4.5"
     pegjs "^0.10.0"

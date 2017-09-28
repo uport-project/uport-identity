@@ -102,7 +102,7 @@ contract('MetaIdentityManager', (accounts) => {
     let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
     let log = tx.logs[0]
 
-    assert.equal(log.event, 'IdentityCreated', 'wrong event')
+    assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
     assert.equal(log.args.owner, user1, 'Owner key is set in event')
     assert.equal(log.args.recoveryKey, recoveryKey, 'Recovery key is set in event')
     assert.equal(log.args.creator, nobody, 'Creator is set in event')
@@ -117,7 +117,7 @@ contract('MetaIdentityManager', (accounts) => {
     beforeEach(async function() {
       let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
       let log = tx.logs[0]
-      assert.equal(log.event, 'IdentityCreated', 'wrong event')
+      assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
       proxy = Proxy.at(log.args.identity)
     })
 
@@ -154,7 +154,7 @@ contract('MetaIdentityManager', (accounts) => {
       assert.isFalse(isOwner, 'user5 should not be owner yet')
       let tx = await identityManager.addOwner(user1, proxy.address, user5, {from: user1})
       let log = tx.logs[0]
-      assert.equal(log.event, 'OwnerAdded', 'should trigger correct event')
+      assert.equal(log.event, 'LogOwnerAdded', 'should trigger correct event')
       assert.equal(log.args.identity,
                   proxy.address,
                   'event should be for correct proxy')
@@ -172,7 +172,7 @@ contract('MetaIdentityManager', (accounts) => {
       //User1 adds user5
       let tx = await identityManager.addOwner(user1, proxy.address, user5, {from: user1})
       let log = tx.logs[0]
-      assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
+      assert.equal(log.event, 'LogOwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
       //User1 try to add another owner, should fail.
       let errorThrown = false
       try {
@@ -205,7 +205,7 @@ contract('MetaIdentityManager', (accounts) => {
       //User1 tries to add another owner. Should be able to
       tx = await identityManager.addOwner(user1, proxy.address, user4, {from: user1})
       log = tx.logs[0]
-      assert.equal(log.event, 'OwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
+      assert.equal(log.event, 'LogOwnerAdded', 'should trigger correct event') //tests for correctness elsewhere
       //User1 try to remove a user. Should be rate limited and fail.
       errorThrown = false
       try {
@@ -228,7 +228,7 @@ contract('MetaIdentityManager', (accounts) => {
       await evm_increaseTime(adminTimeLock + 1)
       tx = await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       log = tx.logs[0]
-      assert.equal(log.event, 'OwnerRemoved', 'should trigger correct event')
+      assert.equal(log.event, 'LogOwnerRemoved', 'should trigger correct event')
       //user1 tries to change recovery, but is rate limited
       errorThrown = false
       try {
@@ -242,7 +242,7 @@ contract('MetaIdentityManager', (accounts) => {
       await evm_increaseTime(adminTimeLock + 1)
       tx = await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       log = tx.logs[0]
-      assert.equal(log.event, 'RecoveryChanged', 'should trigger correct event')
+      assert.equal(log.event, 'LogRecoveryChanged', 'should trigger correct event')
     })
 
     it('non-owner can not add other owner', async function() {
@@ -393,7 +393,7 @@ contract('MetaIdentityManager', (accounts) => {
         //should no longer be rateLimited
         await evm_increaseTime(adminTimeLock + 1)
         tx = await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
-        assert.equal(tx.logs[0].event, 'OwnerAdded', 'should trigger correct event')
+        assert.equal(tx.logs[0].event, 'LogOwnerAdded', 'should trigger correct event')
       })
 
       it('within userTimeLock is not allowed transactions', async function() {
@@ -475,13 +475,13 @@ contract('MetaIdentityManager', (accounts) => {
     beforeEach(async function() {
       let tx = await identityManager.createIdentity(user1, recoveryKey, {from: nobody})
       let log = tx.logs[0]
-      assert.equal(log.event, 'IdentityCreated', 'wrong event')
+      assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
       proxy = Proxy.at(log.args.identity)
       newIdenManager = await MetaIdentityManager.new(userTimeLock, adminTimeLock, adminRate, relay)
       //user2 is now a younger owner, while user1 is an olderowner
       tx = await identityManager.addOwner(user1, proxy.address, user2, {from: user1})
       log = tx.logs[0]
-      assert.equal(log.event, 'OwnerAdded', 'wrong event')
+      assert.equal(log.event, 'LogOwnerAdded', 'wrong event')
       assert.equal(log.args.identity, proxy.address, 'wrong proxy')
       assert.equal(log.args.owner, user2, 'wrong owner added')
       assert.equal(log.args.instigator, user1, 'wrong initiator')
@@ -490,7 +490,7 @@ contract('MetaIdentityManager', (accounts) => {
     it('older owner can start transfer', async function() {
       let tx = await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let log = tx.logs[0]
-      assert.equal(log.event, 'MigrationInitiated', 'wrong event initiated')
+      assert.equal(log.event, 'LogMigrationInitiated', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'migrating to wrong location')
       assert.equal(log.args.instigator, user1, 'migrating to wrong location')
@@ -521,14 +521,14 @@ contract('MetaIdentityManager', (accounts) => {
     it('correct keys can cancel migration', async function() {
       let tx = await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let log = tx.logs[0]
-      assert.equal(log.event, 'MigrationInitiated', 'wrong event initiated')
+      assert.equal(log.event, 'LogMigrationInitiated', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'migrating to wrong location')
       assert.equal(log.args.instigator, user1, 'started migrating from wrong user')
 
       tx = await identityManager.cancelMigration(user1, proxy.address, {from: user1})
       log = tx.logs[0]
-      assert.equal(log.event, 'MigrationCanceled', 'wrong event initiated')
+      assert.equal(log.event, 'LogMigrationCanceled', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'canceled migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'canceled migration to wrong location')
       assert.equal(log.args.instigator, user1, 'canceled migrating from wrong user')
@@ -537,7 +537,7 @@ contract('MetaIdentityManager', (accounts) => {
       tx = await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       //Second migration attempt, should allow
       log = tx.logs[0]
-      assert.equal(log.event, 'MigrationInitiated', 'wrong event initiated')
+      assert.equal(log.event, 'LogMigrationInitiated', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'migrating to wrong location')
       assert.equal(log.args.instigator, user1, 'started migrating from wrong person')
@@ -546,7 +546,7 @@ contract('MetaIdentityManager', (accounts) => {
       tx = await identityManager.cancelMigration(user2, proxy.address, {from: user2})
       //young owner should also be able to cancel migration
       log = tx.logs[0]
-      assert.equal(log.event, 'MigrationCanceled', 'wrong event initiated')
+      assert.equal(log.event, 'LogMigrationCanceled', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'canceled migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'canceled migration to wrong location')
       assert.equal(log.args.instigator, user2, 'canceled migrating from wrong person')
@@ -602,7 +602,7 @@ contract('MetaIdentityManager', (accounts) => {
       await evm_increaseTime(2 * adminTimeLock)
       let tx = await identityManager.finalizeMigration(user1, proxy.address, {from: user1})
       let log = tx.logs[0]
-      assert.equal(log.event, 'MigrationFinalized', 'wrong event initiated')
+      assert.equal(log.event, 'LogMigrationFinalized', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'finalized migration to wrong location')
       assert.equal(log.args.instigator, user1, 'finalized migrating from wrong person')
@@ -616,7 +616,7 @@ contract('MetaIdentityManager', (accounts) => {
       await evm_increaseTime(2 * adminTimeLock)
       let tx = await identityManager.finalizeMigration(user1, proxy.address, newIdenManager.address, {from: user1})
       let log = tx.logs[0]
-      assert.equal(log.event, 'MigrationFinalized', 'wrong event initiated')
+      assert.equal(log.event, 'LogMigrationFinalized', 'wrong event initiated')
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'finalized migration to wrong location')
       assert.equal(log.args.instigator, user1, 'finalized migrating from wrong user')
