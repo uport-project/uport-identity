@@ -38,6 +38,11 @@ module.exports = {
       gas: 0xfffffffffff, // <-- Use this high gas value
       gasPrice: 0x01      // <-- Use this low gas price
     },
+    privateTest: {
+      host: "localhost",
+      port: 8544,
+      network_id: "234"
+    },
     local: {
       host: "localhost",
       port: 8545,
