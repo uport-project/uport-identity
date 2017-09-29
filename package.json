@@ -18,7 +18,7 @@
     "generate-readme": "./scripts/generate-readme.js",
     "test": "./node_modules/.bin/truffle test --network in_memory",
     "lint": "./node_modules/.bin/solium -d contracts",
-    "coverage": "rm docs/coverage -r; ./node_modules/.bin/solidity-coverage; mv coverage docs; npm run generate-readme",
+    "coverage": "rm -r docs/coverage; ./node_modules/.bin/solidity-coverage; mv coverage docs; npm run generate-readme",
     "diagrams": "scripts/make-diagrams.bash"
   },
   "license": "Apache-2",
