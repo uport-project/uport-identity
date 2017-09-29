@@ -96,7 +96,8 @@ We set these values to the following:
 |_adminTimeLock|129600 (1.5 days)|
 |_adminRate|1200 (20 minutes)|
 
-These values gives an OlderOwner the ability to recover from a stolen recoveryKey. If a stolen recoveryKey is used to add a user, that user will be able to transact from the proxy after 1 h, but won't be able to remove other users etc until 1.5 days have passed.
+These values gives an OlderOwner the ability to recover from a stolen recoveryKey. If a stolen recoveryKey is used to add a user, that user will be able to transact from the proxy after 1 h, but won't be able to remove other users etc until 1.5 days have passed. An adminRate of 20 minutes gives the admin enought time to first remove the stolen recoveryKey and then remove the malicious owner added by the stolen recoveryKey before the new owner will become an OlderOwner. The adminRate simply limits the amount of "admin actions" an OlderOwner can make in a given time period. So for example if the OlderOwner adds a new owner, it can't remove that owner until adminRate has passed. The recoveryKey is also affected by this rate and can only add new owners at a rate of adminRate.
+
 
 The negative implications on these values on UX is the following:
 * after recovery you won't be able to make transactions for 1h
