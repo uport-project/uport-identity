@@ -1,4 +1,4 @@
-pragma solidity 0.4.11;
+pragma solidity 0.4.15;
 import "./RecoverableController.sol";
 import "./libs/ArrayLib.sol";
 

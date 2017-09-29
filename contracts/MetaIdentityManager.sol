@@ -1,4 +1,4 @@
-pragma solidity 0.4.11;
+pragma solidity 0.4.15;
 import "./Proxy.sol";
 
 
@@ -82,7 +82,7 @@ contract MetaIdentityManager {
     }
 
     /// @dev Contract constructor sets initial timelocks and meta-tx relay address
-    /// @param _userTimeLock Time before new owner can control proxy
+    /// @param _userTimeLock Time before new owner added by recovery can control proxy
     /// @param _adminTimeLock Time before new owner can add/remove owners
     /// @param _adminRate Time period used for rate limiting a given key for admin functionality
     /// @param _relayAddress Address of meta transaction relay contract
