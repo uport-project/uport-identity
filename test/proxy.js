@@ -134,7 +134,7 @@ contract('Proxy', (accounts) => {
     assert.isTrue(balance.equals(newBalance), 'Balance should be updated')
   })
 
-  it('Should throw if sending to much ether', async function() {
+  it('Should throw if sending too much ether', async function() {
     let errorThrown = false
     let ethToSend = 20
     let receiver = accounts[3]
@@ -186,7 +186,7 @@ contract('Proxy', (accounts) => {
     assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
 
-  it('Should be able to empty out proxy from ether', async function() {
+  it('Should be able to empty out ether from proxy', async function() {
     let initialBalance
     let receiver = accounts[5]
     let balance = await web3.eth.getBalanceAsync(proxy1.address)
