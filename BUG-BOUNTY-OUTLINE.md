@@ -1,4 +1,4 @@
-#uPort Bug Bounty Program
+# uPort Bug Bounty Program
 
 // TODO: This the initial outline, and will transition to being formalized, mainly timelines, values and additional details needed. Bug bounty modeled after Ethereum's bug bounty.
 
