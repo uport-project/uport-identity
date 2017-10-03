@@ -6,15 +6,16 @@ const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const Promise = require('bluebird')
 const compareCode = require('./compareCode')
+const assertThrown = require('./assertThrown')
 web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-const userTimeLock = 100;
-const adminTimeLock = 1000;
-const adminRate = 200;
+const userTimeLock = 50;
+const adminTimeLock = 200;
+const adminRate = 50;
 
 function getRanomNumber() {
   return Math.floor(Math.random() * (1000000 - 1)) + 1;
@@ -29,14 +30,16 @@ async function testForwardTo(testReg, identityManager, proxyAddress, fromAccount
   try {
     await identityManager.forwardTo(proxyAddress, testReg.address, 0, '0x' + data, {from: fromAccount})
   } catch (error) {
-    errorThrown = error.message
+    //errorThrown = error.message
+    errorThrown = true
   }
   let regData = await testReg.registry.call(proxyAddress)
   if (shouldEqual) {
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    assert.match(errorThrown, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
+    //assert.match(errorThrown, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
+    assertThrown(errorThrown, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -155,7 +158,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //User1 try to remove a user. Should still be rate limited and fail.
       errorThrown = false
       try {
@@ -164,7 +167,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //user1 tries to change recovery, but is still rate limited
       errorThrown = false
       try {
@@ -173,7 +176,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //No longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
       //User1 tries to add another owner. Should be able to
@@ -188,7 +191,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //user1 tries to change recovery, but is still rate limited
       errorThrown = false
       try {
@@ -197,7 +200,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //no longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
       tx = await identityManager.removeOwner(proxy.address, user5, {from: user1})
@@ -211,13 +214,13 @@ contract('IdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //no longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
       tx = await identityManager.changeRecovery(proxy.address, recoveryKey2, {from: user1})
       log = tx.logs[0]
       assert.equal(log.event, 'LogRecoveryChanged', 'should trigger correct event')
-    })
+    }).timeout(10000000)
 
     it('non-owner can not add other owner', async function() {
       try {
@@ -326,7 +329,7 @@ contract('IdentityManager', (accounts) => {
             assert.match(e.message, /invalid opcode/, "should have thrown")
             errorThrown = true
           }
-          assert.isTrue(errorThrown, "should have thrown")
+          assertThrown(errorThrown, "should have thrown")
         })
       })
     })
@@ -393,7 +396,7 @@ contract('IdentityManager', (accounts) => {
           assert.match(e.message, /invalid opcode/, "should have thrown")
           errorThrown = true
         }
-        assert.isTrue(errorThrown, "should have thrown")
+        assertThrown(errorThrown, "should have thrown")
       })
 
       it('should throw if new owner is already an owner', async function() {
@@ -405,8 +408,8 @@ contract('IdentityManager', (accounts) => {
           assert.match(e.message, /invalid opcode/, "should have thrown")
           errorThrown = true
         }
-        assert.isTrue(errorThrown, "should have thrown")
-      })
+        assertThrown(errorThrown, "should have thrown")
+      }).timeout(10000000)
     })
   })
 
@@ -444,7 +447,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'Should have thrown an error here')
+      assertThrown(threwError, 'Should have thrown an error here')
     })
 
     it('non-owner should not be able to start transfer' , async function() {
@@ -455,7 +458,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'Should have thrown an error here')
+      assertThrown(threwError, 'Should have thrown an error here')
     })
 
     it('correct keys can cancel migration', async function() {
@@ -500,8 +503,8 @@ contract('IdentityManager', (accounts) => {
         assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'Should have thrown error')
-    })
+      assertThrown(threwError, 'Should have thrown error')
+    }).timeout(10000000)
 
     it('should return correct address for finalization', async function () {
       await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: user1})
@@ -518,7 +521,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'non-owner should not be able to finalize')
+      assertThrown(threwError, 'non-owner should not be able to finalize')
       threwError = false
       try {
           await identityManager.finalizeMigration(proxy.address, {from: user2})
@@ -526,7 +529,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'young owner should not be able to finalize')
+      assertThrown(threwError, 'young owner should not be able to finalize')
 
       //correct owner tries to finalize before they can
       threwError = false
@@ -536,7 +539,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(error.message, /VM Exception while processing transaction: invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'older owner should not be able to finalize before time is up')
+      assertThrown(threwError, 'older owner should not be able to finalize before time is up')
 
       await evm_increaseTime(2 * adminTimeLock)
       let tx = await identityManager.finalizeMigration(proxy.address, {from: user1})
@@ -545,7 +548,7 @@ contract('IdentityManager', (accounts) => {
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'finalized migration to wrong location')
       assert.equal(log.args.instigator, user1, 'finalized migrating from wrong person')
-    })
+    }).timeout(10000000)
 
     it('should be owner of new identityManager after successful transfer', async function() {
       await identityManager.initiateMigration(proxy.address, newIdenManager.address, {from: user1})
@@ -564,9 +567,10 @@ contract('IdentityManager', (accounts) => {
       // Verify that the proxy address is logged as the sender
       let regData = await testReg.registry.call(proxy.address)
         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction from new contract')
-    })
+    }).timeout(10000000)
 
     it('should throw if trying to register an existing proxy', async function() {
+      let threwError = false
       let data = '0x' + lightwallet.txutils._encodeFunctionTxData('registerIdentity', ['address', 'address'], [user1, recoveryKey])
       try {
         await identityManager.forwardTo(proxy.address, identityManager.address, 0, data, {from: user1})
@@ -574,7 +578,7 @@ contract('IdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'existing proxy should not be able to re-register')
+      assertThrown(threwError, 'existing proxy should not be able to re-register')
     })
   })
 })

@@ -1,4 +1,5 @@
 const Owned = artifacts.require('Owned')
+const assertThrown = require('./assertThrown')
 
 contract('Owned', (accounts) => {
   let owned
@@ -22,12 +23,13 @@ contract('Owned', (accounts) => {
   })
 
   it('Non-owner can not change owner', async function() {
+    errorThrown = false
     try {
       await owned.transfer(nonOwner, {from: nonOwner})
     } catch (e) {
       errorThrown = true
     }
-    assert.isTrue(errorThrown, 'An error should have been thrown')
+    assertThrown(errorThrown, 'An error should have been thrown')
     let isOwner = await owned.isOwner.call(nonOwner)
     assert.isFalse(isOwner, 'Owner should not be changed')
   })

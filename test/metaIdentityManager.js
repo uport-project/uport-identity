@@ -6,15 +6,16 @@ const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const Promise = require('bluebird')
 const compareCode = require('./compareCode')
+const assertThrown = require('./assertThrown')
 web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-const userTimeLock = 100;
-const adminTimeLock = 1000;
-const adminRate = 200;
+const userTimeLock = 50;
+const adminTimeLock = 100;
+const adminRate = 50;
 
 function getRandomNumber() {
   return Math.floor(Math.random() * (1000000 - 1)) + 1;
@@ -30,14 +31,16 @@ async function testForwardTo(testReg, identityManager, proxyAddress, fromAccount
   try {
     await identityManager.forwardTo(claimedFrom, proxyAddress, testReg.address, 0, '0x' + data, {from: fromAccount})
   } catch (e) {
-    errorThrown = e.message
+    //errorThrown = e.message
+    errorThrown = true
   }
   let regData = await testReg.registry.call(proxyAddress)
   if (shouldEqual) {
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    assert.match(errorThrown, /invalid opcode/, 'throws an error')
+    //assert.match(errorThrown, /invalid opcode/, 'throws an error')
+    assertThrown(errorThrown, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -51,14 +54,16 @@ async function testForwardToFromRelay(testReg, identityManager, proxyAddress, fr
   try {
     await identityManager.forwardTo(fromAccount, proxyAddress, testReg.address, 0, '0x' + data, {from: txRelayAddress})
   } catch (e) {
-    errorThrown = e.message
+    //errorThrown = e.message
+    errorThrown = true
   }
   let regData = await testReg.registry.call(proxyAddress)
   if (shouldEqual) {
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    assert.match(errorThrown, /invalid opcode/, 'throws an error')
+    //assert.match(errorThrown, /invalid opcode/, 'throws an error')
+    assertThrown(errorThrown, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -144,15 +149,7 @@ contract('MetaIdentityManager', (accounts) => {
     })
 
     it('onlyAuthorized modifier does not allow transactions from non relay or when msg.sender does not have data with msg.sender ', async function() {
-      //Do not allow a user claiming to be someone else.
-      let errorThrown = false
-      try {
-        await testForwardTo(testReg, identityManager, proxy.address, user2, user1, true)
-      } catch (e) {
-        assert.match(e.message, /invalid opcode/, "Should have thrown")
-        errorThrown = true
-      }
-      assert.isTrue(errorThrown, "should have thrown an error")
+      await testForwardTo(testReg, identityManager, proxy.address, user2, user1, false)
     })
 
     // TODO This test passes test script but fails coverage scripts
@@ -164,7 +161,7 @@ contract('MetaIdentityManager', (accounts) => {
         assert.match(e.message, /invalid opcode/, "Should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown an error")
+      assertThrown(errorThrown, "should have thrown an error")
     })
 
     it('owner can add other owner', async function() {
@@ -196,28 +193,28 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.addOwner(user1, proxy.address, user4, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //User1 try to remove a user. Should still be rate limited and fail.
       errorThrown = false
       try {
         await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //user1 tries to change recovery, but is still rate limited
       errorThrown = false
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //No longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
       //User1 tries to add another owner. Should be able to
@@ -229,19 +226,19 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //user1 tries to change recovery, but is still rate limited
       errorThrown = false
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //no longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
       tx = await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
@@ -252,26 +249,26 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
       //no longer rateLimited
       await evm_increaseTime(adminTimeLock + 1)
       tx = await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       log = tx.logs[0]
       assert.equal(log.event, 'LogRecoveryChanged', 'should trigger correct event')
-    })
+    }).timeout(10000000)
 
     it('non-owner can not add other owner', async function() {
       errorThrown = false
       try {
         await identityManager.addOwner(user3, proxy.address, user4, {from: user3})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "should have thrown")
+      assertThrown(errorThrown, "should have thrown")
     })
 
     describe('new owner added by owner', () => {
@@ -294,13 +291,12 @@ contract('MetaIdentityManager', (accounts) => {
       it('can not add other owner yet', async function() {
         let errorThrown = false
         try {
-          let temp = await identityManager.addOwner(user2, proxy.address, user4, {from: user2})
-          console.log(temp)
+          await identityManager.addOwner(user2, proxy.address, user4, {from: user2})
         } catch(e) {
-          assert.match(e.message, /invalid opcode/, 'throws an error')
+          //assert.match(e.message, /invalid opcode/, 'throws an error')
           errorThrown = true
         }
-        assert.isTrue(errorThrown, 'Should have thrown')
+        assertThrown(errorThrown, 'Should have thrown')
       })
 
       it('can not remove other owner yet', async function() {
@@ -308,10 +304,10 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
         } catch(e) {
-          assert.match(e.message, /invalid opcode/, 'throws an error')
+          //assert.match(e.message, /invalid opcode/, 'throws an error')
           errorThrown = true
         }
-        assert.isTrue(errorThrown, 'Should have thrown')
+        assertThrown(errorThrown, 'Should have thrown')
       })
 
       it('can not change recoveryKey yet', async function() {
@@ -319,10 +315,10 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
         } catch(e) {
-          assert.match(e.message, /invalid opcode/, 'throws an error')
+          //assert.match(e.message, /invalid opcode/, 'throws an error')
           errorThrown = true
         }
-        assert.isTrue(errorThrown, 'Should have thrown')
+        assertThrown(errorThrown, 'Should have thrown')
       })
 
       describe('after adminTimeLock', () => {
@@ -330,7 +326,7 @@ contract('MetaIdentityManager', (accounts) => {
           await evm_increaseTime(adminTimeLock)
           // a tx needs to be sent in order for the evm_increaseTime to have effect for eth_calls
           await web3.eth.sendTransactionAsync({to: user1, from: user2, value: 1})
-        })
+        })//.timeout(10000000)
 
         it('is olderOwner', async function() {
           //send a transaction before, just to make sure that the evm increases time properly
@@ -385,10 +381,10 @@ contract('MetaIdentityManager', (accounts) => {
           try {
             await identityManager.changeRecovery(user2, proxy.address, ZERO_ADDRESS, {from: user2})
           } catch (e) {
-            assert.match(e.message, /invalid opcode/, "should have thrown")
+            //assert.match(e.message, /invalid opcode/, "should have thrown")
             errorThrown = true
           }
-          assert.isTrue(errorThrown, "should have thrown")
+          assertThrown(errorThrown, "should have thrown")
         })
       })
     })
@@ -402,24 +398,24 @@ contract('MetaIdentityManager', (accounts) => {
         //should be rate limited when trying again
         let errorThrown = false
         try {
-          await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
+          tx = await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
         } catch (e) {
-          assert.match(e.message, /invalid opcode/, "should have thrown")
+          //assert.match(e.message, /invalid opcode/, "should have thrown")
           errorThrown = true
         }
-        assert.isTrue(errorThrown, "should have thrown")
+        assertThrown(errorThrown, "should have thrown")
         //should no longer be rateLimited
         await evm_increaseTime(adminTimeLock + 1)
         tx = await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
         assert.equal(tx.logs[0].event, 'LogOwnerAdded', 'should trigger correct event')
-      })
+      }).timeout(10000000)
 
       it('within userTimeLock is not allowed transactions', async function() {
         await testForwardTo(testReg, identityManager, proxy.address, user2, user2, false)
       })
 
       describe('after userTimeLock', () => {
-        beforeEach(async function () {await evm_increaseTime(userTimeLock)})
+        beforeEach(async function () {await evm_increaseTime(userTimeLock)})//.timeout(10000000)
 
         it('Allow transactions', async function() {
           await testForwardTo(testReg, identityManager, proxy.address, user2, user2, true)
@@ -427,7 +423,7 @@ contract('MetaIdentityManager', (accounts) => {
       })
 
       describe('after adminTimeLock', () => {
-        beforeEach(async function () {await evm_increaseTime(adminTimeLock)})
+        beforeEach(async function () {await evm_increaseTime(adminTimeLock)})//.timeout(10000000)
 
         it('can add new owner', async function() {
           let tx = await identityManager.addOwner(user2, proxy.address, user3, {from: user2})
@@ -468,10 +464,10 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.addOwnerFromRecovery(nobody, proxy.address, user4, {from: nobody})
         } catch (e) {
-          assert.match(e.message, /invalid opcode/, "should have thrown")
+          //assert.match(e.message, /invalid opcode/, "should have thrown")
           errorThrown = true
         }
-        assert.isTrue(errorThrown, "should have thrown")
+        assertThrown(errorThrown, "should have thrown")
       })
 
       it('should throw if new owner is already an owner', async function() {
@@ -480,11 +476,11 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user2, {from: recoveryKey})
         } catch (e) {
-          assert.match(e.message, /invalid opcode/, "should have thrown")
+          //assert.match(e.message, /invalid opcode/, "should have thrown")
           errorThrown = true
         }
-        assert.isTrue(errorThrown, "should have thrown")
-      })
+        assertThrown(errorThrown, "should have thrown")
+      }).timeout(10000000)
     })
   })
 
@@ -519,10 +515,10 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(user2, proxy.address, newIdenManager.address, {from: user2})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'Should have thrown an error here')
+      assertThrown(threwError, 'Should have thrown an error here')
     })
 
     it('non-owner should not be able to start transfer' , async function() {
@@ -530,10 +526,10 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(nobody, proxy.address, newIdenManager.address, {from: nobody})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'Should have thrown an error here')
+      assertThrown(threwError, 'Should have thrown an error here')
     })
 
     it('correct keys can cancel migration', async function() {
@@ -575,11 +571,11 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.cancelMigration(nobody, proxy.address, {from: nobody})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'Should have thrown error')
-    })
+      assertThrown(threwError, 'Should have thrown error')
+    }).timeout(10000000)
 
     it('should return correct address for finalization', async function () {
       await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
@@ -593,28 +589,28 @@ contract('MetaIdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(nobody, proxy.address, {from: nobody})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'non-owner should not be able to finalize')
+      assertThrown(threwError, 'non-owner should not be able to finalize')
       threwError = false
       try {
           await identityManager.finalizeMigration(user2, proxy.address, {from: user2})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'young owner should not be able to finalize')
+      assertThrown(threwError, 'young owner should not be able to finalize')
 
       //correct owner should not be able to finalize before time is up
       threwError = false
       try {
           await identityManager.finalizeMigration(user1, proxy.address, {from: user1})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'young owner should not be able to finalize')
+      assertThrown(threwError, 'young owner should not be able to finalize')
 
 
       await evm_increaseTime(2 * adminTimeLock)
@@ -624,7 +620,7 @@ contract('MetaIdentityManager', (accounts) => {
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'finalized migration to wrong location')
       assert.equal(log.args.instigator, user1, 'finalized migrating from wrong person')
-    })
+    }).timeout(10000000)
 
     it('should be owner of new identityManager after successful transfer', async function() {
       await identityManager.initiateMigration(user1, proxy.address, newIdenManager.address, {from: user1})
@@ -643,17 +639,18 @@ contract('MetaIdentityManager', (accounts) => {
       // Verify that the proxy address is logged as the sender
       let regData = await testReg.registry.call(proxy.address)
         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'User1 should be able to send transaction from new contract')
-    })
+    }).timeout(10000000)
 
     it('should throw if trying to register an existing proxy', async function() {
+      let threwError = false
       let data = '0x' + lightwallet.txutils._encodeFunctionTxData('registerIdentity', ['address', 'address'], [user1, recoveryKey])
       try {
         await identityManager.forwardTo(user1, proxy.address, identityManager.address, 0, data, {from: user1})
       } catch(e) {
-        assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /invalid opcode/, 'throws an error')
         threwError = true
       }
-      assert.isTrue(threwError, 'existing proxy should not be able to re-register')
+      assertThrown(threwError, 'existing proxy should not be able to re-register')
     })
   })
 })
