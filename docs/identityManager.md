@@ -15,7 +15,72 @@ The IdentityManager should be able to perform the following actions:
     - Transferring ownership of proxy away from IdentityManager
 
 ## Design
+
+The main purpose of the IdentityManager is to create a proxy contract representing an identity and allow the user to forward transactions through this proxy contract using one or more *owners* (which could be keys or potentially other smart contracts). This allows us to have a persistent identifier (the address of the proxy contract) while being able to revoke and rotate individual keys, and to use a recovery key to restore access if a device is lost.
+
 The IdentityManager contract has any number of owners and one recovery key for each proxy. It also has rate limits for each caller on some of the functions. Proxies can be created, transfered to and from the IdentityManager. Owners can be added and removed, the recovery key can be changed.
+
+The recovery key can be used to add a new owner to an identity. An owner can also add new owners.
+
+If an owner has been added, the new owner needs to wait `userTimeLock` seconds before it can be used to send transactions through the proxy. The new owner needs to wait `adminTimeLock` seconds before it can perform administrative tasks like adding or removing an owner, or changing the recovery key.
+
+Whenever an owner has performed an administrative task, such as adding or removing an owner, or changing the recovery key, a timer is set so that they need to wait `adminRate` seconds before performing another administrative task.
+
+## Description of functions
+
+### Constructor `IdentityManager`
+
+The constructor function initializes the timeout parameters `userTimeLock`, `adminTimeLock` and `adminRate`. These are defined as follows:
+
+* `userTimeLock`: When an owner has been added they need to wait this long in order to be able to send transactions.
+* `adminTimeLock`: When an owner has been added they need to wait this long in order to perform administrative tasks (adding and removing new owners, or change recovery key).
+* `adminRate`: When an owner performs an administrative task they need to wait this long in order to be able to perform an administrative task again.
+
+### `createIdentity`
+
+Creates a new proxy contract, and sets its owner to `owner` and recovery key to `recoveryKey`. The timestamp for this owner is set to `now-adminTimeLock` in order to make sure that it will have admin rights immediately.
+
+### `registerIdentity`
+
+Used to transfer control of existing proxy contract from outside the IdentityManager to the IdentityManager. Same setup as for `createIdentity`. This function needs to be called from the proxy itself.
+
+### `forwardTo`
+
+Allows an Owner to forward a transaction through the proxy contract.
+
+### `addOwner`
+
+Allows an Owner to add another Owner. Note that this new Owner is able to transact immediately, unlike an Owner that is added using the RecoveryKey.
+
+### `addOwnerFromRecovery`
+
+Allows the Recovery Key to add a new owner in order to regain control over the identity. An owner added by the Recovery key needs to wait `userTimeLock` seconds before it can forward transactions through the proxy.
+
+### `removeOwner`
+
+Allows an “older” owner (i.e. with admin privilege) to remove another owner. 
+
+### `changeRecovery`
+
+Allows an owner to replace the Recovery Key with another one.
+
+### `initiateMigration`, `finalizeMigration`, `cancelMigration`
+
+Lets an owner initiate the process of migrating a proxy contract away from the IdentityManager to a new one. There is a time limit of `adminTimeLock` after which the migration can be finalized using `finalizeMigration`. Any owner can call `cancelMigration` at any time to cancel the migration.
+
+(TODO: Might want to fix this?) Note that once migrated away a proxy contract cannot migrate back to the IdentityManager by using `registerIdentity`.
+
+### `isOwner`
+
+Returns true if `owner` is an owner of `identity` and is older than `userTimeLock`.
+
+### `isOlderOwner`
+
+Returns true if `owner` is an owner of `identity` and is older than `adminTimeLock`
+
+### `isRecovery`
+
+Returns true if `recoveryKey` is the recoveryKey of `identity`.
 
 ## Attacks
 A user should not lose access to their proxy contract. Thus, the IdentityManager should be robust during the following scenarios.
@@ -44,4 +109,3 @@ Assume that Alice has at least two keys that she controls on two different devic
             * New evil owner will be able to transact from identity after `userTimeLock` unless Alice acts
             * New evil owner will be able to remove other owners from identity after `adminTimeLock` unless Alice acts
             * Note: In the case where Malory performs this action, an OwnerAdded event will be triggered, and thus Alice should be notified that this is occurring. As long as she realizes before `adminTimeLock`, she can delete both the new evil owner and the evil recovery.
-
