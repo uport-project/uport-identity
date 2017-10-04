@@ -548,6 +548,12 @@ contract('IdentityManager', (accounts) => {
       assert.equal(log.args.identity, proxy.address, 'finalized migrating wrong proxy')
       assert.equal(log.args.newIdManager, newIdenManager.address, 'finalized migration to wrong location')
       assert.equal(log.args.instigator, user1, 'finalized migrating from wrong person')
+
+      let isOwner = await identityManager.isOwner(proxy.address, user1, {from: user1})
+      assert.isFalse(isOwner, 'user1 should not be owner anymore')
+
+      let isRecovery = await identityManager.isRecovery(proxy.address, recoveryKey, {from: user1})
+      assert.isFalse(isRecovery, 'recoveryKey should not be recovery anymore')
     }).timeout(10000000)
 
     it('should be owner of new identityManager after successful transfer', async function() {
