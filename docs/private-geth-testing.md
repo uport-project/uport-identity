@@ -16,3 +16,4 @@ Run the following command to start the tests:
 ```bash
 $ yarn test-geth test/owned.js test/proxy.js test/identityManager.js test/metaIdentityManager.js test/txRelay.js
 ```
+Please note that running these tests take multiple hours.
