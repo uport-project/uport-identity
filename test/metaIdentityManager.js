@@ -1,12 +1,12 @@
 const lightwallet = require('eth-signer')
-const evm_increaseTime = require('./evmIncreaseTime.js')
-const snapshots = require('./evmSnapshots.js')
+const evm_increaseTime = require('./utils/evmIncreaseTime.js')
+const snapshots = require('./utils/evmSnapshots.js')
 const MetaIdentityManager = artifacts.require('MetaIdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const Promise = require('bluebird')
-const compareCode = require('./compareCode')
-const assertThrown = require('./assertThrown')
+const compareCode = require('./utils/compareCode')
+const assertThrown = require('./utils/assertThrown')
 web3.eth = Promise.promisifyAll(web3.eth)
 
 const LOG_NUMBER_1 = 1234

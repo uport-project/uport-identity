@@ -1,13 +1,13 @@
 const lightwallet = require('eth-lightwallet')
-const evm_increaseTime = require('./evmIncreaseTime.js')
+const evm_increaseTime = require('./utils/evmIncreaseTime.js')
 const MetaTxRelay = artifacts.require('TxRelay')
 const MetaIdentityManager = artifacts.require('MetaIdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const MetaTestRegistry = artifacts.require('MetaTestRegistry')
 const Promise = require('bluebird')
-const compareCode = require('./compareCode')
-const assertThrown = require('./assertThrown')
+const compareCode = require('./utils/compareCode')
+const assertThrown = require('./utils/assertThrown')
 const solsha3 = require('solidity-sha3').default
 const leftPad = require('left-pad')
 

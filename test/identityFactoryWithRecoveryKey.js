@@ -1,7 +1,7 @@
 const IdentityFactoryWithRecoveryKey = artifacts.require('IdentityFactoryWithRecoveryKey')
 const Proxy = artifacts.require('Proxy')
 const RecoverableController = artifacts.require('RecoverableController')
-const compareCode = require('./compareCode')
+const compareCode = require('./utils/compareCode')
 
 contract('IdentityFactoryWithRecoveryKey', (accounts) => {
   let proxy

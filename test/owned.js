@@ -1,5 +1,5 @@
 const Owned = artifacts.require('Owned')
-const assertThrown = require('./assertThrown')
+const assertThrown = require('./utils/assertThrown')
 
 contract('Owned', (accounts) => {
   let owned
