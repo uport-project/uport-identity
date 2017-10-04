@@ -2,37 +2,44 @@ const Owned = artifacts.require('Owned')
 
 contract('Owned', (accounts) => {
   let owned
+  const owner = accounts[0]
+  const creator = accounts[0]
+  const nonOwner = accounts[1]
+  const toBeOwner = accounts[2]
 
-  before(async function() {
-    owned = await Owned.new({from: accounts[0]})
+  beforeEach(async function() {
+    owned = await Owned.new({from: creator})
   })
 
-  it('Is owned by creator', async function() {
-    let isOwner = await owned.isOwner.call(accounts[0])
+  it('Is initially owned by creator', async function() {
+    let isOwner = await owned.isOwner.call(creator)
     assert.isTrue(isOwner, 'Owner should be owner')
-    isOwner = await owned.isOwner.call(accounts[1])
+  })
+
+  it('Is initially not owned by non creator', async function() {
+    isOwner = await owned.isOwner.call(nonOwner)
     assert.isFalse(isOwner, 'Non-owner should not be owner')
   })
 
   it('Non-owner can not change owner', async function() {
     try {
-      await owned.transfer(accounts[1], {from: accounts[1]})
+      await owned.transfer(nonOwner, {from: nonOwner})
     } catch (e) {
       errorThrown = true
     }
     assert.isTrue(errorThrown, 'An error should have been thrown')
-    let isOwner = await owned.isOwner.call(accounts[1])
+    let isOwner = await owned.isOwner.call(nonOwner)
     assert.isFalse(isOwner, 'Owner should not be changed')
   })
 
   it('Owner can change owner', async function() {
-    await owned.transfer(accounts[1], {from: accounts[0]})
-    let isOwner = await owned.isOwner.call(accounts[1])
+    await owned.transfer(toBeOwner, {from: owner})
+    let isOwner = await owned.isOwner.call(toBeOwner)
     assert.isTrue(isOwner, 'Owner should be changed')
   })
 
   it('Owner can not change owner to proxy address', async function() {
-    await owned.transfer(owned.address, {from: accounts[1]})
+    await owned.transfer(owned.address, {from: owner})
     let isOwner = await owned.isOwner.call(owned.address)
     assert.isFalse(isOwner, 'Owner should not be changed')
   })

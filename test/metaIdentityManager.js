@@ -133,9 +133,17 @@ contract('MetaIdentityManager', (accounts) => {
       await testForwardTo(testReg, identityManager, proxy.address, recoveryKey, recoveryKey, false)
     })
 
-    it('onlyAuthorized modifier allows in correct users/relay', async function() {
+    it('onlyAuthorized modifier allows transactions from specified relay', async function() {
+      //Allow the transaction relay.
+      await testForwardToFromRelay(testReg, identityManager, proxy.address, user1, relay, true)
+    })
+
+    it('onlyAuthorized modifier allows transactions from msg.sender where data has msg.sender', async function() {
       //Allow a user claimed to be themselves
       await testForwardTo(testReg, identityManager, proxy.address, user1, user1, true)
+    })
+
+    it('onlyAuthorized modifier does not allow transactions from non relay or when msg.sender does not have data with msg.sender ', async function() {
       //Do not allow a user claiming to be someone else.
       let errorThrown = false
       try {
@@ -145,8 +153,18 @@ contract('MetaIdentityManager', (accounts) => {
         errorThrown = true
       }
       assert.isTrue(errorThrown, "should have thrown an error")
-      //Allow the transaction relay.
-      await testForwardToFromRelay(testReg, identityManager, proxy.address, user1, relay, true)
+    })
+
+    // TODO This test passes test script but fails coverage scripts
+    it('onlyAuthorized modifier does not allow transactions when data for metatx is not properly formed starting with address', async function() {
+      let errorThrown = false
+      try {
+        await identityManager.forwardTo('0x0', '0x0', '0x0', 0, '0x0', {from: relay})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "Should have thrown")
+        errorThrown = true
+      }
+      assert.isTrue(errorThrown, "should have thrown an error")
     })
 
     it('owner can add other owner', async function() {
