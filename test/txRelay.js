@@ -1,21 +1,22 @@
 const lightwallet = require('eth-lightwallet')
-const evm_increaseTime = require('./evmIncreaseTime.js')
+const evm_increaseTime = require('./utils/evmIncreaseTime.js')
 const MetaTxRelay = artifacts.require('TxRelay')
 const MetaIdentityManager = artifacts.require('MetaIdentityManager')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
 const MetaTestRegistry = artifacts.require('MetaTestRegistry')
 const Promise = require('bluebird')
-const compareCode = require('./compareCode')
+const compareCode = require('./utils/compareCode')
+const assertThrown = require('./utils/assertThrown')
 const solsha3 = require('solidity-sha3').default
 const leftPad = require('left-pad')
 
 const LOG_NUMBER_1 = 1234
 const LOG_NUMBER_2 = 2345
 
-const userTimeLock = 100;
-const adminTimeLock = 1000;
-const adminRate = 200;
+const userTimeLock = 50;
+const adminTimeLock = 200;
+const adminRate = 50;
 
 //NOTE: All references to identityManager in this contract are to a metaIdentityManager
 
@@ -100,12 +101,13 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, identityMa
     await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sendingAddr})
   } catch (error) {
     errorThrown = true
-    assert.match(errorThrown, /invalid opcode/, "An error should have been thrown")
+    //assert.match(error, /invalid opcode/, "An error should have been thrown")
   }
+  let regData = await testReg.registry.call(proxyAddress)
   if (relayShouldFail) {
-    assert.true(errorThrown, "Transaction should not have gotten through relay")
+    assertThrown(errorThrown, "Transaction should not have gotten through relay")
+    assert.notEqual(regData.toNumber(), testNum)
   } else {
-    let regData = await testReg.registry.call(proxyAddress)
     if (subCallShouldFail) {
       assert.notEqual(regData.toNumber(), testNum)
     } else {
@@ -248,7 +250,7 @@ contract('TxRelay', (accounts) => {
         assert.match(e.message, /invalid opcode/, "Should have thrown")
         errorThrown = true;
       }
-      assert.isTrue(errorThrown, "Has thrown an error")
+      assertThrown(errorThrown, "Has thrown an error")
 
       //Check both address in case in updated one
       regData = await mTestReg.registry.call(user1)
@@ -270,7 +272,7 @@ contract('TxRelay', (accounts) => {
         assert.match(e.message, /invalid opcode/, "Should have thrown")
         errorThrown = true;
       }
-      assert.isTrue(errorThrown, "Has thrown an error")
+      assertThrown(errorThrown, "Has thrown an error")
 
       regData = await mTestReg.registry.call(user1)
       assert.equal(regData.toNumber(), 0, 'Registry did not update')
@@ -293,7 +295,7 @@ contract('TxRelay', (accounts) => {
         assert.match(e.message, /Cannot send value to non-payable function/, "Should have thrown")
         errorThrown = true;
       }
-      assert.isTrue(errorThrown, "Should have thrown an error")
+      assertThrown(errorThrown, "Should have thrown an error")
 
       regData = await mTestReg.registry.call(user1)
       assert.equal(regData.toNumber(), 0, 'Registry did not update')
@@ -320,14 +322,14 @@ contract('TxRelay', (accounts) => {
         assert.match(e.message, /invalid opcode/, "should have thrown")
         errorThrown = true
       }
-      assert.isTrue(errorThrown, "Should have thrown")
+      assertThrown(errorThrown, "Should have thrown")
     })
 
-    //Had some weird stuff w/ hex before - not a great test though :@
+    // Had some weird stuff w/ hex before - not a great test though :@
     it('Should forward meta tx multiple times', async function() {
       let randNum
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 10; i++) {
         randNum = getRandomNumber()
 
         types = ['address', 'uint256']
@@ -341,7 +343,7 @@ contract('TxRelay', (accounts) => {
         regData = await mTestReg.registry.call(user1)
         assert.equal(regData.toNumber(), randNum, 'Registry did not update properly')
       }
-    })
+    }).timeout(10000000)
   })
 
   describe("Meta-tx with IdentityManager", () => {
@@ -454,7 +456,7 @@ contract('TxRelay', (accounts) => {
 
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         await checkLogs(tx, "LogRecoveryChanged", proxy.address, recoveryKey2, user1)
-      })
+      }).timeout(10000000)
 
       it("non-owner can not add other owner", async function () {
         types = ['address', 'address', 'address']
@@ -607,7 +609,7 @@ contract('TxRelay', (accounts) => {
             await evm_increaseTime(userTimeLock + 1)
             await testMetaTxForwardTo(user4, sender, txRelay, identityManager.address, proxy.address,
                                       testReg, false, false, lw, keyFromPw)
-          })
+          }).timeout(10000000)
         })
 
         describe("after adminTimeLock", () => {
@@ -738,7 +740,7 @@ contract('TxRelay', (accounts) => {
                               'cancelMigration', types, params, lw, keyFromPw)
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         await checkLogs(tx, "LogMigrationCanceled", proxy.address, newIdenManager.address, user1)
-      })
+      }).timeout(10000000)
 
       it("correct keys should finilize transfer", async function () {
         //Start migration
@@ -774,7 +776,7 @@ contract('TxRelay', (accounts) => {
         tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
 
         await checkLogs(tx, "LogMigrationFinalized", proxy.address, newIdenManager.address, user1)
-      })
+      }).timeout(10000000)
 
       it("should be owner of new identityManager after successful transfer", async function () {
         //Start migration
@@ -821,7 +823,7 @@ contract('TxRelay', (accounts) => {
         await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
         regData = await testReg.registry.call(proxy.address)
         assert.equal(regData.toNumber(), LOG_NUMBER_1, 'Registry did not update properly')
-      })
+      }).timeout(10000000)
     })
   })
 
@@ -852,5 +854,5 @@ contract('TxRelay', (accounts) => {
     data = enc(n, t, p).substring(0, 26) + zero
     res = await txRelay.getAddress.call(data)
     assert.notEqual(res, user1, "Address is first parameter, should be too short")
-    })
+  })
 })

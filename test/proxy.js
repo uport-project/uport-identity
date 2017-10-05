@@ -1,6 +1,8 @@
 const lightwallet = require('eth-signer')
 const Proxy = artifacts.require('Proxy')
 const TestRegistry = artifacts.require('TestRegistry')
+const waitForTxReceipt = require('./utils/waitForTxReceipt')
+const assertThrown = require('./utils/assertThrown')
 const Promise = require('bluebird')
 const ethJSABI = require("ethjs-abi")
 web3.eth = Promise.promisifyAll(web3.eth)
@@ -28,7 +30,7 @@ async function testProxyTx(testReg, proxy, fromAccount, shouldEqual) {
     assert.isFalse(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    assert.isTrue(errorThrown, 'An error should have been thrown')
+    assertThrown(errorThrown, 'An error should have been thrown')
     assert.notEqual(regData.toNumber(), testNum)
   }
 }
@@ -71,7 +73,7 @@ contract('Proxy', (accounts) => {
 
   it('Transactions with a lot of data works', async function() {
     await testProxyLongTx(testReg, proxy1, ownerProxy1, true)
-    await testProxyTx(testReg, proxy2, ownerProxy2, true)
+    await testProxyLongTx(testReg, proxy2, ownerProxy2, true)
   })
 
   it('Emits event on received transaction', async function() {
@@ -81,7 +83,7 @@ contract('Proxy', (accounts) => {
       to: proxy1.address,
       value: web3.toWei(ethToSend, 'ether')
     })
-    let receipt = await web3.eth.getTransactionReceiptAsync(txHash)
+    let receipt = await waitForTxReceipt(txHash)
     let log = receipt.logs[0]
     // the abi for the Received event
     let eventAbi = proxy1.abi[6]
@@ -147,7 +149,7 @@ contract('Proxy', (accounts) => {
     } catch(e) {
       errorThrown = true
     }
-    assert.isTrue(errorThrown, 'An error should have been thrown')
+    assertThrown(errorThrown, 'An error should have been thrown')
     balance = await web3.eth.getBalanceAsync(proxy1.address)
     assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
@@ -164,7 +166,7 @@ contract('Proxy', (accounts) => {
     } catch(e) {
       errorThrown = true
     }
-    assert.isTrue(errorThrown, 'An error should have been thrown')
+    assertThrown(errorThrown, 'An error should have been thrown')
     balance = await web3.eth.getBalanceAsync(proxy1.address)
     assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
@@ -181,7 +183,7 @@ contract('Proxy', (accounts) => {
     } catch(e) {
       errorThrown = true
     }
-    assert.isTrue(errorThrown, 'An error should have been thrown')
+    assertThrown(errorThrown, 'An error should have been thrown')
     bal = await web3.eth.getBalanceAsync(proxy1.address)
     assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
@@ -204,6 +206,6 @@ contract('Proxy', (accounts) => {
     } catch(e) {
       errorThrown = true
     }
-    assert.isTrue(errorThrown, 'An error should have been thrown')
+    assertThrown(errorThrown, 'An error should have been thrown')
   })
 })

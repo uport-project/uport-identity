@@ -18,6 +18,8 @@
     "deploy-local": "npm run _deploy local",
     "generate-readme": "./scripts/generate-readme.js",
     "test": "./node_modules/.bin/truffle test --network in_memory",
+    "start-geth": "./scripts/start-geth-testchain",
+    "test-geth": "./node_modules/.bin/truffle test --network privateTest",
     "lint": "./node_modules/.bin/solium -d contracts",
     "coverage": "rm -r docs/coverage; ./node_modules/.bin/solidity-coverage; mv coverage docs; npm run generate-readme",
     "diagrams": "scripts/make-diagrams.bash"

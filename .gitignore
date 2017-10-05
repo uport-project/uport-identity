@@ -4,3 +4,5 @@ notes.txt
 .DS_Store
 seed
 coverage.json
+.geth/geth
+.geth/history
