@@ -2,9 +2,9 @@
 To be more certain of that our contracts works as intended we want to not only test them using ethereumjs-testrpc, but also a real geth test network. The main reason for this is that ethereumjs-testrpc runs a different implementation of the EVM that might not be compatible with the EVM on the mainnet at all times.
 
 ## Setting up the node
-This repo includes a configuration for a private geth setup. To get going make sure that you have geth installed and then simply run the following command in the root folder of the repo.
+This repo includes a configuration for a private geth setup. To get going make sure that you have geth installed and then simply run the following command:
 ```bash
-$ script/start-geth-testchain
+$ yarn run start-geth
 ```
 Keep this command running in the background while you continue.
 
