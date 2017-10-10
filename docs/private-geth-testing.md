@@ -14,6 +14,6 @@ The testrpc has a special feature which checks if the contract throws and if so 
 
 Run the following command to start the tests:
 ```bash
-$ yarn test-geth test/owned.js test/proxy.js test/identityManager.js test/metaIdentityManager.js test/txRelay.js
+$ yarn test-geth
 ```
 Please note that running these tests take multiple hours.

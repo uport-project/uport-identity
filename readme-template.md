@@ -3,6 +3,7 @@
 ![CircleCI](https://img.shields.io/circleci/project/github/uport-project/uport-identity.svg)
 <coverage>
 [![Join the chat at](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/uport-project/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Please read our [Whitepaper](http://whitepaper.uport.me) for information on what uPort is, and what is currently possible as far as integration.
 
 <contract-deployments>
