@@ -88,7 +88,9 @@ _adminTimeLock - Time before new owner can add/remove owners
 _adminRate - Time period used for rate limiting a given key for admin functionality
 ```
 
-We set these values to the following:
+There are two options we are exploring right now. The first option is to set these three values to zero. This allows us to use the core functionality of the contracts while not having to conosider any of the complexity in terms of UI/UX to handle all of the timelock rules initially. We will likely not implement the functions that check if your identity is being attacked right away, therefore there is little need to have the timelock anyway. Once we are ready to take the step to add these features to the mobile app we can prompt the users to migrate to the new instances of IdentityManager.
+
+The other option is to use the values specified below. These are also the values we think should be used if migrating from the option above.
 
 |Constant|Value|
 | --|--|
