@@ -80,6 +80,31 @@ Returns true if `owner` is an owner of `identity` and is older than `adminTimeLo
 
 Returns true if `recoveryKey` is the recoveryKey of `identity`.
 
+## Values of constants
+There are three constants that needs to be set when creating this contract. All of these constants are specified in seconds.
+```
+_userTimeLock - Time before new owner added by recovery can control proxy
+_adminTimeLock - Time before new owner can add/remove owners
+_adminRate - Time period used for rate limiting a given key for admin functionality
+```
+
+There are two options we are exploring right now. The first option is to set these three values to zero. This allows us to use the core functionality of the contracts while not having to conosider any of the complexity in terms of UI/UX to handle all of the timelock rules initially. We will likely not implement the functions that check if your identity is being attacked right away, therefore there is little need to have the timelock anyway. Once we are ready to take the step to add these features to the mobile app we can prompt the users to migrate to the new instances of IdentityManager.
+
+The other option is to use the values specified below. These are also the values we think should be used if migrating from the option above.
+
+|Constant|Value|
+| --|--|
+|_userTimeLock|3600 (1 hour)|
+|_adminTimeLock|129600 (1.5 days)|
+|_adminRate|1200 (20 minutes)|
+
+These values gives an OlderOwner the ability to recover from a stolen recoveryKey. If a stolen recoveryKey is used to add a user, that user will be able to transact from the proxy after 1 h, but won't be able to remove other users etc until 1.5 days have passed. An adminRate of 20 minutes gives the admin enought time to first remove the stolen recoveryKey and then remove the malicious owner added by the stolen recoveryKey before the new owner will become an OlderOwner. The adminRate simply limits the amount of "admin actions" an OlderOwner can make in a given time period. So for example if the OlderOwner adds a new owner, it can't remove that owner until adminRate has passed. The recoveryKey is also affected by this rate and can only add new owners at a rate of adminRate.
+
+
+The negative implications on these values on UX is the following:
+* after recovery you won't be able to make transactions for 1h
+* after you have created your identity you'd have to wait 1.5 days to add a new device (user)
+
 ## Attacks
 A user should not lose access to their proxy contract. Thus, the IdentityManager should be robust during the following scenarios.
 
@@ -107,3 +132,8 @@ Assume that Alice has at least two keys that she controls on two different devic
             * New evil owner will be able to transact from identity after `userTimeLock` unless Alice acts
             * New evil owner will be able to remove other owners from identity after `adminTimeLock` unless Alice acts
             * Note: In the case where Malory performs this action, an OwnerAdded event will be triggered, and thus Alice should be notified that this is occurring. As long as she realizes before `adminTimeLock`, she can delete both the new evil owner and the evil recovery.
+
+## Measures in case of bugs
+If a critical bug is discovered in the IdentityManager we basically have one option. Since this contract needs to be trustless there should not be any way for us to upgrading it without users knowing about it. Instead we rely on the `Migration` functionality to move user to a new contract where the bug is fixed. This can be done with a simple confirmation from the user in the uPort client app. If a bug is discovered in the `Migration` functionality itself, the user will have no way of migrating away from the IdentityManager.
+
+If you have found a critical bug in this or any other of our contracts please report it to team@uport.me
