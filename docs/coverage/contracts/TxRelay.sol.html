@@ -22,12 +22,12 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>9/9</span>
+        <span class='fraction'>8/8</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>6/6</span>
+        <span class='fraction'>4/4</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -104,7 +104,12 @@
 59
 60
 61
-62</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+62
+63
+64
+65
+66
+67</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -126,29 +131,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">170×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">170×</span>
-<span class="cline-any cline-yes">170×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">170×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">167×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">80×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">80×</span>
+<span class="cline-any cline-yes">80×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">80×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">190×</span>
-<span class="cline-any cline-yes">189×</span>
+<span class="cline-any cline-yes">77×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -160,12 +157,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">100×</span>
+<span class="cline-any cline-yes">99×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">177×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity 0.4.11;
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">87×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity 0.4.15;
 &nbsp;
 &nbsp;
 //This contract is meant as a "singleton" forwarding contract.
@@ -173,58 +183,63 @@
 //Any contract that is built to accept it.
 contract TxRelay {
 &nbsp;
-  // Note: This is a local nonce.
-  // Different from the nonce defined w/in protocol.
-  mapping(address =&gt; uint) nonce;
+    // Note: This is a local nonce.
+    // Different from the nonce defined w/in protocol.
+    mapping(address =&gt; uint) nonce;
 &nbsp;
-  /*
-   * @dev Relays meta transactions
-   * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
-   * @param destination Location the meta-tx should be forwarded to
-   * @param data The bytes necessary to call the function in the destination contract.
-                 Note, the first encoded argument in data must be address of the signer
-   */
-  function relayMetaTx(uint8 sigV, bytes32 sigR, bytes32 sigS,
-                       address destination, bytes data) {
+    /*
+     * @dev Relays meta transactions
+     * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
+     * @param destination Location the meta-tx should be forwarded to
+     * @param data The bytes necessary to call the function in the destination contract.
+     Note, the first encoded argument in data must be address of the signer
+     */
+    function relayMetaTx(
+        uint8 sigV,
+        bytes32 sigR,
+        bytes32 sigS,
+        address destination,
+        bytes data
+    ) public {
 &nbsp;
-    address claimedSender = getAddress(data);
-    // relay :: nonce :: destination :: data :: relayer
-    bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
-    address addressFromSig = ecrecover(h, sigV, sigR, sigS);
+        address claimedSender = getAddress(data);
+        // relay :: nonce :: destination :: data :: relayer
+        bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
+        address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 &nbsp;
-    if (claimedSender != addressFromSig) throw;
+        require(claimedSender == addressFromSig);
 &nbsp;
-    nonce[claimedSender]++; //if we are going to do tx, update nonce
+        nonce[claimedSender]++; //if we are going to do tx, update nonce
 &nbsp;
-    if (!destination.call(data)) {
-      //In the future, add event here. Has semi-complex gas considerations. See EIP 150
+        if (!destination.call(data)) {
+            //In the future, add event here. Has semi-complex gas considerations. See EIP 150
+        }
     }
-  }
 &nbsp;
-  /*
-   * @dev Gets an address encoded as the first argument in transaction data
-   * @param b The byte array that should have an address as first argument
-   * @returns a The address retrieved from the array
+    /*
+     * @dev Gets an address encoded as the first argument in transaction data
+     * @param b The byte array that should have an address as first argument
+     * @returns a The address retrieved from the array
      (Optimization based on work by tjade273)
-   */
-  function getAddress(bytes b) constant returns (address a) {
-    if (b.length &lt; 36) return address(0);
-    assembly {
-        let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        a := and(mask, mload(add(b, 36)))
-        //36 is the offset of the first param of the data, if encoded properly.
-        //4 bytes for the function signature, and 32 for the addess.
+     */
+    function getAddress(bytes b) public constant returns (address a) {
+        if (b.length &lt; 36) return address(0);
+        assembly {
+            let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            a := and(mask, mload(add(b, 36)))
+            //36 is the offset of the first param of the data, if encoded properly.
+            //4 bytes for the function signature, and 32 for the addess.
+        }
     }
-  }
 &nbsp;
-  /*
- * @dev Returns the local nonce of an account.
- * @param add The address to return the nonce for.
- * @return The specific-to-this-contract nonce of the address provided
- */
-  function getNonce(address add) constant returns (uint) {
-    return nonce[add];
-  }
+    /*
+     * @dev Returns the local nonce of an account.
+     * @param add The address to return the nonce for.
+     * @return The specific-to-this-contract nonce of the address provided
+     */
+    function getNonce(address add) public constant returns (uint) {
+        return nonce[add];
+    }
 }
 &nbsp;</pre></td></tr>
 </table></pre>
@@ -232,7 +247,7 @@ contract TxRelay {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Aug 02 2017 18:09:16 GMT+0200 (CEST)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Oct 11 2017 09:38:14 GMT+0200 (CEST)
 </div>
 </div>
 <script src="../prettify.js"></script>

@@ -9,8 +9,4 @@ contract MetaTestRegistry {
     function register(address sender, uint x) {
         registry[sender] = x;
     }
-
-    function testThrow() {
-        revert();
-    }
 }
