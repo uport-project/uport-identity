@@ -73,5 +73,5 @@ A pull request being merged into `develop` needs to be reviewed by at least two 
 A pull request being merged into `master` needs to be reviewed by a security team that is external to the uport team. To prepare for this make a branch from `develop` called `release/<semver-number>` and make neccesary preparations. Then make a pull request to `master`. The `develop` branch has been reviewed by the uport team and should generally be in a good state. The external review team audits the newly created branch. If there are changes needed they are made in this branch. Once the external team are happy with the state of the contracts make sure that contracts are deployed on the *relevant networks*. The release branch can then be merged into `master`, and also `develop`.
 
 #### Relevant networks
-Right now the networks we want the contracts deployed on are `rinkeby (testnet)` and ethereums `mainnet`.
+Right now the networks we want the contracts deployed on are `rinkeby`, `kovan`, `ropsten` and `mainnet`.
 
