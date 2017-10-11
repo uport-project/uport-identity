@@ -168,6 +168,8 @@ contract IdentityManager {
         delete migrationInitiated[identity];
         delete migrationNewAddress[identity];
         identity.transfer(newIdManager);
+        delete recoveryKeys[identity];
+        delete owners[identity][msg.sender];
         LogMigrationFinalized(identity, newIdManager, msg.sender);
     }
 
