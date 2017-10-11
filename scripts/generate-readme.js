@@ -20,7 +20,7 @@ exec('grep -m 1 -o ">.\\{1,5\\}%" ./docs/coverage/index.html', (error, stdout, s
   lines.on('line', line => {
     if (line === '<coverage>') {
       outStream.write('[![solidity-coverage](https://img.shields.io/badge/coverage-' +
-        coverage + '25-green.svg)](https://uport-project.github.io/uport-identity/coverage)\n\n')
+        coverage + '25-green.svg)](https://uport-project.github.io/uport-identity/coverage)\n')
     } else if (line === '<contract-deployments>') {
       outStream.write('## Contract Deployments\n')
       outStream.write('### Mainnet (id: 1)\n')
