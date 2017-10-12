@@ -1,6 +1,6 @@
 {
   "name": "uport-identity",
-  "version": "1.2.3",
+  "version": "2.0.0",
   "description": "uPort Contracts for identity",
   "main": "artifact-index.js",
   "directories": {
