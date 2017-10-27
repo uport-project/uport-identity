@@ -13,14 +13,13 @@ TxRelay is a contract that provides the uPort contract system with meta transact
 The TxRelay contract has one main function, called `relayMetaTx`, that takes in a signature, destination, and data as parameters. This function checks that the signature is valid, then calls the destination address with the data parameter. The destination address must be a contract that is compatible with the TxRelay contract. The relayer can be chosen by the user and is part of the signature described below.
 
 ### Signed data
-Currently, a user is required to sign the following data: relay_address :: nonce :: destination :: data :: relayer_address
+Currently, a user is required to sign the following data: relay_address :: nonce :: destination :: data
 
 Rationale:
 1. relay_address: if the txRelay is ever upgraded, these transactions cannot be replayed.
 2. nonce: prevents replay attacks. 
 3. destination: necessary to know where tx is going :)
 4. data: necessary to know what the user is trying to do. 
-5. relayer_address: prevents a not-really-feasible-but-maybe attack, where someone could front run, but not send enough gas when they do for the meta-tx to be processed, and then try and trick the user to convince them the transaction just failed, other than the meta-tx. They can then relay the transaction later. Assuming an honest relayer, this is not an issue. 
 
 ### Using TxRelay in a contract
 If you want a contract to support meta-tx there some changes that needs to be made. Refer to the [MetaIdentityManager](./metaIdentityManager.md) contract for an example.
