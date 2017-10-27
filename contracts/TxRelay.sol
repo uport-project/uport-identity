@@ -27,7 +27,7 @@ contract TxRelay {
 
         address claimedSender = getAddress(data);
         // relay :: nonce :: destination :: data :: relayer
-        bytes32 h = sha3(this, nonce[claimedSender], destination, data, msg.sender);
+        bytes32 h = sha3(this, nonce[claimedSender], destination, data);
         address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
         require(claimedSender == addressFromSig);

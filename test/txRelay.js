@@ -67,7 +67,7 @@ async function signPayload(signingAddr, sendingAddr, txRelay, destinationAddress
    nonce = await txRelay.getNonce.call(signingAddr)
    //Tight packing, as Solidity sha3 does
    hashInput = txRelay.address + pad(nonce.toString('16')).slice(2)
-               + destinationAddress.slice(2) + data.slice(2) + sendingAddr.slice(2)
+               + destinationAddress.slice(2) + data.slice(2)
    hash = solsha3(hashInput)
    sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signingAddr)
    retVal.r = '0x'+sig.r.toString('hex')
@@ -256,25 +256,6 @@ contract('TxRelay', (accounts) => {
       regData = await mTestReg.registry.call(user1)
       assert.equal(regData.toNumber(), 0, 'Registry did not update')
       regData = await mTestReg.registry.call(user2)
-      assert.equal(regData.toNumber(), 0, 'Registry did not update')
-    })
-
-    it('Should not forward meta tx from a dishonest relayer', async function() {
-      types = ['address', 'uint256']
-      params = [user1, LOG_NUMBER_1]
-      p = await signPayload(user1, sender, txRelay, mTestReg.address, 'register',
-                            types, params, lw, keyFromPw)
-
-      try {
-        //Wrong sender tries to send transaction
-        await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: notSender})
-      } catch (e) {
-        assert.match(e.message, /invalid opcode/, "Should have thrown")
-        errorThrown = true;
-      }
-      assertThrown(errorThrown, "Has thrown an error")
-
-      regData = await mTestReg.registry.call(user1)
       assert.equal(regData.toNumber(), 0, 'Registry did not update')
     })
 
