@@ -23,6 +23,7 @@ contract TestRegistry {
     }
 
     function testThrow() {
-        revert();
+        uint x = 0;
+        for (uint i = 0; i >- 0; i++) {x++;}
     }
 }
