@@ -77,8 +77,13 @@ contract('IdentityManager', (accounts) => {
     identityManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate)
     deployedProxy = await Proxy.new({from: user1})
     testReg = await TestRegistry.new({from: user1})
+<<<<<<< HEAD
     testNum = 1
     data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [1])
+=======
+    testNum = getRanomNumber()
+    data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
+>>>>>>> af2f914... Add tests for createIdentitySetRegistry
     //   return snapshots.snapshot()
     // }).then(id => {
     //   snapshotId = id
@@ -110,11 +115,8 @@ contract('IdentityManager', (accounts) => {
   })
 
   it('Correctly creates Identity and calls registry set', async function() {
-    let tx = await identityManager.createIdentitySetRegistry(testReg.address, data, user1, recoveryKey, {from: nobody})
+    let tx = await identityManager.createIdentitySetRegistry(testReg.address, 0, '0x' + data, user1, recoveryKey, {from: nobody})
     let log = tx.logs[0]
-    console.log('==================')
-    console.log(log)
-    console.log('==================')
     assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
 
     assert.equal(log.args.owner,
@@ -130,6 +132,10 @@ contract('IdentityManager', (accounts) => {
     await compareCode(log.args.identity, deployedProxy.address)
     let proxyOwner = await Proxy.at(log.args.identity).owner.call()
     assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
+    let setValue = await testReg.registry.call(log.args.identity)
+    //test that registry was set properly with testNum as the data
+    assert.equal(setValue.toNumber(), testNum)
+
   })
 
   describe('existing identity', () => {
