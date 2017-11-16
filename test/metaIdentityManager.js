@@ -120,7 +120,7 @@ contract('MetaIdentityManager', (accounts) => {
   })
 
   it('Correctly creates Identity and calls registry set', async function() {
-    let tx = await identityManager.createIdentitySetRegistry(testReg.address, 0, '0x' + data, user1, recoveryKey, {from: nobody})
+    let tx = await identityManager.createIdentityWithCall(testReg.address, 0, '0x' + data, user1, recoveryKey, {from: nobody})
     let log = tx.logs[0]
     assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
 
