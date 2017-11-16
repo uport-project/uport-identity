@@ -295,6 +295,19 @@ contract('IdentityManager', (accounts) => {
                       'Instigator key is set in event')
         })
 
+        it('can not remove yourself as owner', async function() {
+          let errorThrown = false
+          try {
+            await identityManager.removeOwner(proxy.address, user2, {from: user2})
+          } catch (e) {
+            assert.match(e.message, /invalid opcode/, "should have thrown")
+            errorThrown = true
+          }
+          assertThrown(errorThrown, "should have thrown")
+          let isOwner = await identityManager.isOwner(proxy.address, user2, {from: user1})
+          assert.isTrue(isOwner, 'user2 should still be owner')
+        })
+
         it('can remove other owner', async function() {
           let tx = await identityManager.removeOwner(proxy.address, user1, {from: user2})
           const log = tx.logs[0]
