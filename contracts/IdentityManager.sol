@@ -96,13 +96,15 @@ contract IdentityManager {
         LogIdentityCreated(identity, msg.sender, owner,  recoveryKey);
     }
 
-
-    function createIdentitySetRegistry(address registry, uint value, bytes data, address owner, address recoveryKey) public validAddress(recoveryKey) {
+    /// @dev Creates a new proxy contract for an owner and recovery and allows an initial forward call which would be to set the registry in our case
+    /// @param owner Key who can use this contract to control proxy. Given full power
+    /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
+    function createIdentityWithCall(address destination, uint value, bytes data, address owner, address recoveryKey) public validAddress(recoveryKey) {
         Proxy identity = new Proxy();
         owners[identity][owner] = now - adminTimeLock; // This is to ensure original owner has full power from day one
         recoveryKeys[identity] = recoveryKey;
         LogIdentityCreated(identity, msg.sender, owner,  recoveryKey);
-        identity.forward(registry, value, data);
+        identity.forward(destination, value, data);
     }
 
     /// @dev Allows a user to transfer control of existing proxy to this contract. Must come through proxy
