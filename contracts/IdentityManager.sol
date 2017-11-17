@@ -114,6 +114,7 @@ contract IdentityManager {
 
     /// @dev Allows an olderOwner to add a new owner instantly
     function addOwner(Proxy identity, address newOwner) public onlyOlderOwner(identity) rateLimited(identity) {
+        require(!isOwner(identity, newOwner));
         owners[identity][newOwner] = now - userTimeLock;
         LogOwnerAdded(identity, newOwner, msg.sender);
     }

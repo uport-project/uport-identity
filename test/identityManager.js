@@ -145,6 +145,16 @@ contract('IdentityManager', (accounts) => {
       assert.isTrue(isOwner, 'user5 should be owner now')
     })
 
+    it('owner can not add owner that is already an owner', async function() {
+      try {
+        let tx = await identityManager.addOwner(proxy.address, user1, {from: user1})
+      } catch (e) {
+        assert.match(e.message, /invalid opcode/, "should have thrown")
+        errorThrown = true
+      }
+      assertThrown(errorThrown, "should have thrown")
+    })
+
     it('owner is rateLimited on some functions', async function() {
       //User1 adds user5
       let tx = await identityManager.addOwner(proxy.address, user5, {from: user1})

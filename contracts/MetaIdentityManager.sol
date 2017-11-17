@@ -129,6 +129,7 @@ contract MetaIdentityManager {
         onlyOlderOwner(identity, sender)
         rateLimited(identity, sender)
     {
+        require(!isOwner(identity, newOwner));
         owners[identity][newOwner] = now - userTimeLock;
         LogOwnerAdded(identity, newOwner, sender);
     }
