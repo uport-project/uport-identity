@@ -80,6 +80,7 @@ contract IdentityManager {
     /// @param _adminTimeLock Time before new owner can add/remove owners
     /// @param _adminRate Time period used for rate limiting a given key for admin functionality
     function IdentityManager(uint _userTimeLock, uint _adminTimeLock, uint _adminRate) {
+        require(_adminTimeLock >= _userTimeLock);
         adminTimeLock = _adminTimeLock;
         userTimeLock = _userTimeLock;
         adminRate = _adminRate;

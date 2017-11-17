@@ -87,6 +87,17 @@ contract('MetaIdentityManager', (accounts) => {
 
   let snapshotId
 
+  it('Throws if MetaIdentityManager is created with adminTimeLock < userTimeLock', async function() {
+    errorThrown = false
+    try {
+      await MetaIdentityManager.new(100, 10, adminRate, relay)
+    } catch (e) {
+      assert.match(e.message, /invalid opcode/, "should have thrown")
+      errorThrown = true
+    }
+    assertThrown(errorThrown, "should have thrown")
+  })
+
   before(async function() {
     // Truffle deploys contracts with accounts[0]
     user1 = accounts[0]
