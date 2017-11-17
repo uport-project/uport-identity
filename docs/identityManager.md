@@ -68,6 +68,8 @@ Allows an owner to replace the Recovery Key with another one.
 
 Lets an owner initiate the process of migrating a proxy contract away from the IdentityManager to a new one. There is a time limit of `adminTimeLock` after which the migration can be finalized using `finalizeMigration`. Any owner can call `cancelMigration` at any time to cancel the migration.
 
+WARNING: Since all owners are stored in a mapping the `finalizeMigration` method can only remove the owner that is calling the function. This means that any other owners will still be present if the same proxy is migrated back to this IdentityManager again. To be sure this doesn't happen `removeOwner` can be called on all other owners before the call to `finalizeMigration`.
+
 ### `isOwner`
 
 Returns true if `owner` is an owner of `identity` and is older than `userTimeLock`.

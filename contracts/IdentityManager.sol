@@ -169,6 +169,8 @@ contract IdentityManager {
         delete migrationNewAddress[identity];
         identity.transfer(newIdManager);
         delete recoveryKeys[identity];
+        // We can only delete the owner that we know of. All other owners
+        // needs to be removed before a call to this method.
         delete owners[identity][msg.sender];
         LogMigrationFinalized(identity, newIdManager, msg.sender);
     }
