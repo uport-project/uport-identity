@@ -171,19 +171,13 @@ contract('Proxy', (accounts) => {
     assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
 
-  it('Should throw if sending zero ether', async function() {
-    let errorThrown = false
-    let ethToSend = -2
+  it('Should not change balance if sending zero ether', async function() {
+    let ethToSend = 0
     let receiver = accounts[3]
     let proxyBalance
     let balance = await web3.eth.getBalanceAsync(proxy1.address)
     proxyBalance = web3.fromWei(balance, 'ether').toNumber()
-    try {
-      await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
-    } catch(e) {
-      errorThrown = true
-    }
-    assertThrown(errorThrown, 'An error should have been thrown')
+    await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
     bal = await web3.eth.getBalanceAsync(proxy1.address)
     assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
