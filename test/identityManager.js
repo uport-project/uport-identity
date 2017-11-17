@@ -101,8 +101,8 @@ contract('IdentityManager', (accounts) => {
                  'Creator is set in event')
 
     await compareCode(log.args.identity, deployedProxy.address)
-    let proxyOwner = await Proxy.at(log.args.identity).owner.call()
-    assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
+    let proxyController = await Proxy.at(log.args.identity).controller.call()
+    assert.equal(proxyController, identityManager.address, 'Proxy controller should be the identity manager')
   })
 
   describe('existing identity', () => {
