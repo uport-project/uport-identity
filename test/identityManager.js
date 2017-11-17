@@ -56,8 +56,6 @@ contract('IdentityManager', (accounts) => {
   let user4
   let user5
   let nobody
-  let data
-  let testNum
 
   let recoveryKey
   let recoveryKey2
@@ -77,13 +75,8 @@ contract('IdentityManager', (accounts) => {
     identityManager = await IdentityManager.new(userTimeLock, adminTimeLock, adminRate)
     deployedProxy = await Proxy.new({from: user1})
     testReg = await TestRegistry.new({from: user1})
-<<<<<<< HEAD
-    testNum = 1
-    data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [1])
-=======
     testNum = getRanomNumber()
     data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
->>>>>>> af2f914... Add tests for createIdentitySetRegistry
     //   return snapshots.snapshot()
     // }).then(id => {
     //   snapshotId = id
@@ -115,7 +108,9 @@ contract('IdentityManager', (accounts) => {
   })
 
   it('Correctly creates Identity and calls registry set', async function() {
-    let tx = await identityManager.createIdentityWithCall(testReg.address, 0, '0x' + data, user1, recoveryKey, {from: nobody})
+    let testNum = getRanomNumber()
+    let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
+    let tx = await identityManager.createIdentityWithCall(testReg.address, '0x' + data, user1, recoveryKey, {from: nobody})
     let log = tx.logs[0]
     assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
 
