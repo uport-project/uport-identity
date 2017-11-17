@@ -1,9 +1,9 @@
 pragma solidity 0.4.15;
 
 
-//This contract is meant as a "singleton" forwarding contract.
-//Eventually, it will be able to forward any transaction to
-//Any contract that is built to accept it.
+// This contract is meant as a "singleton" forwarding contract.
+// Eventually, it will be able to forward any transaction to
+// Any contract that is built to accept it.
 contract TxRelay {
 
     // Note: This is a local nonce.
@@ -15,7 +15,8 @@ contract TxRelay {
      * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
      * @param destination Location the meta-tx should be forwarded to
      * @param data The bytes necessary to call the function in the destination contract.
-     Note, the first encoded argument in data must be address of the signer
+     * Note: The first encoded argument in data must be address of the signer. This means
+     * that all functions called from this relay must take an address as the first parameter.
      */
     function relayMetaTx(
         uint8 sigV,
@@ -50,8 +51,8 @@ contract TxRelay {
         assembly {
             let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
             a := and(mask, mload(add(b, 36)))
-            //36 is the offset of the first param of the data, if encoded properly.
-            //4 bytes for the function signature, and 32 for the addess.
+            // 36 is the offset of the first parameter of the data, if encoded properly.
+            // 32 bytes for the length of the bytes array, and 4 bytes for the function signature.
         }
     }
 
