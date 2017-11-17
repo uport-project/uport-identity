@@ -97,6 +97,8 @@ contract IdentityManager {
     }
 
     /// @dev Creates a new proxy contract for an owner and recovery and allows an initial forward call which would be to set the registry in our case
+    /// @param destination Address of contract to be called after proxy is created
+    /// @param data of function to be called at the destination contract
     /// @param owner Key who can use this contract to control proxy. Given full power
     /// @param recoveryKey Key of recovery network or address from seed to recovery proxy
     function createIdentityWithCall(address destination, bytes data, address owner, address recoveryKey) public validAddress(recoveryKey) {
