@@ -101,7 +101,7 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, identityMa
     await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sendingAddr})
   } catch (error) {
     errorThrown = true
-    //assert.match(error, /invalid opcode/, "An error should have been thrown")
+    //assert.match(error, /revert/, "An error should have been thrown")
   }
   let regData = await testReg.registry.call(proxyAddress)
   if (relayShouldFail) {
@@ -247,7 +247,7 @@ contract('TxRelay', (accounts) => {
         //claim to be a different person again
         await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "Should have thrown")
+        assert.match(e.message, /revert/, "Should have thrown")
         errorThrown = true;
       }
       assertThrown(errorThrown, "Has thrown an error")
@@ -300,7 +300,7 @@ contract('TxRelay', (accounts) => {
         //Relayer tries to relay the same transaction twice
         await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "Should have thrown")
