@@ -120,7 +120,7 @@ contract('MetaIdentityManager', (accounts) => {
   it('Correctly creates Identity and calls registry set', async function() {
     let testNum = getRandomNumber()
     let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
-    let tx = await identityManager.createIdentityWithCall(testReg.address, '0x' + data, user1, recoveryKey, {from: nobody})
+    let tx = await identityManager.createIdentityWithCall(user1, recoveryKey, testReg.address, '0x' + data, {from: nobody})
     let log = tx.logs[0]
     assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
 
