@@ -39,7 +39,7 @@ async function testForwardTo(testReg, identityManager, proxyAddress, fromAccount
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    //assert.match(errorThrown, /invalid opcode/, 'throws an error')
+    //assert.match(errorThrown, /revert/, 'throws an error')
     assertThrown(errorThrown, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
@@ -62,7 +62,7 @@ async function testForwardToFromRelay(testReg, identityManager, proxyAddress, fr
     assert.isNotOk(errorThrown, 'An error should not have been thrown')
     assert.equal(regData.toNumber(), testNum)
   } else {
-    //assert.match(errorThrown, /invalid opcode/, 'throws an error')
+    //assert.match(errorThrown, /revert/, 'throws an error')
     assertThrown(errorThrown, 'throws an error')
     assert.notEqual(regData.toNumber(), testNum)
   }
@@ -158,7 +158,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.forwardTo('0x0', '0x0', '0x0', 0, '0x0', {from: relay})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "Should have thrown")
+        assert.match(e.message, /revert/, "Should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown an error")
@@ -193,7 +193,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.addOwner(user1, proxy.address, user4, {from: user1})
       } catch (e) {
-        //assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
@@ -202,7 +202,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
-        //assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
@@ -211,7 +211,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        //assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
@@ -226,7 +226,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.removeOwner(user1, proxy.address, user5, {from: user1})
       } catch (e) {
-        //assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
@@ -235,7 +235,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        //assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
@@ -249,7 +249,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.changeRecovery(user1, proxy.address, recoveryKey2, {from: user1})
       } catch (e) {
-        //assert.match(e.message, /invalid opcode/, "should have thrown")
+        //assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
@@ -265,7 +265,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.addOwner(user3, proxy.address, user4, {from: user3})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
@@ -293,7 +293,7 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.addOwner(user2, proxy.address, user4, {from: user2})
         } catch(e) {
-          //assert.match(e.message, /invalid opcode/, 'throws an error')
+          //assert.match(e.message, /revert/, 'throws an error')
           errorThrown = true
         }
         assertThrown(errorThrown, 'Should have thrown')
@@ -304,7 +304,7 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.removeOwner(user2, proxy.address, user1, {from: user2})
         } catch(e) {
-          //assert.match(e.message, /invalid opcode/, 'throws an error')
+          //assert.match(e.message, /revert/, 'throws an error')
           errorThrown = true
         }
         assertThrown(errorThrown, 'Should have thrown')
@@ -315,7 +315,7 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.changeRecovery(user2, proxy.address, recoveryKey2, {from: user2})
         } catch(e) {
-          //assert.match(e.message, /invalid opcode/, 'throws an error')
+          //assert.match(e.message, /revert/, 'throws an error')
           errorThrown = true
         }
         assertThrown(errorThrown, 'Should have thrown')
@@ -381,7 +381,7 @@ contract('MetaIdentityManager', (accounts) => {
           try {
             await identityManager.changeRecovery(user2, proxy.address, ZERO_ADDRESS, {from: user2})
           } catch (e) {
-            //assert.match(e.message, /invalid opcode/, "should have thrown")
+            //assert.match(e.message, /revert/, "should have thrown")
             errorThrown = true
           }
           assertThrown(errorThrown, "should have thrown")
@@ -400,7 +400,7 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           tx = await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user4, {from: recoveryKey})
         } catch (e) {
-          //assert.match(e.message, /invalid opcode/, "should have thrown")
+          //assert.match(e.message, /revert/, "should have thrown")
           errorThrown = true
         }
         assertThrown(errorThrown, "should have thrown")
@@ -464,7 +464,7 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.addOwnerFromRecovery(nobody, proxy.address, user4, {from: nobody})
         } catch (e) {
-          //assert.match(e.message, /invalid opcode/, "should have thrown")
+          //assert.match(e.message, /revert/, "should have thrown")
           errorThrown = true
         }
         assertThrown(errorThrown, "should have thrown")
@@ -476,7 +476,7 @@ contract('MetaIdentityManager', (accounts) => {
         try {
           await identityManager.addOwnerFromRecovery(recoveryKey, proxy.address, user2, {from: recoveryKey})
         } catch (e) {
-          //assert.match(e.message, /invalid opcode/, "should have thrown")
+          //assert.match(e.message, /revert/, "should have thrown")
           errorThrown = true
         }
         assertThrown(errorThrown, "should have thrown")
@@ -515,7 +515,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(user2, proxy.address, newIdenManager.address, {from: user2})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         threwError = true
       }
       assertThrown(threwError, 'Should have thrown an error here')
@@ -526,7 +526,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.initiateMigration(nobody, proxy.address, newIdenManager.address, {from: nobody})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         threwError = true
       }
       assertThrown(threwError, 'Should have thrown an error here')
@@ -571,7 +571,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.cancelMigration(nobody, proxy.address, {from: nobody})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         threwError = true
       }
       assertThrown(threwError, 'Should have thrown error')
@@ -589,7 +589,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(nobody, proxy.address, {from: nobody})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         threwError = true
       }
       assertThrown(threwError, 'non-owner should not be able to finalize')
@@ -597,7 +597,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(user2, proxy.address, {from: user2})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         threwError = true
       }
       assertThrown(threwError, 'young owner should not be able to finalize')
@@ -607,7 +607,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
           await identityManager.finalizeMigration(user1, proxy.address, {from: user1})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         threwError = true
       }
       assertThrown(threwError, 'young owner should not be able to finalize')
@@ -653,7 +653,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         await identityManager.forwardTo(user1, proxy.address, identityManager.address, 0, data, {from: user1})
       } catch(e) {
-        //assert.match(e.message, /invalid opcode/, 'throws an error')
+        //assert.match(e.message, /revert/, 'throws an error')
         threwError = true
       }
       assertThrown(threwError, 'existing proxy should not be able to re-register')
