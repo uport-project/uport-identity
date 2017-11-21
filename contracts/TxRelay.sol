@@ -10,10 +10,6 @@ contract TxRelay {
     // Different from the nonce defined w/in protocol.
     mapping(address => uint) nonce;
 
-    event LogTxFailed(
-        address indexed destination,
-        bytes data);
-
     /*
      * @dev Relays meta transactions
      * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
@@ -40,9 +36,7 @@ contract TxRelay {
 
         nonce[claimedSender]++; //if we are going to do tx, update nonce
 
-        if (!destination.call(data)) {
-            LogTxFailed(destination, data);
-        }
+        require(destination.call(data));
     }
 
     /*

@@ -108,14 +108,16 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, identityMa
     assertThrown(errorThrown, "Transaction should not have gotten through relay")
     assert.notEqual(regData.toNumber(), testNum)
   } else {
+    let expectedNonce = firstNonce.toNumber()
     if (subCallShouldFail) {
       assert.notEqual(regData.toNumber(), testNum)
     } else {
       assert.equal(regData.toNumber(), testNum)
+      expectedNonce += 1
     }
     p = await signPayload(signingAddr, sendingAddr, txRelay, identityManagerAddress,
                           'forwardTo', types, params, lw, keyFromPw)
-    assert.equal(p.nonce.toNumber(), firstNonce.toNumber() + 1, "Nonce should have updated")
+    assert.equal(p.nonce.toNumber(), expectedNonce, "Nonce should have updated")
   }
 }
 
@@ -222,18 +224,20 @@ contract('TxRelay', (accounts) => {
       p = await signPayload(user1, sender, txRelay, mTestReg.address, 'testThrow',
                             types, params, lw, keyFromPw)
 
-      tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
-                                    {from: sender, gas: 4500000})
-      //Best way I have found to test for throw in a sub-call. Suggestions welcome :)
-      //assert.isAbove(tx.receipt.gasUsed, 4000000, "Did not throw, as it should have consumed gas")
-      let event = tx.logs[0]
-      assert.equal(event.event, 'LogTxFailed')
-      assert.equal(event.args.destination, p.dest)
+      errorThrown = false
+      try {
+        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data,
+                                        {from: sender, gas: 4500000})
+      } catch (e) {
+        assert.match(e.message, /revert/, "Should have thrown")
+        errorThrown = true
+      }
+      assertThrown(errorThrown, "Has thrown an error")
 
       p = await signPayload(user1, sender, txRelay, mTestReg.address, 'testThrow',
                             types, params, lw, keyFromPw)
 
-      assert.equal(p.nonce, "1", "nonce should have updated")
+      assert.equal(p.nonce, "0", "nonce should not have updated")
     })
 
     it('Should not forward meta tx from someone lying about address', async function() {
@@ -368,30 +372,39 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'addOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
-        let event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Tries to change the recoveryKey
         params = [user1, proxy.address, recoveryKey2]
         p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
-        event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Then have user1 try to remove user2 - still is rateLimited
         params = [user1, proxy.address, user2]
         p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Make them no longer rateLimited
         await evm_increaseTime(adminRate + 1)
@@ -408,20 +421,26 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'removeOwner', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
-        event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Tries to change the recoveryKey
         params = [user1, proxy.address, recoveryKey2]
         p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
-        event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Unrate limit them again
         await evm_increaseTime(adminRate + 1)
@@ -438,10 +457,13 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user1, sender, txRelay, identityManager.address,
                               'changeRecovery', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
-        event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Unrate limit them again
         await evm_increaseTime(adminRate + 1)
@@ -463,10 +485,13 @@ contract('TxRelay', (accounts) => {
         res = await txRelay.getAddress.call(p.data)
         assert.equal(res, user3, "Address is not first parameter")
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        let event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
       })
 
       describe("new owner added by owner", () => {
@@ -505,10 +530,13 @@ contract('TxRelay', (accounts) => {
             res = await txRelay.getAddress.call(p.data)
             assert.equal(res, user2, "Address is not first parameter")
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-            let event = tx.logs[0]
-            assert.equal(event.event, 'LogTxFailed')
-            assert.equal(event.args.destination, p.dest)
+            errorThrown = false
+            try {
+              tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+            } catch (e) {
+              assert.match(e.message, /revert/, "Should have thrown")
+              errorThrown = true
+            }
           })
 
           it("can not remove other owner yet", async function () {
@@ -520,10 +548,13 @@ contract('TxRelay', (accounts) => {
             res = await txRelay.getAddress.call(p.data)
             assert.equal(res, user2, "Address is not first parameter")
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-            let event = tx.logs[0]
-            assert.equal(event.event, 'LogTxFailed')
-            assert.equal(event.args.destination, p.dest)
+            errorThrown = false
+            try {
+              tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+            } catch (e) {
+              assert.match(e.message, /revert/, "Should have thrown")
+              errorThrown = true
+            }
           })
 
           it("can not change recoveryKey yet", async function () {
@@ -535,10 +566,13 @@ contract('TxRelay', (accounts) => {
             res = await txRelay.getAddress.call(p.data)
             assert.equal(res, user2, "Address is not first parameter")
 
-            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-            let event = tx.logs[0]
-            assert.equal(event.event, 'LogTxFailed')
-            assert.equal(event.args.destination, p.dest)
+            errorThrown = false
+            try {
+              tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+            } catch (e) {
+              assert.match(e.message, /revert/, "Should have thrown")
+              errorThrown = true
+            }
           })
         })
 
@@ -599,10 +633,13 @@ contract('TxRelay', (accounts) => {
           p = await signPayload(recoveryKey, sender, txRelay, identityManager.address,
                                 'addOwnerFromRecovery', types, params, lw, keyFromPw)
 
-          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
-          let event = tx.logs[0]
-          assert.equal(event.event, 'LogTxFailed')
-          assert.equal(event.args.destination, p.dest)
+          errorThrown = false
+          try {
+            tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender, gas: 4500000})
+          } catch (e) {
+            assert.match(e.message, /revert/, "Should have thrown")
+            errorThrown = true
+          }
         })
 
         it("within userTimeLock is not allowed transactions", async function () {
@@ -692,10 +729,13 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user2, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        let event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
       })
 
       it("non-owner should not be able to start transfer", async function () {
@@ -704,10 +744,13 @@ contract('TxRelay', (accounts) => {
         p = await signPayload(user3, sender, txRelay, identityManager.address,
                               'initiateMigration', types, params, lw, keyFromPw)
 
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        let event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
       })
 
       it("correct keys can cancel migration ", async function () {
@@ -724,10 +767,13 @@ contract('TxRelay', (accounts) => {
         params = [user3, proxy.address]
         p = await signPayload(user3, sender, txRelay, identityManager.address,
                               'cancelMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        let event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Young owner tries to cancel
         params = [user2, proxy.address]
@@ -769,19 +815,25 @@ contract('TxRelay', (accounts) => {
         params = [user3, proxy.address]
         p = await signPayload(user3, sender, txRelay, identityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        let event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         //Young owner tries to finalize
         params = [user2, proxy.address]
         p = await signPayload(user2, sender, txRelay, identityManager.address,
                               'finalizeMigration', types, params, lw, keyFromPw)
-        tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
-        event = tx.logs[0]
-        assert.equal(event.event, 'LogTxFailed')
-        assert.equal(event.args.destination, p.dest)
+        errorThrown = false
+        try {
+          tx = await txRelay.relayMetaTx(p.v, p.r, p.s, p.dest, p.data, {from: sender})
+        } catch (e) {
+          assert.match(e.message, /revert/, "Should have thrown")
+          errorThrown = true
+        }
 
         await evm_increaseTime(adminTimeLock + 1)
 
