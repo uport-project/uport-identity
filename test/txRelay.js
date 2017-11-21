@@ -66,8 +66,8 @@ async function signPayload(signingAddr, sendingAddr, txRelay, destinationAddress
 
    nonce = await txRelay.getNonce.call(signingAddr)
    //Tight packing, as Solidity sha3 does
-   hashInput = '0x1900' + txRelay.address.slice(2) + pad(nonce.toString('16')).slice(2)
-               + destinationAddress.slice(2) + data.slice(2) + pad('0').slice(2)
+   hashInput = '0x1900' + txRelay.address.slice(2) + pad('0').slice(2) + pad(nonce.toString('16')).slice(2)
+               + destinationAddress.slice(2) + data.slice(2)
    hash = solsha3(hashInput)
    sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signingAddr)
    retVal.r = '0x'+sig.r.toString('hex')
