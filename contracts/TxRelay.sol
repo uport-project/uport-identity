@@ -10,6 +10,9 @@ contract TxRelay {
     // Different from the nonce defined w/in protocol.
     mapping(address => uint) nonce;
 
+    mapping(uint => mapping(address => bool)) public whitelist;
+    mapping(uint => address) public listOwner;
+
     /*
      * @dev Relays meta transactions
      * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
@@ -23,13 +26,18 @@ contract TxRelay {
         bytes32 sigR,
         bytes32 sigS,
         address destination,
-        bytes data
+        bytes data,
+        uint listNum
     ) public {
+
+        // only allow senders from the whitelist specified by the user,
+        // 0 means no whitelist.
+        require(listNum == 0 || whitelist[listNum][msg.sender]);
 
         address claimedSender = getAddress(data);
         // use EIP 191
-        // 0x19 :: version :: relay :: nonce :: destination :: data
-        bytes32 h = keccak256(byte(0x19), byte(0), this, nonce[claimedSender], destination, data);
+        // 0x19 :: version :: relay :: nonce :: destination :: data :: whitelist
+        bytes32 h = keccak256(byte(0x19), byte(0), this, nonce[claimedSender], destination, data, listNum);
         address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
         require(claimedSender == addressFromSig);
@@ -62,5 +70,45 @@ contract TxRelay {
      */
     function getNonce(address add) public constant returns (uint) {
         return nonce[add];
+    }
+
+    /*
+     * @dev Adds a number of addresses to a specific whitelist. Only
+     * the owner of a whitelist can add to it.
+     * @param listNum The list number
+     * @param allowedSenders the addresses to add to the whitelist
+     */
+    function addToWhitelist(uint listNum, address[] allowedSenders) public {
+        if (listOwner[listNum] == 0x0) {
+            listOwner[listNum] = msg.sender;
+        }
+        updateWhitelist(listNum, allowedSenders, true);
+    }
+
+    /*
+     * @dev Removes a number of addresses from a specific whitelist. Only
+     * the owner of a whitelist can remove from it.
+     * @param listNum The list number
+     * @param allowedSenders the addresses to add to the whitelist
+     */
+    function removeFromWhitelist(uint listNum, address[] allowedSenders) public {
+        updateWhitelist(listNum, allowedSenders, false);
+    }
+
+    /*
+     * @dev Internal logic to update a whitelist
+     * @param listNum The list number
+     * @param allowedSenders the addresses to add to the whitelist
+     * @param onList whether to add or remove addresses
+     */
+    function updateWhitelist(uint listNum, address[] allowedSenders, bool onList) private {
+        // list 0 can not be owned
+        require(listNum != 0);
+        // list must be owned by msg.sender
+        require(listOwner[listNum] == msg.sender);
+
+        for (uint i = 0; i < allowedSenders.length; i++) {
+            whitelist[listNum][allowedSenders[i]] = onList;
+        }
     }
 }

@@ -382,7 +382,7 @@ contract('MetaIdentityManager', (accounts) => {
           try {
             await identityManager.removeOwner(user2, proxy.address, user2, {from: user2})
           } catch (e) {
-            assert.match(e.message, /invalid opcode/, "should have thrown")
+            assert.match(e.message, /revert/, "should have thrown")
             errorThrown = true
           }
           assertThrown(errorThrown, "should have thrown")
