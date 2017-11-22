@@ -151,7 +151,7 @@ contract MetaIdentityManager {
         rateLimited(identity, sender)
     {
         // an owner should not be allowed to remove itself
-        require(msg.sender != owner);
+        require(sender != owner);
         delete owners[identity][owner];
         LogOwnerRemoved(identity, owner, sender);
     }
