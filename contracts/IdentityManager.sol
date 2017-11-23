@@ -140,6 +140,8 @@ contract IdentityManager {
 
     /// @dev Allows an owner to remove another owner instantly
     function removeOwner(Proxy identity, address owner) public onlyOlderOwner(identity) rateLimited(identity) {
+        // an owner should not be allowed to remove itself
+        require(msg.sender != owner);
         delete owners[identity][owner];
         LogOwnerRemoved(identity, owner, msg.sender);
     }
