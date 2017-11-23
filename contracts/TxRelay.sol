@@ -27,7 +27,7 @@ contract TxRelay {
 
         address claimedSender = getAddress(data);
         // use EIP 191
-        // 0x19 :: version :: relay :: nonce :: destination :: data :: relayer
+        // 0x19 :: version :: relay :: nonce :: destination :: data
         bytes32 h = keccak256(byte(0x19), byte(0), this, nonce[claimedSender], destination, data);
         address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
