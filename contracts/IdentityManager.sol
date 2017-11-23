@@ -167,7 +167,7 @@ contract IdentityManager {
         address newIdManager = migrationNewAddress[identity];
         delete migrationInitiated[identity];
         delete migrationNewAddress[identity];
-        identity.transfer(newIdManager);
+        identity.changeController(newIdManager);
         delete recoveryKeys[identity];
         delete owners[identity][msg.sender];
         LogMigrationFinalized(identity, newIdManager, msg.sender);

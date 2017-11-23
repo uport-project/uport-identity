@@ -25,7 +25,7 @@ contract('Controlled', (accounts) => {
   it('Non-controller can not change controller', async function() {
     errorThrown = false
     try {
-      await controlled.transfer(notController, {from: notController})
+      await controlled.changeController(notController, {from: notController})
     } catch (e) {
       errorThrown = true
     }
@@ -35,13 +35,13 @@ contract('Controlled', (accounts) => {
   })
 
   it('Controller can change controller', async function() {
-    await controlled.transfer(toBeController, {from: controller})
+    await controlled.changeController(toBeController, {from: controller})
     let isController = await controlled.isController.call(toBeController)
     assert.isTrue(isController, 'Controller should be changed')
   })
 
   it('Controller can not change controller to proxy address', async function() {
-    await controlled.transfer(controlled.address, {from: controller})
+    await controlled.changeController(controlled.address, {from: controller})
     let isController = await controlled.isController.call(controlled.address)
     assert.isFalse(isController, 'Controller should not be changed')
   })

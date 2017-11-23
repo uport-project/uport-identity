@@ -194,7 +194,7 @@ contract MetaIdentityManager {
         address newIdManager = migrationNewAddress[identity];
         delete migrationInitiated[identity];
         delete migrationNewAddress[identity];
-        identity.transfer(newIdManager);
+        identity.changeController(newIdManager);
         delete recoveryKeys[identity];
         delete owners[identity][sender];
         LogMigrationFinalized(identity, newIdManager, sender);
