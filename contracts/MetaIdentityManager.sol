@@ -87,6 +87,7 @@ contract MetaIdentityManager {
     /// @param _adminRate Time period used for rate limiting a given key for admin functionality
     /// @param _relayAddress Address of meta transaction relay contract
     function MetaIdentityManager(uint _userTimeLock, uint _adminTimeLock, uint _adminRate, address _relayAddress) {
+        require(_adminTimeLock >= _userTimeLock);
         adminTimeLock = _adminTimeLock;
         userTimeLock = _userTimeLock;
         adminRate = _adminRate;

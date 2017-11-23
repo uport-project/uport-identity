@@ -62,6 +62,17 @@ contract('IdentityManager', (accounts) => {
 
   let snapshotId
 
+  it('Throws if IdentityManager is created with adminTimeLock < userTimeLock', async function() {
+    errorThrown = false
+    try {
+      await IdentityManager.new(100, 10, adminRate)
+    } catch (e) {
+      assert.match(e.message, /invalid opcode/, "should have thrown")
+      errorThrown = true
+    }
+    assertThrown(errorThrown, "should have thrown")
+  })
+
   before(async function() {
     // Truffle deploys contracts with accounts[0]
     user1 = accounts[0]
