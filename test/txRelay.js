@@ -496,7 +496,7 @@ contract('TxRelay', (accounts) => {
             types = ['address', 'address', 'address']
             params = [user2, proxy.address, user1]
             p = await signPayload(user2, sender, txRelay, identityManager.address,
-                                  'addOwner', types, params, lw, keyFromPw)
+                                  'removeOwner', types, params, lw, keyFromPw)
 
             res = await txRelay.getAddress.call(p.data)
             assert.equal(res, user2, "Address is not first parameter")
