@@ -6,7 +6,7 @@ participant Proxy as p
 ->tr:relayMetaTx(v, r, s, IdentityManager, data)
 
 activate tr
-tr->tr:verifySignature
+tr->tr:require(claimedSender == addressFromSig)
 
 tr->im: forwardTo(sender, proxy, destination, value, data)
 activate im
