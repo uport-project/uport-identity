@@ -117,6 +117,33 @@ contract('MetaIdentityManager', (accounts) => {
     assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
   })
 
+  it('Correctly creates Identity and calls registry set', async function() {
+    let testNum = getRandomNumber()
+    let data = lightwallet.txutils._encodeFunctionTxData('register', ['uint256'], [testNum])
+    let tx = await identityManager.createIdentityWithCall(user1, recoveryKey, testReg.address, '0x' + data, {from: nobody})
+    let log = tx.logs[0]
+    assert.equal(log.event, 'LogIdentityCreated', 'wrong event')
+
+    assert.equal(log.args.owner,
+                 user1,
+                 'Owner key is set in event')
+    assert.equal(log.args.recoveryKey,
+                 recoveryKey,
+                 'Recovery key is set in event')
+    assert.equal(log.args.creator,
+                 nobody,
+                 'Creator is set in event')
+
+    await compareCode(log.args.identity, deployedProxy.address)
+    let proxyOwner = await Proxy.at(log.args.identity).owner.call()
+    assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
+
+    let setValue = await testReg.registry.call(log.args.identity)
+    //test that registry was set properly with testNum as the data
+    assert.equal(setValue.toNumber(), testNum)
+
+  })
+
   describe('existing identity', () => {
 
     beforeEach(async function() {
