@@ -27,8 +27,9 @@ contract TxRelay {
     ) public {
 
         address claimedSender = getAddress(data);
-        // relay :: nonce :: destination :: data :: relayer
-        bytes32 h = keccak256(this, nonce[claimedSender], destination, data);
+        // use EIP 191
+        // 0x19 :: version :: relay :: nonce :: destination :: data
+        bytes32 h = keccak256(byte(0x19), byte(0), this, nonce[claimedSender], destination, data);
         address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
         require(claimedSender == addressFromSig);
