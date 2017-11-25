@@ -67,7 +67,7 @@ contract('IdentityManager', (accounts) => {
     try {
       await IdentityManager.new(100, 10, adminRate)
     } catch (e) {
-      assert.match(e.message, /invalid opcode/, "should have thrown")
+      assert.match(e.message, /revert/, "should have thrown")
       errorThrown = true
     }
     assertThrown(errorThrown, "should have thrown")
@@ -189,7 +189,7 @@ contract('IdentityManager', (accounts) => {
       try {
         let tx = await identityManager.addOwner(proxy.address, user2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")

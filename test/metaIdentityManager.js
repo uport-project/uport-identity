@@ -92,7 +92,7 @@ contract('MetaIdentityManager', (accounts) => {
     try {
       await MetaIdentityManager.new(100, 10, adminRate, relay)
     } catch (e) {
-      assert.match(e.message, /invalid opcode/, "should have thrown")
+      assert.match(e.message, /revert/, "should have thrown")
       errorThrown = true
     }
     assertThrown(errorThrown, "should have thrown")
@@ -227,7 +227,7 @@ contract('MetaIdentityManager', (accounts) => {
       try {
         let tx = await identityManager.addOwner(user1, proxy.address, user2, {from: user1})
       } catch (e) {
-        assert.match(e.message, /invalid opcode/, "should have thrown")
+        assert.match(e.message, /revert/, "should have thrown")
         errorThrown = true
       }
       assertThrown(errorThrown, "should have thrown")
