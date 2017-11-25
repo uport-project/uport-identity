@@ -146,7 +146,7 @@ contract('MetaIdentityManager', (accounts) => {
                  'Creator is set in event')
 
     await compareCode(log.args.identity, deployedProxy.address)
-    let proxyOwner = await Proxy.at(log.args.identity).owner.call()
+    let proxyOwner = await Proxy.at(log.args.identity).controller.call()
     assert.equal(proxyOwner, identityManager.address, 'Proxy owner should be the identity manager')
 
     let setValue = await testReg.registry.call(log.args.identity)
