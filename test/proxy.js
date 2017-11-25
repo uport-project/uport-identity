@@ -177,7 +177,11 @@ contract('Proxy', (accounts) => {
     let proxyBalance
     let balance = await web3.eth.getBalanceAsync(proxy1.address)
     proxyBalance = web3.fromWei(balance, 'ether').toNumber()
-    await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
+    let tx = await proxy1.forward(receiver, web3.toWei(ethToSend, 'ether'), '0x0', {from: ownerProxy1})
+    assert.equal(tx.receipt.status, 1, "tx should not fail")
+    let logArgs = tx.logs[0].args
+    assert.equal(logArgs.value.toNumber(), 0, "Should send zero ether")
+    assert.equal(logArgs.data, '0x', "Should send no data")
     bal = await web3.eth.getBalanceAsync(proxy1.address)
     assert.equal(web3.fromWei(balance, 'ether').toNumber(), proxyBalance, 'Balance of proxy should not have changed')
   })
