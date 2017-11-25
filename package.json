@@ -41,7 +41,7 @@
     "directory-tree": "^2.0.0",
     "eth-lightwallet": "^2.5.6",
     "eth-signer": "^0.2.2",
-    "ethereumjs-testrpc": "^3.0.3",
+    "ethereumjs-testrpc": "^6.0.3",
     "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
     "solidity-coverage": "^0.1.7",

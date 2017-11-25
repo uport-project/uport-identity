@@ -10,6 +10,13 @@ contract TxRelay {
     // Different from the nonce defined w/in protocol.
     mapping(address => uint) nonce;
 
+    // This mapping specifies a whitelist of allowed senders for transactions.
+    // There can be one whitelist per ethereum account, which is the owner of that
+    // whitelist. Users can specify which whitelist they want to use when signing
+    // a transaction. They can use their own whitelist, a whitelist belonging
+    // to another account, or skip using a whitelist by specifying the zero address.
+    mapping(address => mapping(address => bool)) public whitelist;
+
     /*
      * @dev Relays meta transactions
      * @param sigV, sigR, sigS ECDSA signature on some data to be forwarded
@@ -23,22 +30,25 @@ contract TxRelay {
         bytes32 sigR,
         bytes32 sigS,
         address destination,
-        bytes data
+        bytes data,
+        address listOwner
     ) public {
+
+        // only allow senders from the whitelist specified by the user,
+        // 0x0 means no whitelist.
+        require(listOwner == 0x0 || whitelist[listOwner][msg.sender]);
 
         address claimedSender = getAddress(data);
         // use EIP 191
-        // 0x19 :: version :: relay :: nonce :: destination :: data
-        bytes32 h = keccak256(byte(0x19), byte(0), this, nonce[claimedSender], destination, data);
+        // 0x19 :: version :: relay :: whitelistOwner :: nonce :: destination :: data
+        bytes32 h = keccak256(byte(0x19), byte(0), this, listOwner, nonce[claimedSender], destination, data);
         address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
         require(claimedSender == addressFromSig);
 
         nonce[claimedSender]++; //if we are going to do tx, update nonce
 
-        if (!destination.call(data)) {
-            //In the future, add event here. Has semi-complex gas considerations. See EIP 150
-        }
+        require(destination.call(data));
     }
 
     /*
@@ -64,5 +74,34 @@ contract TxRelay {
      */
     function getNonce(address add) public constant returns (uint) {
         return nonce[add];
+    }
+
+    /*
+     * @dev Adds a number of addresses to a specific whitelist. Only
+     * the owner of a whitelist can add to it.
+     * @param sendersToUpdate the addresses to add to the whitelist
+     */
+    function addToWhitelist(address[] sendersToUpdate) public {
+        updateWhitelist(sendersToUpdate, true);
+    }
+
+    /*
+     * @dev Removes a number of addresses from a specific whitelist. Only
+     * the owner of a whitelist can remove from it.
+     * @param sendersToUpdate the addresses to add to the whitelist
+     */
+    function removeFromWhitelist(address[] sendersToUpdate) public {
+        updateWhitelist(sendersToUpdate, false);
+    }
+
+    /*
+     * @dev Internal logic to update a whitelist
+     * @param sendersToUpdate the addresses to add to the whitelist
+     * @param newStatus whether to add or remove addresses
+     */
+    function updateWhitelist(address[] sendersToUpdate, bool newStatus) private {
+        for (uint i = 0; i < sendersToUpdate.length; i++) {
+            whitelist[msg.sender][sendersToUpdate[i]] = newStatus;
+        }
     }
 }
