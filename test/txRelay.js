@@ -388,13 +388,13 @@ contract('TxRelay', (accounts) => {
     })
 
     it("Should allow another sender to create their own whitelist", async () => {
-      await testTxRelay.addToWhitelist([sender5, sender6], {from: sender2})
+      await testTxRelay.addToWhitelist([sender6, sender7], {from: sender2})
 
       assert.isFalse(await testTxRelay.whitelist.call(sender2, sender2), "sender2 should not be on list")
       assert.isFalse(await testTxRelay.whitelist.call(sender2, sender3), "sender3 should not be on list")
       assert.isFalse(await testTxRelay.whitelist.call(sender2, sender4), "sender4 should not be on list")
-      assert.isTrue(await testTxRelay.whitelist.call(sender2, sender5), "sender5 should be on list")
       assert.isTrue(await testTxRelay.whitelist.call(sender2, sender6), "sender6 should be on list")
+      assert.isTrue(await testTxRelay.whitelist.call(sender2, sender7), "sender7 should be on list")
     })
 
     it("Should send tx if sender is in whitelist", async () => {

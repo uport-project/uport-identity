@@ -10,6 +10,11 @@ contract TxRelay {
     // Different from the nonce defined w/in protocol.
     mapping(address => uint) nonce;
 
+    // This mapping specifies a whitelist of allowed senders for transactions.
+    // There can be one whitelist per ethereum account, which is the owner of that
+    // whitelist. Users can specify which whitelist they want to use when signing
+    // a transaction. They can use their own whitelist, a whitelist belonging
+    // to another account, or skip using a whitelist by specifying the zero address.
     mapping(address => mapping(address => bool)) public whitelist;
 
     /*
