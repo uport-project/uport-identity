@@ -10,30 +10,30 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 ### Mainnet (id: 1)
 |Contract|Address|
 | --|--|
-|IdentityManager|(not deployed)|
-|TxRelay|(not deployed)|
-|MetaIdentityManager|(not deployed)|
+|IdentityManager|[0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7](https://etherscan.io/address/0xb7d66b18fbe8eb655ce7daa5d616d908c25c32a7)|
+|TxRelay|[0xa2a24504c7bbb24ce92b5fa8a9befc3cbded560d](https://etherscan.io/address/0xa2a24504c7bbb24ce92b5fa8a9befc3cbded560d)|
+|MetaIdentityManager|[0x71845bbfe5ddfdb919e780febfff5eda62a30fdc](https://etherscan.io/address/0x71845bbfe5ddfdb919e780febfff5eda62a30fdc)|
 
 ### Rinkeby testnet (id: 4)
 |Contract|Address|
 | --|--|
-|IdentityManager|[0xabbcd5b340c80b5f1c0545c04c987b87310296ae](https://rinkeby.etherscan.io/address/0xabbcd5b340c80b5f1c0545c04c987b87310296ae)|
-|TxRelay|[0x476debfb878d266d9e3182d7bb304301a8748aad](https://rinkeby.etherscan.io/address/0x476debfb878d266d9e3182d7bb304301a8748aad)|
-|MetaIdentityManager|[0x7c338672f483795eca47106dc395660d95041dbe](https://rinkeby.etherscan.io/address/0x7c338672f483795eca47106dc395660d95041dbe)|
+|IdentityManager|[0x5e26d1d62b77d59ee54d97eb5b4bf7aef679067b](https://rinkeby.etherscan.io/address/0x5e26d1d62b77d59ee54d97eb5b4bf7aef679067b)|
+|TxRelay|[0xdb0efde21a5f59c4829e343419a8996fff5c7924](https://rinkeby.etherscan.io/address/0xdb0efde21a5f59c4829e343419a8996fff5c7924)|
+|MetaIdentityManager|[0x7ed7ceb55167eb71e775a352111dae44db754c40](https://rinkeby.etherscan.io/address/0x7ed7ceb55167eb71e775a352111dae44db754c40)|
 
 ### Kovan testnet (id: 42)
 |Contract|Address|
 | --|--|
-|IdentityManager|[0x71845bbfe5ddfdb919e780febfff5eda62a30fdc](https://kovan.etherscan.io/address/0x71845bbfe5ddfdb919e780febfff5eda62a30fdc)|
-|TxRelay|[0x899d47b36d94bc36050e9fdddb7d210a62c8656c](https://kovan.etherscan.io/address/0x899d47b36d94bc36050e9fdddb7d210a62c8656c)|
-|MetaIdentityManager|[0xd36ea9fa1235763e25cfc6625a55cc2a3a3b7556](https://kovan.etherscan.io/address/0xd36ea9fa1235763e25cfc6625a55cc2a3a3b7556)|
+|IdentityManager|[0x22a4d688748845e9d5d7394a0f05bc583adf4656](https://kovan.etherscan.io/address/0x22a4d688748845e9d5d7394a0f05bc583adf4656)|
+|TxRelay|[0xec2642cd5a47fd5cca2a8a280c3b5f88828aa578](https://kovan.etherscan.io/address/0xec2642cd5a47fd5cca2a8a280c3b5f88828aa578)|
+|MetaIdentityManager|[0x27500ae27b6b6ad7de7d64b1def90f3e6e7ced47](https://kovan.etherscan.io/address/0x27500ae27b6b6ad7de7d64b1def90f3e6e7ced47)|
 
 ### Ropsten testnet (id: 3)
 |Contract|Address|
 | --|--|
-|IdentityManager|(not deployed)|
-|TxRelay|(not deployed)|
-|MetaIdentityManager|(not deployed)|
+|IdentityManager|[0x468468f383effe864515719e68b0604e04e93f10](https://ropsten.etherscan.io/address/0x468468f383effe864515719e68b0604e04e93f10)|
+|TxRelay|[0xabbcd5b340c80b5f1c0545c04c987b87310296ae](https://ropsten.etherscan.io/address/0xabbcd5b340c80b5f1c0545c04c987b87310296ae)|
+|MetaIdentityManager|[0x7c338672f483795eca47106dc395660d95041dbe](https://ropsten.etherscan.io/address/0x7c338672f483795eca47106dc395660d95041dbe)|
 
 
 ## Using the contracts

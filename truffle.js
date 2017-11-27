@@ -52,6 +52,7 @@ module.exports = {
       get provider() {
         return getProvider("https://ropsten.infura.io/")
       },
+      gas: 4004580,
       network_id: 3
     },
     rinkeby: {
@@ -70,12 +71,15 @@ module.exports = {
       get provider() {
         return getProvider("https://kovan.infura.io/")
       },
+      gas: 4004580,
       network_id: 42
     },
     mainnet: {
       get provider() {
         return getProvider("https://mainnet.infura.io/")
       },
+      gas: 1704580,
+      gasPrice: 1000000000,
       network_id: 1
     }
   }
