@@ -70,6 +70,7 @@ module.exports = {
       get provider() {
         return getProvider("https://kovan.infura.io/")
       },
+      gas: 4004580,
       network_id: 42
     },
     mainnet: {
