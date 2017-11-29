@@ -100,7 +100,7 @@ contract('Proxy', (accounts) => {
     // Send forward request from the owner
     let tx = await proxy1.forward(testReg.address, 0, data, {from: accounts[0]})
     let log = tx.logs[0]
-    assert.equal(log.event, 'LogForwarded', 'Should emit a "Forwarded" event');
+    assert.equal(log.event, 'Forwarded', 'Should emit a "Forwarded" event');
     assert.equal(log.args.destination, testReg.address)
     assert.equal(log.args.value.toNumber(), 0)
     assert.equal(log.args.data, data)
