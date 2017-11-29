@@ -1,14 +1,14 @@
 pragma solidity 0.4.15;
-import "./libs/Controlled.sol";
+import "./libs/Owned.sol";
 
 
-contract Proxy is Controlled {
+contract Proxy is Owned {
     event LogForwarded (address indexed destination, uint value, bytes data);
     event LogReceived (address indexed sender, uint value);
 
     function () payable { LogReceived(msg.sender, msg.value); }
 
-    function forward(address destination, uint value, bytes data) public onlyController {
+    function forward(address destination, uint value, bytes data) public onlyOwner {
         require(destination.call.value(value)(data));
         LogForwarded(destination, value, data);
     }
