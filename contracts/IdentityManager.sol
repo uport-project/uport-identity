@@ -184,7 +184,7 @@ contract IdentityManager {
         address newIdManager = migrationNewAddress[identity];
         delete migrationInitiated[identity];
         delete migrationNewAddress[identity];
-        identity.changeController(newIdManager);
+        identity.transfer(newIdManager);
         delete recoveryKeys[identity];
         // We can only delete the owner that we know of. All other owners
         // needs to be removed before a call to this method.
