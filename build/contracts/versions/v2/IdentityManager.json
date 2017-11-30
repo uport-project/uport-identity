@@ -1,0 +1,1148 @@
+{
+  "contract_name": "IdentityManager",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "recoveryKey",
+          "type": "address"
+        }
+      ],
+      "name": "isRecovery",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "addOwner",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "isOlderOwner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "name": "recoveryKey",
+          "type": "address"
+        },
+        {
+          "name": "destination",
+          "type": "address"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "createIdentityWithCall",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "newIdManager",
+          "type": "address"
+        }
+      ],
+      "name": "initiateMigration",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "migrationNewAddress",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "addOwnerFromRecovery",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "recoveryKey",
+          "type": "address"
+        }
+      ],
+      "name": "changeRecovery",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        }
+      ],
+      "name": "finalizeMigration",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        }
+      ],
+      "name": "cancelMigration",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "destination",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "forwardTo",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "name": "recoveryKey",
+          "type": "address"
+        }
+      ],
+      "name": "registerIdentity",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "isOwner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "migrationInitiated",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "name": "recoveryKey",
+          "type": "address"
+        }
+      ],
+      "name": "createIdentity",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "removeOwner",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_userTimeLock",
+          "type": "uint256"
+        },
+        {
+          "name": "_adminTimeLock",
+          "type": "uint256"
+        },
+        {
+          "name": "_adminRate",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "creator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "recoveryKey",
+          "type": "address"
+        }
+      ],
+      "name": "LogIdentityCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "instigator",
+          "type": "address"
+        }
+      ],
+      "name": "LogOwnerAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "instigator",
+          "type": "address"
+        }
+      ],
+      "name": "LogOwnerRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "recoveryKey",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "instigator",
+          "type": "address"
+        }
+      ],
+      "name": "LogRecoveryChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newIdManager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "instigator",
+          "type": "address"
+        }
+      ],
+      "name": "LogMigrationInitiated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newIdManager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "instigator",
+          "type": "address"
+        }
+      ],
+      "name": "LogMigrationCanceled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "identity",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newIdManager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "instigator",
+          "type": "address"
+        }
+      ],
+      "name": "LogMigrationFinalized",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b6040516060806114d78339810160405280805191906020018051919060200180519150505b8282101561004157600080fd5b6000829055600183905560028190555b5050505b611473806100646000396000f300606060405236156100ca5763ffffffff60e060020a60003504166311fe12b381146100cf57806316d390bf1461010857806332967ea01461012f5780633c8ac88e146101685780633dcf59ca146101d8578063422e33f3146101ff5780635143eea21461023a57806353faa9a914610261578063633b1954146102885780636f022ac4146102a957806373b40a5c146102ca578063781f5a83146103385780637ddc02d41461035f578063c778427b14610398578063d10e73ab146103c9578063fbe5ce0a146103f0575b600080fd5b34156100da57600080fd5b6100f4600160a060020a0360043581169060243516610417565b604051901515815260200160405180910390f35b341561011357600080fd5b61012d600160a060020a036004358116906024351661043e565b005b341561013a57600080fd5b6100f4600160a060020a0360043581169060243516610547565b604051901515815260200160405180910390f35b341561017357600080fd5b61012d60048035600160a060020a03908116916024803583169260443516919060849060643590810190830135806020601f820181900481020160405190810160405281815292919060208401838380828437509496506105b195505050505050565b005b34156101e357600080fd5b61012d600160a060020a0360043581169060243516610767565b005b341561020a57600080fd5b61021e600160a060020a0360043516610815565b604051600160a060020a03909116815260200160405180910390f35b341561024557600080fd5b61012d600160a060020a0360043581169060243516610830565b005b341561026c57600080fd5b61012d600160a060020a0360043581169060243516610944565b005b341561029357600080fd5b61012d600160a060020a0360043516610a42565b005b34156102b457600080fd5b61012d600160a060020a0360043516610bc6565b005b34156102d557600080fd5b61012d600160a060020a036004803582169160248035909116916044359160849060643590810190830135806020601f82018190048102016040519081016040528181529291906020840183838082843750949650610c6495505050505050565b005b341561034357600080fd5b61012d600160a060020a0360043581169060243516610d64565b005b341561036a57600080fd5b6100f4600160a060020a0360043581169060243516610e37565b604051901515815260200160405180910390f35b34156103a357600080fd5b6103b7600160a060020a0360043516610ea1565b60405190815260200160405180910390f35b34156103d457600080fd5b61012d600160a060020a0360043581169060243516610eb3565b005b34156103fb57600080fd5b61012d600160a060020a0360043581169060243516610f85565b005b600160a060020a038281166000908152600460205260409020548116908216145b92915050565b816104498133610547565b151561045457600080fd5b600254600160a060020a038085166000908152600560209081526040808320339094168352929052205484914203901061048d57600080fd5b600160a060020a038082166000908152600560209081526040808320339094168352929052204290556104c08484610e37565b156104ca57600080fd5b600154600160a060020a0380861660008181526003602090815260408083209489168084529490915290819020429490940390935590917f8672e8532f3edff41d3acf0cd4be6ff900e427461b81d094f0197354471cb3c690339051600160a060020a03909116815260200160405180910390a35b5b505b505050565b600160a060020a03808316600090815260036020908152604080832093851683529290529081205481901180156105a8575060008054600160a060020a03808616835260036020908152604080852092871685529190529091205442910111155b90505b92915050565b600083600160a060020a03811615156105c957600080fd5b6105d161107f565b604051809103906000f08015156105e757600080fd5b60008054600160a060020a038381168084526003602090815260408086208d851687528252808620429590950390945581855260049052928290208054600160a060020a0319168a8316908117909155939550331691907f14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee6266908a9051600160a060020a03909116815260200160405180910390a481600160a060020a031663d7f31eb9856000866040518463ffffffff1660e060020a0281526004018084600160a060020a0316600160a060020a0316815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b838110156106fc5780820151818401525b6020016106e3565b50505050905090810190601f1680156107295780820380516001836020036101000a031916815260200191505b50945050505050600060405180830381600087803b151561074957600080fd5b6102c65a03f1151561075a57600080fd5b5050505b5b505050505050565b816107728133610547565b151561077d57600080fd5b81600160a060020a038116151561079357600080fd5b600160a060020a0384811660008181526006602090815260408083204290556007909152908190208054600160a060020a03191693871693841790557fb7b4557c664a8a4a9a57f5e00f216de044a96f96fc84b70eaa6bd48cb078454190339051600160a060020a03909116815260200160405180910390a35b5b505b505050565b600760205260009081526040902054600160a060020a031681565b600160a060020a03828116600090815260046020526040902054839133811691161461085b57600080fd5b600254600160a060020a038085166000908152600560209081526040808320339094168352929052205484914203901061089457600080fd5b600160a060020a038082166000908152600560209081526040808320339094168352929052204290556108c78484610e37565b156108d157600080fd5b600160a060020a03808516600081815260036020908152604080832094881680845294909152908190204290557f8672e8532f3edff41d3acf0cd4be6ff900e427461b81d094f0197354471cb3c690339051600160a060020a03909116815260200160405180910390a35b5b505b505050565b8161094f8133610547565b151561095a57600080fd5b600254600160a060020a038085166000908152600560209081526040808320339094168352929052205484914203901061099357600080fd5b600160a060020a038082166000908152600560209081526040808320338516845290915290204290558390811615156109cb57600080fd5b600160a060020a03858116600081815260046020526040908190208054600160a060020a03191693881693841790557fbd1ad05c16aafa75ac8c1d6b8264f47ad9f3045596f667c9476f3f749c01870990339051600160a060020a03909116815260200160405180910390a35b5b505b505b505050565b600081610a4f8133610547565b1515610a5a57600080fd5b600160a060020a03831660009081526006602052604090205415801590610a9c575060008054600160a060020a03851682526006602052604090912054429101105b1515610aa757600080fd5b600160a060020a03808416600081815260076020818152604080842080546006845282862095909555929091528154600160a060020a0319169091559216935090631a6952309084905160e060020a63ffffffff8416028152600160a060020a039091166004820152602401600060405180830381600087803b1515610b2c57600080fd5b6102c65a03f11515610b3d57600080fd5b505050600160a060020a0380841660008181526004602090815260408083208054600160a060020a031916905560038252808320338087168552925280832092909255928516927f565ed5a2d5e196b82acb6ff1149b699c2b13169c7d34412d736d3c380de64f319151600160a060020a03909116815260200160405180910390a35b5b505050565b600081610bd38133610e37565b1515610bde57600080fd5b600160a060020a03808416600081815260076020818152604080842080546006845282862095909555929091528154600160a060020a0319169091559216935083917f60e805c5650597523aba29fb00a59c856d925c672bce1ea7d579f03aef3a10ce90339051600160a060020a03909116815260200160405180910390a35b5b505050565b83610c6f8133610e37565b1515610c7a57600080fd5b84600160a060020a031663d7f31eb98585856040518463ffffffff1660e060020a0281526004018084600160a060020a0316600160a060020a0316815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b83811015610cfa5780820151818401525b602001610ce1565b50505050905090810190601f168015610d275780820380516001836020036101000a031916815260200191505b50945050505050600060405180830381600087803b1515610d4757600080fd5b6102c65a03f11515610d5857600080fd5b5050505b5b5050505050565b80600160a060020a0381161515610d7a57600080fd5b600160a060020a033381166000908152600460205260409020541615610d9f57600080fd5b60008054600160a060020a0333811680845260036020908152604080862089851687528252808620429590950390945581855260049052928290208054918616600160a060020a031990921682179055919081907f14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee626690879051600160a060020a03909116815260200160405180910390a45b5b505050565b600160a060020a03808316600090815260036020908152604080832093851683529290529081205481901180156105a85750600154600160a060020a0380851660009081526003602090815260408083209387168352929052205442910111155b90505b92915050565b60066020526000908152604090205481565b600081600160a060020a0381161515610ecb57600080fd5b610ed361107f565b604051809103906000f0801515610ee957600080fd5b60008054600160a060020a038381168084526003602090815260408086208b851687528252808620429590950390945581855260049052928290208054600160a060020a031916888316908117909155939550331691907f14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee626690889051600160a060020a03909116815260200160405180910390a45b5b50505050565b81610f908133610547565b1515610f9b57600080fd5b600254600160a060020a0380851660009081526005602090815260408083203390941683529290522054849142039010610fd457600080fd5b600160a060020a0380821660009081526005602090815260408083203385168085529252909120429055908416141561100c57600080fd5b600160a060020a03808516600081815260036020908152604080832094881680845294909152808220919091557f5e159cd4447854ae8b4aa048f91c8daad986faab696c3685030e1a5e5a4e8ced90339051600160a060020a03909116815260200160405180910390a35b5b505b505050565b6040516103b88061109083390190560060606040525b60008054600160a060020a03191633600160a060020a03161790555b5b610387806100316000396000f3006060604052361561005f5763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416631a69523081146100a05780632f54bf6e146100c15780638da5cb5b146100f4578063d7f31eb914610123575b5b33600160a060020a03167f88a5966d370b9919b20f3e2c13ff65706f196a4e32cc2c12bf57088f885258743460405190815260200160405180910390a25b005b34156100ab57600080fd5b61009e600160a060020a036004351661018a565b005b34156100cc57600080fd5b6100e0600160a060020a03600435166101e7565b604051901515815260200160405180910390f35b34156100ff57600080fd5b6101076101fe565b604051600160a060020a03909116815260200160405180910390f35b341561012e57600080fd5b61009e60048035600160a060020a03169060248035919060649060443590810190830135806020601f8201819004810201604051908101604052818152929190602084018383808284375094965061020d95505050505050565b005b610193336101e7565b151561019e57600080fd5b30600160a060020a031681600160a060020a03161415156101e2576000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b5b50565b600054600160a060020a038281169116145b919050565b600054600160a060020a031681565b610216336101e7565b151561022157600080fd5b82600160a060020a0316828260405180828051906020019080838360005b838110156102585780820151818401525b60200161023f565b50505050905090810190601f1680156102855780820380516001836020036101000a031916815260200191505b5091505060006040518083038185876187965a03f19250505015156102a957600080fd5b82600160a060020a03167fc1de93dfa06362c6a616cde73ec17d116c0d588dd1df70f27f91b500de207c41838360405182815260406020820181815290820183818151815260200191508051906020019080838360005b838110156103195780820151818401525b602001610300565b50505050905090810190601f1680156103465780820380516001836020036101000a031916815260200191505b50935050505060405180910390a25b5b5050505600a165627a7a72305820dcb26f0fbb81926e3b3d053ffd1c1260ebb65f5b4166b74f38e53f04234042860029a165627a7a7230582036643b790f60f7754eb6dd04752322b739fba3a788ca680665a0633a9056a2d30029",
+  "networks": {
+    "1": {
+      "events": {
+        "0x14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee6266": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "creator",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            }
+          ],
+          "name": "LogIdentityCreated",
+          "type": "event"
+        },
+        "0x8672e8532f3edff41d3acf0cd4be6ff900e427461b81d094f0197354471cb3c6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerAdded",
+          "type": "event"
+        },
+        "0x5e159cd4447854ae8b4aa048f91c8daad986faab696c3685030e1a5e5a4e8ced": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerRemoved",
+          "type": "event"
+        },
+        "0xbd1ad05c16aafa75ac8c1d6b8264f47ad9f3045596f667c9476f3f749c018709": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogRecoveryChanged",
+          "type": "event"
+        },
+        "0xb7b4557c664a8a4a9a57f5e00f216de044a96f96fc84b70eaa6bd48cb0784541": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationInitiated",
+          "type": "event"
+        },
+        "0x60e805c5650597523aba29fb00a59c856d925c672bce1ea7d579f03aef3a10ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationCanceled",
+          "type": "event"
+        },
+        "0x565ed5a2d5e196b82acb6ff1149b699c2b13169c7d34412d736d3c380de64f31": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationFinalized",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x22a4d688748845e9d5d7394a0f05bc583adf4656",
+      "updated_at": 1512033408944
+    },
+    "3": {
+      "events": {
+        "0x14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee6266": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "creator",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            }
+          ],
+          "name": "LogIdentityCreated",
+          "type": "event"
+        },
+        "0x8672e8532f3edff41d3acf0cd4be6ff900e427461b81d094f0197354471cb3c6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerAdded",
+          "type": "event"
+        },
+        "0x5e159cd4447854ae8b4aa048f91c8daad986faab696c3685030e1a5e5a4e8ced": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerRemoved",
+          "type": "event"
+        },
+        "0xbd1ad05c16aafa75ac8c1d6b8264f47ad9f3045596f667c9476f3f749c018709": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogRecoveryChanged",
+          "type": "event"
+        },
+        "0xb7b4557c664a8a4a9a57f5e00f216de044a96f96fc84b70eaa6bd48cb0784541": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationInitiated",
+          "type": "event"
+        },
+        "0x60e805c5650597523aba29fb00a59c856d925c672bce1ea7d579f03aef3a10ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationCanceled",
+          "type": "event"
+        },
+        "0x565ed5a2d5e196b82acb6ff1149b699c2b13169c7d34412d736d3c380de64f31": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationFinalized",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x27500ae27b6b6ad7de7d64b1def90f3e6e7ced47",
+      "updated_at": 1511988747347
+    },
+    "4": {
+      "events": {
+        "0x14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee6266": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "creator",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            }
+          ],
+          "name": "LogIdentityCreated",
+          "type": "event"
+        },
+        "0x8672e8532f3edff41d3acf0cd4be6ff900e427461b81d094f0197354471cb3c6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerAdded",
+          "type": "event"
+        },
+        "0x5e159cd4447854ae8b4aa048f91c8daad986faab696c3685030e1a5e5a4e8ced": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerRemoved",
+          "type": "event"
+        },
+        "0xbd1ad05c16aafa75ac8c1d6b8264f47ad9f3045596f667c9476f3f749c018709": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogRecoveryChanged",
+          "type": "event"
+        },
+        "0xb7b4557c664a8a4a9a57f5e00f216de044a96f96fc84b70eaa6bd48cb0784541": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationInitiated",
+          "type": "event"
+        },
+        "0x60e805c5650597523aba29fb00a59c856d925c672bce1ea7d579f03aef3a10ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationCanceled",
+          "type": "event"
+        },
+        "0x565ed5a2d5e196b82acb6ff1149b699c2b13169c7d34412d736d3c380de64f31": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationFinalized",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x19aece3ae41ee33c30f331906b7e4bb578946a55",
+      "updated_at": 1511988281920
+    },
+    "42": {
+      "events": {
+        "0x14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee6266": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "creator",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            }
+          ],
+          "name": "LogIdentityCreated",
+          "type": "event"
+        },
+        "0x8672e8532f3edff41d3acf0cd4be6ff900e427461b81d094f0197354471cb3c6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerAdded",
+          "type": "event"
+        },
+        "0x5e159cd4447854ae8b4aa048f91c8daad986faab696c3685030e1a5e5a4e8ced": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerRemoved",
+          "type": "event"
+        },
+        "0xbd1ad05c16aafa75ac8c1d6b8264f47ad9f3045596f667c9476f3f749c018709": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogRecoveryChanged",
+          "type": "event"
+        },
+        "0xb7b4557c664a8a4a9a57f5e00f216de044a96f96fc84b70eaa6bd48cb0784541": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationInitiated",
+          "type": "event"
+        },
+        "0x60e805c5650597523aba29fb00a59c856d925c672bce1ea7d579f03aef3a10ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationCanceled",
+          "type": "event"
+        },
+        "0x565ed5a2d5e196b82acb6ff1149b699c2b13169c7d34412d736d3c380de64f31": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationFinalized",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xdb55d40684e7dc04655a9789937214b493a2c2c6",
+      "updated_at": 1511988467065
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1512033408944
+}
