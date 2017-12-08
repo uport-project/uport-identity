@@ -1,0 +1,314 @@
+{
+  "contract_name": "RecoverableController",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "proposedRecoveryKey",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "userKey",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "proposedControllerPendingUntil",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "longTimeLock",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "proposedUserKey",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "proposedUserKeyPendingUntil",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_proposedController",
+          "type": "address"
+        }
+      ],
+      "name": "signControllerChange",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_proposedRecoveryKey",
+          "type": "address"
+        }
+      ],
+      "name": "signRecoveryChange",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "changeController",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "changeUserKey",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "recoveryKey",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_recoveryKey",
+          "type": "address"
+        }
+      ],
+      "name": "changeRecoveryFromRecovery",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_userKey",
+          "type": "address"
+        }
+      ],
+      "name": "changeUserKeyFromRecovery",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_proposedUserKey",
+          "type": "address"
+        }
+      ],
+      "name": "signUserKeyChange",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "proposedRecoveryKeyPendingUntil",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "changeRecovery",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "destination",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "forward",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "proxy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "proposedController",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "shortTimeLock",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "proxyAddress",
+          "type": "address"
+        },
+        {
+          "name": "_userKey",
+          "type": "address"
+        },
+        {
+          "name": "_longTimeLock",
+          "type": "uint256"
+        },
+        {
+          "name": "_shortTimeLock",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "action",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "initiatedBy",
+          "type": "address"
+        }
+      ],
+      "name": "RecoveryEvent",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b604051608080610a1083398101604090815281516020830151918301516060909301519092905b600160008190558054600160a060020a03808716600160a060020a03199283161790925560028054868416908316179055600a839055600b8490556005805433909316929091169190911790555b505050505b61097b806100956000396000f300606060405236156101015763ffffffff60e060020a60003504166309b8f77a81146101035780631c1c22891461012f5780631de0e8771461015b5780631ec9f7b51461017d57806334c7dcf81461019f5780634893ed5b146101cb57806354fd4d50146101ed5780637a5d53451461020f5780637ab0b9981461022d57806384191f621461024b5780638ac0eef91461025d57806397905a881461026f578063a08df7701461029b578063c998e9dd146102b9578063cbd2c73b146102d7578063d1c484f6146102f5578063d233fc0b14610317578063d7f31eb914610329578063ec5568891461038e578063f60edb0e146103ba578063f66c6691146103e6575bfe5b341561010b57fe5b610113610408565b60408051600160a060020a039092168252519081900360200190f35b341561013757fe5b610113610417565b60408051600160a060020a039092168252519081900360200190f35b341561016357fe5b61016b610426565b60408051918252519081900360200190f35b341561018557fe5b61016b61042c565b60408051918252519081900360200190f35b34156101a757fe5b610113610432565b60408051600160a060020a039092168252519081900360200190f35b34156101d357fe5b61016b610441565b60408051918252519081900360200190f35b34156101f557fe5b61016b610447565b60408051918252519081900360200190f35b341561021757fe5b61022b600160a060020a036004351661044d565b005b341561023557fe5b61022b600160a060020a03600435166104e2565b005b341561025357fe5b61022b610575565b005b341561026557fe5b61022b610608565b005b341561027757fe5b61011361069e565b60408051600160a060020a039092168252519081900360200190f35b34156102a357fe5b61022b600160a060020a03600435166106ad565b005b34156102c157fe5b61022b600160a060020a03600435166106e5565b005b34156102df57fe5b61022b600160a060020a0360043516610729565b005b34156102fd57fe5b61016b6107bb565b60408051918252519081900360200190f35b341561031f57fe5b61022b6107c1565b005b341561033157fe5b604080516020600460443581810135601f810184900484028501840190955284845261022b948235600160a060020a031694602480359560649492939190920191819084018382808284375094965061080a95505050505050565b005b341561039657fe5b61011361090b565b60408051600160a060020a039092168252519081900360200190f35b34156103c257fe5b61011361091a565b60408051600160a060020a039092168252519081900360200190f35b34156103ee57fe5b61016b610929565b60408051918252519081900360200190f35b600654600160a060020a031681565b600254600160a060020a031681565b60095481565b600b5481565b600354600160a060020a031681565b60045481565b60005481565b60025433600160a060020a03908116911614156104dd57600b54420160095560088054600160a060020a031916600160a060020a038381169190911790915560408051339092166020830152808252601482820152606060020a737369676e436f6e74726f6c6c65724368616e676502606083015251600080516020610930833981519152916080908290030190a15b5b5b50565b60025433600160a060020a03908116911614156104dd57600b54420160075560068054600160a060020a031916600160a060020a038381169190911790915560408051339092166020830152808252601282820152607060020a717369676e5265636f766572794368616e676502606083015251600080516020610930833981519152916080908290030190a15b5b5b50565b426009541080156105905750600854600160a060020a031615155b15610605576001546008546040805160e460020a6301a69523028152600160a060020a03928316600482015290519190921691631a69523091602480830192600092919082900301818387803b15156105e557fe5b6102c65a03f115156105f357fe5b5050600854600160a060020a03169050ff5b5b565b426004541080156106235750600354600160a060020a031615155b15610605576003805460028054600160a060020a03808416600160a060020a03199283161790925590911690915560408051339092166020830152808252600d82820152609860020a6c6368616e6765557365724b657902606083015251600080516020610930833981519152916080908290030190a15b5b565b600554600160a060020a031681565b60055433600160a060020a03908116911614156104dd5760058054600160a060020a031916600160a060020a0383161790555b5b5b50565b60055433600160a060020a03908116911614156104dd5760038054600160a060020a031990811690915560028054909116600160a060020a0383161790555b5b5b50565b60025433600160a060020a03908116911614156104dd57600a54420160045560038054600160a060020a031916600160a060020a038381169190911790915560408051339092166020830152808252601182820152607860020a707369676e557365724b65794368616e676502606083015251600080516020610930833981519152916080908290030190a15b5b5b50565b60075481565b426007541080156107dc5750600654600160a060020a031615155b15610605576006805460058054600160a060020a0319908116600160a060020a038416179091551690555b5b565b60025433600160a060020a03908116911614156109045760015460405160e060020a63d7f31eb9028152600160a060020a038581166004830190815260248301869052606060448401908152855160648501528551929094169363d7f31eb99388938893889390929091608490910190602085019080838382156108a9575b8051825260208311156108a957601f199092019160209182019101610889565b505050905090810190601f1680156108d55780820380516001836020036101000a031916815260200191505b50945050505050600060405180830381600087803b15156108f257fe5b6102c65a03f1151561090057fe5b5050505b5b5b505050565b600154600160a060020a031681565b600854600160a060020a031681565b600a54815600ea8e84a162c4602ea0c61acf85fa1242db8ce550e7a448d613e3c7dff2f06793a165627a7a72305820a43c0b655dda499d223a0b393026eef0566ec4e64f7bb8d0f1a1b5f0c4a3734e0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1501696578123
+}

@@ -1,13 +1,20 @@
-pragma solidity 0.4.8;
+pragma solidity 0.4.15;
+
 
 contract Owned {
-  address public owner;
-  modifier onlyOwner(){ if (isOwner(msg.sender)) _; }
-  modifier ifOwner(address sender) { if(isOwner(sender)) _; }
+    address public owner;
+    modifier onlyOwner() {
+        require(isOwner(msg.sender));
+        _;
+    }
 
-  function Owned(){ owner = msg.sender; }
+    function Owned() { owner = msg.sender; }
 
-  function isOwner(address addr) public returns(bool) { return addr == owner; }
+    function isOwner(address addr) public returns(bool) { return addr == owner; }
 
-  function transfer(address _owner) onlyOwner { owner = _owner; }
+    function transfer(address newOwner) public onlyOwner {
+        if (newOwner != address(this)) {
+            owner = newOwner;
+        }
+    }
 }

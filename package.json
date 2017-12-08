@@ -1,13 +1,14 @@
 {
   "name": "uport-identity",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "uPort Contracts for identity",
-  "main": "index.js",
+  "main": "artifact-index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "compile": "./node_modules/.bin/truffle compile",
+    "build-artifact-index": "./scripts/build-artifact-index.js",
     "_deploy": "./node_modules/.bin/truffle migrate --network ",
     "deploy-mainnet": "npm run _deploy mainnet",
     "deploy-infuranet": "npm run _deploy infuranet",
@@ -17,7 +18,11 @@
     "deploy-local": "npm run _deploy local",
     "generate-readme": "./scripts/generate-readme.js",
     "test": "./node_modules/.bin/truffle test --network in_memory",
-    "diagrams": "bash scripts/make-diagrams.bash"
+    "start-geth": "./scripts/start-geth-testchain",
+    "test-geth": "./node_modules/.bin/truffle test --network privateTest",
+    "lint": "./node_modules/.bin/solium -d contracts",
+    "coverage": "rm -r docs/coverage; ./node_modules/.bin/solidity-coverage; mv coverage docs; npm run generate-readme",
+    "diagrams": "scripts/make-diagrams.bash"
   },
   "license": "Apache-2",
   "repository": {
@@ -29,12 +34,20 @@
   },
   "homepage": "https://github.com/uport-project/uport-identity#readme",
   "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
     "bluebird": "^3.5.0",
+    "directory-tree": "^2.0.0",
+    "eth-lightwallet": "^2.5.6",
     "eth-signer": "^0.2.2",
-    "ethereumjs-testrpc": "^3.0.3",
+    "ethereumjs-testrpc": "^6.0.3",
     "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
-    "truffle": "3.1.2",
+    "solidity-coverage": "^0.1.7",
+    "solidity-sha3": "^0.4.1",
+    "solium": "^1.0.0",
+    "truffle": "^3.4.11",
     "truffle-contract": "^1.1.10",
     "truffle-hdwallet-provider": "0.0.3"
   }

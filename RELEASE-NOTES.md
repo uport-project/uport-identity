@@ -1,5 +1,24 @@
 # Release notes
 
+## v2.0.0
+This release contains a lot of bugfixes and security updates to the contracts. It also has a new structure for artifacts called [artifact index](./docs/artifact-index.md). Along with these updates there is also updated documentation that better describes all contracts.
+
+## v1.2.3
+Small fix in order to play more nicely with react-native
+
+## v1.2.2
+Deployed updated versions of IdentityManager and MetaIdentityManager.
+
+## v1.2.1
+* Small fixes to IdentityManager and MetaIdentityManager
+* Better documentation for contracts
+
+## v1.2.0
+New controller called MetaIdentityManager and a contract called TxRelay. The MetaIdentityManager is very similar to the IdentityManager but also supports meta transactions with the help of the TxRelay.
+
+## v1.1.0
+New controller called IdentityManager. It is a controller that is shared by multiple users to reduce the overall gas cost in the uport system.
+
 ## v1.0.5
 Fixed small bug in js-lib
 

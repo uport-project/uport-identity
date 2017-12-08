@@ -3,3 +3,7 @@ node_modules
 notes.txt
 .DS_Store
 seed
+coverage.json
+test/.geth/geth
+test/.geth/history
+allFiredEvents

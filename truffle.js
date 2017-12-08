@@ -31,6 +31,18 @@ module.exports = {
       },
       network_id: "*"
     },
+    coverage: {
+      host: "localhost",
+      network_id: "*",
+      port: 8555,         // <-- Use port 8555
+      gas: 0xfffffffffff, // <-- Use this high gas value
+      gasPrice: 0x01      // <-- Use this low gas price
+    },
+    privateTest: {
+      host: "localhost",
+      port: 8544,
+      network_id: "234"
+    },
     local: {
       host: "localhost",
       port: 8545,
@@ -40,6 +52,7 @@ module.exports = {
       get provider() {
         return getProvider("https://ropsten.infura.io/")
       },
+      gas: 4004580,
       network_id: 3
     },
     rinkeby: {
@@ -58,12 +71,15 @@ module.exports = {
       get provider() {
         return getProvider("https://kovan.infura.io/")
       },
+      gas: 4004580,
       network_id: 42
     },
     mainnet: {
       get provider() {
         return getProvider("https://mainnet.infura.io/")
       },
+      gas: 1704580,
+      gasPrice: 1000000000,
       network_id: 1
     }
   }

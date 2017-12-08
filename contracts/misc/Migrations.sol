@@ -1,6 +1,5 @@
-// mainnet: 0x237fe774d27c03f57d2bfd7709f901f531c3440f
-// ropsten: 0x4a954e8ba71be5246fe8590e09b145ef4e31c552
-pragma solidity 0.4.8;
+pragma solidity 0.4.15;
+
 
 contract Migrations {
   address public owner;

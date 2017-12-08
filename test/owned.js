@@ -1,40 +1,48 @@
 const Owned = artifacts.require('Owned')
+const assertThrown = require('./utils/assertThrown')
 
 contract('Owned', (accounts) => {
   let owned
+  const controller = accounts[0]
+  const creator = accounts[0]
+  const notController = accounts[1]
+  const toBeController = accounts[2]
 
-  before((done) => {
-    Owned.new({from: accounts[0]}).then(instance => {
-      owned = instance
-      done();
-    })
+  beforeEach(async function() {
+    owned = await Owned.new({from: creator})
   })
 
-  it('Is owned by creator', (done) => {
-    owned.isOwner.call(accounts[0]).then((isOwner) => {
-      assert.isTrue(isOwner, 'Owner should be owner')
-      return owned.isOwner.call(accounts[1])
-    }).then((isOwner) => {
-      assert.isFalse(isOwner, 'Non-owner should not be owner')
-      done()
-    }).catch(done)
+  it('Is initially owned by creator', async function() {
+    let isOwner = await owned.isOwner.call(creator)
+    assert.isTrue(isOwner, 'Controller should be controller')
   })
 
-  it('Non-owner can not change owner', (done) => {
-    owned.transfer(accounts[1], {from: accounts[1]}).then(() => {
-      return owned.isOwner.call(accounts[1])
-    }).then((isOwner) => {
-      assert.isFalse(isOwner, 'Owner should not be changed')
-      done()
-    }).catch(done)
+  it('Is initially not owned by non creator', async function() {
+    isOwner = await owned.isOwner.call(notController)
+    assert.isFalse(isOwner, 'Non-controller should not be controller')
   })
 
-  it('Owner can change owner', (done) => {
-    owned.transfer(accounts[1], {from: accounts[0]}).then(() => {
-      return owned.isOwner.call(accounts[1])
-    }).then((isOwner) => {
-      assert.isTrue(isOwner, 'Owner should be changed')
-      done()
-    }).catch(done)
+  it('Non-controller can not change controller', async function() {
+    errorThrown = false
+    try {
+      await owned.transfer(notController, {from: notController})
+    } catch (e) {
+      errorThrown = true
+    }
+    assertThrown(errorThrown, 'An error should have been thrown')
+    let isOwner = await owned.isOwner.call(notController)
+    assert.isFalse(isOwner, 'Controller should not be changed')
+  })
+
+  it('Controller can change controller', async function() {
+    await owned.transfer(toBeController, {from: controller})
+    let isOwner = await owned.isOwner.call(toBeController)
+    assert.isTrue(isOwner, 'Controller should be changed')
+  })
+
+  it('Controller can not change controller to proxy address', async function() {
+    await owned.transfer(owned.address, {from: controller})
+    let isOwner = await owned.isOwner.call(owned.address)
+    assert.isFalse(isOwner, 'Controller should not be changed')
   })
 })
