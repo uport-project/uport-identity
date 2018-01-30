@@ -41,7 +41,6 @@
     "directory-tree": "^2.0.0",
     "eth-lightwallet": "^2.5.6",
     "eth-signer": "^0.2.2",
-    "ethereumjs-testrpc": "^6.0.3",
     "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
     "solidity-coverage": "^0.1.7",
@@ -50,5 +49,8 @@
     "truffle": "^3.4.11",
     "truffle-contract": "^1.1.10",
     "truffle-hdwallet-provider": "0.0.3"
+  },
+  "dependencies": {
+    "ganache-cli": "^6.0.3"
   }
 }
