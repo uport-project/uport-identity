@@ -17,7 +17,7 @@ contract Proxy is Owned {
     // https://github.com/gnosis/gnosis-safe-contracts/blob/master/contracts/GnosisSafe.sol
     function executeCall(address to, uint256 value, bytes data) internal returns (bool success) {
         assembly {
-            success := call(not(0), to, value, add(data, 0x20), mload(data), 0, 0)
+            success := call(gas, to, value, add(data, 0x20), mload(data), 0, 0)
         }
     }
 }
