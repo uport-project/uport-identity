@@ -67,6 +67,12 @@ module.exports = {
       },
       network_id: "*"
     },
+    msftnet: {
+      get provider() {
+        return getProvider("http://104.214.116.254:8545")
+      },
+      network_id: "*"
+    },
     kovan: {
       get provider() {
         return getProvider("https://kovan.infura.io/")
