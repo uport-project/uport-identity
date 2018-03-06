@@ -79,7 +79,7 @@ module.exports = {
         return getProvider("https://mainnet.infura.io/")
       },
       gas: 1704580,
-      gasPrice: 1000000000,
+      gasPrice: 5000000000,
       network_id: 1
     }
   }
