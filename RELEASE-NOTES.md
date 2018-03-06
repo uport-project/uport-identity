@@ -1,5 +1,8 @@
 # Release notes
 
+## v2.0.1
+This release changes the proxy to call using assembly rather than solidity `.call`.
+
 ## v2.0.0
 This release contains a lot of bugfixes and security updates to the contracts. It also has a new structure for artifacts called [artifact index](./docs/artifact-index.md). Along with these updates there is also updated documentation that better describes all contracts.
 

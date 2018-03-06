@@ -1,6 +1,6 @@
 //HD Wallet for keyless servers (infura)
 const HDWalletProvider = require("truffle-hdwallet-provider");
-const TestRPC = require("ethereumjs-testrpc");
+const TestRPC = require("ganache-cli");
 
 let provider
 
@@ -79,7 +79,7 @@ module.exports = {
         return getProvider("https://mainnet.infura.io/")
       },
       gas: 1704580,
-      gasPrice: 1000000000,
+      gasPrice: 5000000000,
       network_id: 1
     }
   }

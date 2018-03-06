@@ -7,14 +7,16 @@ module.exports = {
     RecoveryQuorum: require('./build/contracts/legacy/RecoveryQuorum.json'),
   },
   IdentityManager: {
-    latestVersion: 'v2',
+    latestVersion: 'v3',
     v1: require('./build/contracts/versions/v1/IdentityManager.json'),
     v2: require('./build/contracts/versions/v2/IdentityManager.json'),
+    v3: require('./build/contracts/versions/v3/IdentityManager.json'),
   },
   MetaIdentityManager: {
-    latestVersion: 'v2',
+    latestVersion: 'v3',
     v1: require('./build/contracts/versions/v1/MetaIdentityManager.json'),
     v2: require('./build/contracts/versions/v2/MetaIdentityManager.json'),
+    v3: require('./build/contracts/versions/v3/MetaIdentityManager.json'),
   },
   Owned: {
     latestVersion: 'v2',
@@ -27,8 +29,9 @@ module.exports = {
     v2: require('./build/contracts/versions/v2/Proxy.json'),
   },
   TxRelay: {
-    latestVersion: 'v2',
+    latestVersion: 'v3',
     v1: require('./build/contracts/versions/v1/TxRelay.json'),
     v2: require('./build/contracts/versions/v2/TxRelay.json'),
+    v3: require('./build/contracts/versions/v3/TxRelay.json'),
   }
 }
