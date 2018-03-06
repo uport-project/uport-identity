@@ -127,6 +127,12 @@
       "address": "0xdb0efde21a5f59c4829e343419a8996fff5c7924",
       "updated_at": 1520342176774
     },
+    "3": {
+      "events": {},
+      "links": {},
+      "address": "0x790a57a505fe46396777dde06f47e0cfb5028bf4",
+      "updated_at": 1520343964397
+    },
     "4": {
       "events": {},
       "links": {},
@@ -141,5 +147,5 @@
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1520342176774
+  "updated_at": 1520343964397
 }

@@ -644,6 +644,172 @@
       "address": "0x5e26d1d62b77d59ee54d97eb5b4bf7aef679067b",
       "updated_at": 1520342176767
     },
+    "3": {
+      "events": {
+        "0x14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee6266": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "creator",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            }
+          ],
+          "name": "LogIdentityCreated",
+          "type": "event"
+        },
+        "0x8672e8532f3edff41d3acf0cd4be6ff900e427461b81d094f0197354471cb3c6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerAdded",
+          "type": "event"
+        },
+        "0x5e159cd4447854ae8b4aa048f91c8daad986faab696c3685030e1a5e5a4e8ced": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerRemoved",
+          "type": "event"
+        },
+        "0xbd1ad05c16aafa75ac8c1d6b8264f47ad9f3045596f667c9476f3f749c018709": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "recoveryKey",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogRecoveryChanged",
+          "type": "event"
+        },
+        "0xb7b4557c664a8a4a9a57f5e00f216de044a96f96fc84b70eaa6bd48cb0784541": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationInitiated",
+          "type": "event"
+        },
+        "0x60e805c5650597523aba29fb00a59c856d925c672bce1ea7d579f03aef3a10ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationCanceled",
+          "type": "event"
+        },
+        "0x565ed5a2d5e196b82acb6ff1149b699c2b13169c7d34412d736d3c380de64f31": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "identity",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newIdManager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "instigator",
+              "type": "address"
+            }
+          ],
+          "name": "LogMigrationFinalized",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x0ec689c2864e1f11670b8294a83fffdf6e446a7f",
+      "updated_at": 1520343964393
+    },
     "4": {
       "events": {
         "0x14e580ab5cd452b772e031536a7c893ec705152c17b3665c6671b382c3ee6266": {
@@ -978,5 +1144,5 @@
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1520342176767
+  "updated_at": 1520343964393
 }
