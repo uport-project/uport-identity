@@ -84,7 +84,7 @@ yourNetwork: {
 ```
 If the gas price on the network is very high you might need to add the `gasPrice` parameter.
 
-Create a file called `./seed`. This file should contain a mnemonic seed phrase. Make sure that the first address of this seed has ether on your private network. Then run:
+Create a file called `./seed`. This file should contain a mnemonic seed phrase. Make sure that the first address (`m/44'/60'/0'/0`) of this seed has ether on your private network. Then run:
 ```
 $ yarn _deploy yourNetwork
 ```
