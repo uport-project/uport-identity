@@ -12,28 +12,28 @@ Please read our [Whitepaper](http://whitepaper.uport.me) for information on what
 | --|--|
 |IdentityManager|[0x22a4d688748845e9d5d7394a0f05bc583adf4656](https://etherscan.io/address/0x22a4d688748845e9d5d7394a0f05bc583adf4656)|
 |TxRelay|[0xec2642cd5a47fd5cca2a8a280c3b5f88828aa578](https://etherscan.io/address/0xec2642cd5a47fd5cca2a8a280c3b5f88828aa578)|
-|MetaIdentityManager|[0x27500ae27b6b6ad7de7d64b1def90f3e6e7ced47](https://etherscan.io/address/0x27500ae27b6b6ad7de7d64b1def90f3e6e7ced47)|
+|MetaIdentityManager|[0xc67c19b13bb42d23704a7b253aadf3230a78e6d3](https://etherscan.io/address/0xc67c19b13bb42d23704a7b253aadf3230a78e6d3)|
 
 ### Rinkeby testnet (id: 4)
 |Contract|Address|
 | --|--|
 |IdentityManager|[0x19aece3ae41ee33c30f331906b7e4bb578946a55](https://rinkeby.etherscan.io/address/0x19aece3ae41ee33c30f331906b7e4bb578946a55)|
 |TxRelay|[0xda8c6dce9e9a85e6f9df7b09b2354da44cb48331](https://rinkeby.etherscan.io/address/0xda8c6dce9e9a85e6f9df7b09b2354da44cb48331)|
-|MetaIdentityManager|[0x87ea811785c4bd30fc104c2543cf8ed90f7eeec7](https://rinkeby.etherscan.io/address/0x87ea811785c4bd30fc104c2543cf8ed90f7eeec7)|
+|MetaIdentityManager|[0xcc3d1f03381c66a3e641084cc8e367332922b23f](https://rinkeby.etherscan.io/address/0xcc3d1f03381c66a3e641084cc8e367332922b23f)|
 
 ### Kovan testnet (id: 42)
 |Contract|Address|
 | --|--|
 |IdentityManager|[0xdb55d40684e7dc04655a9789937214b493a2c2c6](https://kovan.etherscan.io/address/0xdb55d40684e7dc04655a9789937214b493a2c2c6)|
 |TxRelay|[0xa9235151d3afa7912e9091ab76a36cbabe219a0c](https://kovan.etherscan.io/address/0xa9235151d3afa7912e9091ab76a36cbabe219a0c)|
-|MetaIdentityManager|[0x737f53c0cebf0acd1ea591685351b2a8580702a5](https://kovan.etherscan.io/address/0x737f53c0cebf0acd1ea591685351b2a8580702a5)|
+|MetaIdentityManager|[0x932a60fedf58a898780737e3b1c920cf1e825d2b](https://kovan.etherscan.io/address/0x932a60fedf58a898780737e3b1c920cf1e825d2b)|
 
 ### Ropsten testnet (id: 3)
 |Contract|Address|
 | --|--|
 |IdentityManager|[0x27500ae27b6b6ad7de7d64b1def90f3e6e7ced47](https://ropsten.etherscan.io/address/0x27500ae27b6b6ad7de7d64b1def90f3e6e7ced47)|
 |TxRelay|[0xa5e04cf2942868f5a66b9f7db790b8ab662039d5](https://ropsten.etherscan.io/address/0xa5e04cf2942868f5a66b9f7db790b8ab662039d5)|
-|MetaIdentityManager|[0xbdaf396ce9b9b9c42cd40d37e01b5dbd535cc960](https://ropsten.etherscan.io/address/0xbdaf396ce9b9b9c42cd40d37e01b5dbd535cc960)|
+|MetaIdentityManager|[0xd430425d7e62ec813611ada95de588d4f79cff8f](https://ropsten.etherscan.io/address/0xd430425d7e62ec813611ada95de588d4f79cff8f)|
 
 
 ## Using the contracts
