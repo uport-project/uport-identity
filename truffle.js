@@ -1,6 +1,6 @@
 //HD Wallet for keyless servers (infura)
 const HDWalletProvider = require("truffle-hdwallet-provider");
-const TestRPC = require("ethereumjs-testrpc");
+const TestRPC = require("ganache-cli");
 
 let provider
 

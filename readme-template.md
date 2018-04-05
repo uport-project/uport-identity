@@ -72,5 +72,25 @@ The most important interactions with the contracts are creation of identities an
 #### Send a meta-tx
 ![meta-tx](./docs/diagrams/send-tx.seq.png)
 
+## Deploying contracts to a private network
+Add a new entry in `./truffle.js` like so:
+```js
+yourNetwork: {
+  get provider() {
+    return getProvider("http://my-private.network/")
+  },
+  network_id: "*"
+},
+```
+If the gas price on the network is very high you might need to add the `gasPrice` parameter.
+
+Create a file called `./seed`. This file should contain a mnemonic seed phrase. Make sure that the first address (`m/44'/60'/0'/0`) of this seed has ether on your private network. Then run:
+```
+$ yarn _deploy yourNetwork
+```
+
+The addresses of the deployed contracts should then be located in `./build/contracts/{ContractName}.json`.
+
+
 ## Contributing
 Want to contribute to uport-contracts? Cool, please read our [contribution guidelines](./CONTRIBUTING.md) to get an understanding of the process we use for making changes to this repo.
