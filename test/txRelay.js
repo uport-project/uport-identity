@@ -8,7 +8,7 @@ const MetaTestRegistry = artifacts.require('MetaTestRegistry')
 const Promise = require('bluebird')
 const compareCode = require('./utils/compareCode')
 const assertThrown = require('./utils/assertThrown')
-const Sha3 = require('sha3')
+const Web3Utils = require('web3-utils')
 const leftPad = require('left-pad')
 
 const LOG_NUMBER_1 = 1234
@@ -17,6 +17,8 @@ const LOG_NUMBER_2 = 2345
 const userTimeLock = 50;
 const adminTimeLock = 200;
 const adminRate = 50;
+
+const solsha3 = Web3Utils.soliditySha3
 
 //NOTE: All references to identityManager in this contract are to a metaIdentityManager
 
@@ -69,7 +71,7 @@ async function signPayload(signingAddr, txRelay, whitelistOwner, destinationAddr
    //Tight packing, as Solidity sha3 does
    hashInput = '0x1900' + txRelay.address.slice(2) + whitelistOwner.slice(2) + pad(nonce.toString('16')).slice(2)
                + destinationAddress.slice(2) + data.slice(2)
-   hash = Sha3(hashInput)
+   hash = solsha3(hashInput)
    sig = lightwallet.signing.signMsgHash(lw, keyFromPw, hash, signingAddr)
    retVal.r = '0x'+sig.r.toString('hex')
    retVal.s = '0x'+sig.s.toString('hex')
@@ -124,7 +126,7 @@ async function testMetaTxForwardTo(signingAddr, sendingAddr, txRelay, identityMa
 
 async function checkLogs(tx, eventName, indexAddOne, indexAddTwo, notIndexAdd) {
   const log = tx.receipt.logs[0]
-  assert.equal(log.topics[0], Sha3(eventName + "(address,address,address)"), "Wrong event")
+  assert.equal(log.topics[0], solsha3(eventName + "(address,address,address)"), "Wrong event")
   assert.equal(log.topics[1], pad(indexAddOne), "Wrong topic one")
   assert.equal(log.topics[2], pad(indexAddTwo), "Wrong topic two")
   assert.equal(log.data, pad(notIndexAdd), "Wrong initiator")

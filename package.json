@@ -1,6 +1,6 @@
 {
   "name": "uport-identity",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "uPort Contracts for identity",
   "main": "artifact-index.js",
   "directories": {
@@ -44,7 +44,7 @@
     "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
     "solidity-coverage": "^0.4.3",
-    "sha3": "^1.0.0",
+    "web3-utils": "1.0.0-beta.34",
     "solium": "^1.0.0",
     "truffle": "^3.4.11",
     "truffle-contract": "^1.1.10",
