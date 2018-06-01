@@ -8,7 +8,7 @@ const MetaTestRegistry = artifacts.require('MetaTestRegistry')
 const Promise = require('bluebird')
 const compareCode = require('./utils/compareCode')
 const assertThrown = require('./utils/assertThrown')
-const solsha3 = require('solidity-sha3').default
+const Web3Utils = require('web3-utils')
 const leftPad = require('left-pad')
 
 const LOG_NUMBER_1 = 1234
@@ -17,6 +17,8 @@ const LOG_NUMBER_2 = 2345
 const userTimeLock = 50;
 const adminTimeLock = 200;
 const adminRate = 50;
+
+const solsha3 = Web3Utils.soliditySha3
 
 //NOTE: All references to identityManager in this contract are to a metaIdentityManager
 
