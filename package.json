@@ -44,7 +44,7 @@
     "ethjs-abi": "^0.1.9",
     "node-plantuml": "^0.5.0",
     "solidity-coverage": "^0.1.7",
-    "solidity-sha3": "^0.4.1",
+    "solidity-sha3": "DOkwufulueze/solidity-sha3#ss3-babel-preset-env"
     "solium": "^1.0.0",
     "truffle": "^3.4.11",
     "truffle-contract": "^1.1.10",
