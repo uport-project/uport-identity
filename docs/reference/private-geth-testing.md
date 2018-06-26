@@ -1,3 +1,9 @@
+---
+title: "Private Network Testing"
+category: "reference"
+type: "content"
+---
+
 # Testing on a private geth network
 To be more certain of that our contracts works as intended we want to not only test them using ethereumjs-testrpc, but also a real geth test network. The main reason for this is that ethereumjs-testrpc runs a different implementation of the EVM that might not be compatible with the EVM on the mainnet at all times.
 

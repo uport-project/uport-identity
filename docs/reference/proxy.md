@@ -1,3 +1,9 @@
+---
+title: "Proxy Contract"
+category: "reference"
+type: "content"
+---
+
 # Proxy
 The Proxy contract acts as a permanent identifier for a uport user. When interacting with other smart contracts on the blockchain the address of the proxy contract will be `msg.sender` for the user.
 
