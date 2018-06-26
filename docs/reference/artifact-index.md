@@ -1,3 +1,9 @@
+---
+title: "The artifact index"
+category: "reference"
+type: "content"
+---
+
 # The artifact index
 This document provides an overview of what the artifact index is and how it works. The reason the artifact index was created was that we needed a way to provide different versions of a contract to the user of the uport-identity module. Truffle provides great artifacts of contracts and populates them with addresses on the networks which it has been deployed, but what if we update a contract and redeploy the new version? Then the old address would not be available this versioned index of artifacts solves this.
 

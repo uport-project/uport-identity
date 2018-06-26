@@ -1,3 +1,9 @@
+---
+title: "TxRelay Contract"
+category: "reference"
+type: "content"
+---
+
 # TxRelay
 TxRelay is a contract that provides the uPort contract system with meta transactions. Meta-tx are a way for a user to sign some data, and then another person/service to relay this data to the Ethereum network. This has the benefit of allowing “unfunded” keys to exist and transact on the Ethereum network without the difficulty of funding them. Instead the person/service relaying the transaction will pay for the gas cost.
 
@@ -17,9 +23,9 @@ Currently, a user is required to sign the following data: relay_address :: nonce
 
 Rationale:
 1. relay_address: if the txRelay is ever upgraded, these transactions cannot be replayed.
-2. nonce: prevents replay attacks. 
+2. nonce: prevents replay attacks.
 3. destination: necessary to know where tx is going :)
-4. data: necessary to know what the user is trying to do. 
+4. data: necessary to know what the user is trying to do.
 
 ### Using TxRelay in a contract
 If you want a contract to support meta-tx there some changes that needs to be made. Refer to the [MetaIdentityManager](./metaIdentityManager.md) contract for an example.
@@ -34,7 +40,7 @@ If you want a contract to support meta-tx there some changes that needs to be ma
 ## Attacks
 Replay attacks are a subset of censorship attacks. Here is a brief summary of both:
 
-* Censorship: A relayer promises to relay a transaction. They do not relay the transaction, but they tell the user that they did relay the transaction, maybe reporting some false outcome to make the user act in some way. They also may choose to relay this contract at a later point in time. 
+* Censorship: A relayer promises to relay a transaction. They do not relay the transaction, but they tell the user that they did relay the transaction, maybe reporting some false outcome to make the user act in some way. They also may choose to relay this contract at a later point in time.
 * Replay: A relayer promises to relay a transaction. They send the transaction, but with not enough gas to make it though the signature verification.
 
 Question: Why would anyone choose to replay as compared to censoring?

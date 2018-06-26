@@ -1,3 +1,9 @@
+---
+title: "MetaIdentityManager"
+category: "reference"
+type: "content"
+---
+
 # MetaIdentityManager
 The MetaIdentityManager has the same functionality as [IdentityManager](./identityManager.md) but with the addition of being able to send meta transactions (meta-tx).
 

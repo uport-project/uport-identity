@@ -1,4 +1,5 @@
 @startuml
+!includeurl https://raw.githubusercontent.com/uport-project/specs/develop/uportskin.plantuml
 participant Proxy as p
 participant IdentityManager as im
 

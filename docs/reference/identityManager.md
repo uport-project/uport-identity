@@ -1,3 +1,9 @@
+---
+title: "IdentityManager"
+category: "reference"
+type: "content"
+---
+
 # IdentityManager
 IdentityManager is a controller contract for [Proxy](./proxy.md) contracts that is shared between users. This minimizes gas costs compared to each user having to have their own separate controller for their proxy, while still allowing the user to have full control over their own proxy. The IdentityManager also gives the user the power to control the proxy from multiple devices.
 
@@ -58,7 +64,7 @@ Allows the Recovery Key to add a new owner in order to regain control over the i
 
 ### `removeOwner`
 
-Allows an “older” owner (i.e. with admin privilege) to remove another owner. 
+Allows an “older” owner (i.e. with admin privilege) to remove another owner.
 
 ### `changeRecovery`
 
