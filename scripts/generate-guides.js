@@ -8,7 +8,7 @@ const exec = require('child_process').exec
 let outStream = fs.createWriteStream(__dirname + '/../docs/guides/index.md')
 
 let lines = readline.createInterface({
-  input: fs.createReadStream(__dirname + '/../docs/guides/_template.md')
+  input: fs.createReadStream(__dirname + '/../guides-template.md')
 })
 
 lines.on('line', line => {
