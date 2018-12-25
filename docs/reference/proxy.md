@@ -8,7 +8,7 @@ type: "content"
 The Proxy contract acts as a permanent identifier for a uport user. When interacting with other smart contracts on the blockchain the address of the proxy contract will be `msg.sender` for the user.
 
 ## Requirements
-The Proxy should be able to preform the following actions:
+The Proxy should be able to perform the following actions:
 * Transaction forwarding
     - Forward any type of transaction that a user would want to send (except contract creation)
     - Send value transactions with ether stored in the proxy contract
