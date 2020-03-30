@@ -62,7 +62,7 @@ let IdentityManager = web3.eth.contract(IdentityManagerArtifact)
 let identityManager = IdentityManager.at(IdentityManagerArtifact.networks[networkId].address)
 ```
 
-If you want to learn more about this structure, checkout the document about the [artifact index](./docs/artifact-index.md).
+If you want to learn more about this structure, checkout the document about the [artifact index](../reference/artifact-index.md).
 
 ## Testing the contracts
 All aspects of the contracts need to be tested. To do this we use `truffle` and `testrpc` behind the scenes. Right now we only have tests written in javascript, but in the future we plan on adding tests written in solidity as well.
@@ -77,27 +77,27 @@ If you want to run run a specific test you can just add the filename:
 $ yarn test test/testName.js
 ```
 
-You can also run the tests on a [geth node](./docs/reference/private-geth-testing.md).
+You can also run the tests on a [geth node](../reference/private-geth-testing.md).
 
 ## Contract documentation
 This repository contains the contracts currently in use by uPort. This is also where you find the addresses of these contracts currently deployed on Mainnet and relevant test networks. Below you can find descriptions of each of the contracts and the rationale behind the design decisions.
 
-#### [Proxy](./docs/reference/proxy.md)
-#### [TxRelay](./docs/reference/txRelay.md)
-#### [IdentityManager](./docs/reference/identityManager.md)
-#### [MetaIdentityManager](./docs/reference/metaIdentityManager.md)
+#### [Proxy](../reference/proxy.md)
+#### [TxRelay](../reference/txRelay.md)
+#### [IdentityManager](../reference/identityManager.md)
+#### [MetaIdentityManager](../reference/metaIdentityManager.md)
 
 ### Main contract interactions
 The most important interactions with the contracts are creation of identities and sending transactions. Here are visual representations of this being executed.
 
 #### Creating an identity with the IdentityManager
-![identity creation](./docs/diagrams/create-identity.seq.png)
+![identity creation](../diagrams/create-identity.seq.png)
 
 #### Transfer an identity to IdentityManager
-![register identity](./docs/diagrams/register-identity.seq.png)
+![register identity](../diagrams/register-identity.seq.png)
 
 #### Send a meta-tx
-![meta-tx](./docs/diagrams/send-tx.seq.png)
+![meta-tx](../diagrams/send-tx.seq.png)
 
 ## Deploying contracts to a private network
 Add a new entry in `./truffle.js` like so:
